@@ -1,3 +1,8 @@
 
-/auth/ - POST:
-    login
+* auth
+    * login
+    * logout
+    * salts
+    * reset
+        * request
+        * complete

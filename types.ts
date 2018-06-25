@@ -21,5 +21,6 @@ export interface UserAuthData {
     salt ?: string;
 }
 
+export interface IProduct{
 
-
+}
