@@ -9,10 +9,10 @@ import * as session from 'express-session';
 import * as fs from 'fs';
 import * as path from 'path';
 
+import * as auth from './auth/auth';
 import {passport} from './auth/passport';
 import {initDB} from './DB/data-generator';
-import * as auth from "./auth/auth";
-import * as users from "./users/users";
+import * as users from './users/users';
 
 // init the data base with fake data
 initDB();
@@ -31,10 +31,10 @@ app.use(session({secret}));
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use("/auth", auth.router );
-app.use("/users", users.router);
+app.use('/auth', auth.router);
+app.use('/users', users.router);
 
-//app.use('/', express.static(path.join(__dirname, 'public')));
+app.use('/', express.static(path.join(__dirname, 'public')));
 
 
 

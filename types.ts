@@ -1,16 +1,16 @@
 export enum Gender { Male = 1, Female = 2 }
+export enum UserType {Basic = 1, Admin = 2}
 
 export interface User {
 
-    // used to remember the class type when the client sends back
-    // the object for update/deletion/client type etc.
+    userType : UserType;
     firstName: string;
     lastName: string;
     username: string; // key/id field
     email: string;
     gender: Gender;
     address: string;
-    image? : string;
+    imageURL : string;
 }
 
 export interface UserAuthData {

@@ -11,9 +11,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const faker = require("faker");
 const fs = require("fs");
 const path = require("path");
+const auth_1 = require("../auth/auth");
 const types_1 = require("../types");
 const MongodDB_1 = require("./MongodDB");
-const auth_1 = require("../auth/auth");
 const logFile = path.join(__dirname, 'password.log');
 function generateUser() {
     let firstName = faker.name.firstName();
@@ -21,13 +21,15 @@ function generateUser() {
     let username = faker.internet.userName(firstName, lastName);
     let password = faker.internet.password();
     let user = {
+        userType: faker.random.number(20) > 19 ? types_1.UserType.Admin : types_1.UserType.Basic,
         firstName,
         lastName,
         username,
         address: faker.address.streetAddress() + ', ' + faker.address.city() +
             ', ' + faker.address.country(),
         email: faker.internet.email(),
-        gender: faker.random.boolean ? types_1.Gender.Male : types_1.Gender.Female
+        gender: faker.random.boolean ? types_1.Gender.Male : types_1.Gender.Female,
+        imageURL: "/img/default.png"
     };
     return { user, password: password };
 }
@@ -43,7 +45,7 @@ function initDB(usersSize = 50, logPasswod = true) {
         for (let pack of getFakeUsers(usersSize)) {
             MongodDB_1.db.addUser(pack.user);
             auth_1.createUserData(pack.user.username, pack.password);
-            //log
+            // log
             if (logPasswod) {
                 let logText = pack.user.username + ' : ' + pack.password + '\n';
                 fs.appendFile(logFile, logText, function (err) {

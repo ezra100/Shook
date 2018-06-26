@@ -2,6 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 // import the mongoose module
 const mongoose = require("mongoose");
+const helpers_1 = require("../helpers");
+const types_1 = require("../types");
 // set up default mongoose connection
 var connectionString = 'mongodb://127.0.0.1/shook';
 mongoose.connect(connectionString);
@@ -12,29 +14,67 @@ var mdb = mongoose.connection;
 let Schema = mongoose.Schema;
 let userSchema = new Schema({
     _id: String,
-    className: String,
-    firstName: String,
-    lastName: String,
-    username: String,
-    email: { type: String, index: { unique: true } },
-    gender: Number,
-    address: String,
-    image: String,
+    userType: {
+        type: Number,
+        required: function () {
+            return this.userType in types_1.UserType;
+        }
+    },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    username: {
+        type: String,
+        required: [
+            function () {
+                // username must be at least 6 letters, and english alphabet, underscore
+                // and number only
+                return /^[a-zA-Z0-9_]{6,}$/.test(this.username);
+            },
+            'username must be at least 6 characters. English alphabet, underscore and numbers only'
+        ]
+    },
+    email: {
+        type: String,
+        index: { unique: true },
+        required: function () {
+            return helpers_1.helpers.validateEmail(this.email);
+        }
+    },
+    gender: {
+        type: Number,
+        required: function () {
+            return this.gender in types_1.Gender;
+        }
+    },
+    address: { type: String, required: true },
+    imageURL: { type: String, required: function () {
+            return helpers_1.helpers.isValidURL(this.imageURL);
+        } },
 });
 let userDataSchema = new Schema({
     _id: String,
-    username: String,
+    username: {
+        type: String,
+        required: [
+            function () {
+                // username must be at least 6 letters, and english alphabet, underscore
+                // and number only
+                return /^[a-zA-Z0-9_]{6,}$/.test(this.username);
+            },
+            'username must be at least 6 characters. English alphabet, underscore and numbers only'
+        ]
+    },
     recoveryKey: String,
     recoveryCreationDate: Date,
-    salt: String,
-    hashedPassword: String,
+    salt: { type: String, required: true },
+    hashedPassword: { type: String, required: true },
 });
 userDataSchema.pre('save', function (next) {
-    this._id = this.username;
+    this._id = this.username.toLowerCase();
     next();
 });
 userSchema.pre('save', function (next) {
-    this._id = this.username;
+    this._id = this.username.toLowerCase();
     next();
 });
 let userModel = mongoose.model('User', userSchema);
@@ -44,6 +84,7 @@ let userDataModel = mongoose.model('UserData', userDataSchema);
 mdb.on('error', console.error.bind(console, 'MongoDB connection error:'));
 class MongoDB {
     getUserAuthData(username) {
+        username = username.toLowerCase();
         return new Promise((resolve, reject) => {
             userDataModel.findById(username, (err, data) => {
                 if (err) {
@@ -55,6 +96,7 @@ class MongoDB {
         });
     }
     updateUserAuthData(username, data) {
+        username = username.toLowerCase();
         return new Promise((resolve, reject) => {
             userDataModel.findByIdAndUpdate(username, data, { upsert: true }, (err, data) => {
                 if (err) {
@@ -148,8 +190,9 @@ class MongoDB {
         });
     }
     updateUserById(username, user) {
-        //prevent changing the username
+        // prevent changing the username
         delete user.username;
+        username = username.toLowerCase();
         return new Promise((resolve, reject) => {
             userModel.findByIdAndUpdate(username, user, (err, oldUser) => {
                 if (err) {
@@ -175,7 +218,7 @@ class MongoDB {
     }
     deleteUser(user) {
         return new Promise((resolve, reject) => {
-            userModel.findByIdAndRemove(user.username, (err, user) => {
+            userModel.findByIdAndRemove(user.username.toLowerCase(), (err, user) => {
                 if (err) {
                     reject(err);
                     return;

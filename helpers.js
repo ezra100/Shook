@@ -27,5 +27,15 @@ var helpers;
         });
     }
     helpers.sendEmail = sendEmail;
+    function validateEmail(email) {
+        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
+    }
+    helpers.validateEmail = validateEmail;
+    // checks if url is a valid URL, includes relative url
+    function isValidURL(url) {
+        return /^((http[s]?):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?$/i.test(url);
+    }
+    helpers.isValidURL = isValidURL;
 })(helpers = exports.helpers || (exports.helpers = {}));
 //# sourceMappingURL=helpers.js.map

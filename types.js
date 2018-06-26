@@ -5,4 +5,9 @@ var Gender;
     Gender[Gender["Male"] = 1] = "Male";
     Gender[Gender["Female"] = 2] = "Female";
 })(Gender = exports.Gender || (exports.Gender = {}));
+var UserType;
+(function (UserType) {
+    UserType[UserType["Basic"] = 1] = "Basic";
+    UserType[UserType["Admin"] = 2] = "Admin";
+})(UserType = exports.UserType || (exports.UserType = {}));
 //# sourceMappingURL=types.js.map
