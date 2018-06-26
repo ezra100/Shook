@@ -1,42 +1,29 @@
 import * as express from 'express';
-
+import {message} from '../../data.json';
 import {db} from '../../DB/MongodDB';
 import {helpers} from '../../helpers';
-
-import {getRandomString} from '../crypto';
+import {User} from '../../types';
+import {getRandomString, hashLength, sha512} from '../crypto';
 
 export var router = express.Router();
-
-//#region reset
-// reset message that will be sent to the user by mail
-const resetString = `
-Dear customer <br>
-You've requested a password reset for your account, in order to complete this procedure please click the follwoing 
-<a href="placeholder">
-link
-</a>
-<br>
-Thanks,
-<br>
-Flowers++
-`;
 
 
 // request a password reset - sends an email to the given address if a user with
 // such email exists
 router.post('/request', async function(req, res) {
-  let email = req.body.email;
+  let user: User;
+  // the user can send an email or a username to reset
+  if (req.body.email) {
+    user = await db.findUserByEmail(req.body.email);
+  } else if (req.body.username) {
+    user = await db.findUser(req.body.username);
+  }
+  if (!user) {
+    res.status(400).end('user not found');
+    return;
+  }
   let key = getRandomString(16);
-  let users = await db.getUsers(null, {email: email});
-  if (users.length > 1) {
-    res.status(400).end('There\'s more than one user with the email ' + email);
-    return;
-  }
-  let user = users[0];
-  if (!(user && user.username)) {
-    res.status(400).end('There\'s no user with the email ' + email);
-    return;
-  }
+
   if (!user.username) {
     console.log(user);
     console.error(user.username + ' not found');
@@ -44,21 +31,17 @@ router.post('/request', async function(req, res) {
   db.updateUserAuthData(
       user.username, {recoveryKey: key, recoveryCreationDate: new Date()});
   helpers.sendEmail(
-      email, user.firstName + ' ' + user.lastName,
+      user.email, user.firstName + ' ' + user.lastName,
       'Password reset for your account at flowers++',
-      resetString.replace(
+      message.replace(
           'placeholder',
           'https://localhost:3000/complete?key=' + key +
               '&&username=' + user.username));
-  res.end('reset email sent to ' + email);
+  // don't show the email unless the user sent it
+  res.status(201).end('reset email sent to' + (req.body.email || 'your email'));
 });
 
-// this should be implemented on the angular, with no need for server side
-// router.get('/complete', function(req, res) {
-//   let key = req.query.key;
-//   let username = req.query.username;
-//   res.redirect("/reset/co");
-// });
+
 // the target of the reset form - here the  password is replaced with the new
 // one
 router.post('/complete', async function(req, res) {
@@ -75,7 +58,15 @@ router.post('/complete', async function(req, res) {
     }
     // deletes the key
     // todo - make sure that the key is actually deleted in mongodDB
-    db.updateUserAuthData(username, {recoveryKey: undefined});
+
+    // new salt, because why not
+    let newSalt = getRandomString(hashLength);
+    let newPasswordHash = sha512(newPassword, newSalt);
+    db.updateUserAuthData(username, {
+      recoveryKey: undefined,  // prevent reuse of the recovery key
+      hashedPassword: newPasswordHash,
+      salt: newSalt
+    });
     res.status(201).end();
     return;
   } else {
@@ -83,4 +74,3 @@ router.post('/complete', async function(req, res) {
         'failed to reset password, key doesn\'t match or username not found');
   }
 });
-//#endregion

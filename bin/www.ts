@@ -30,8 +30,8 @@ app.set("port", port);
 /**
  * Create HTTPS server.
  */
-var privateKey = fs.readFileSync(path.join(__dirname, "../cert/key.pem"), "utf8");
-var certificate = fs.readFileSync(path.join(__dirname, "../cert/cert.pem"), "utf8");
+var privateKey = fs.readFileSync(path.join(__dirname, "../cert/server.key"), "utf8");
+var certificate = fs.readFileSync(path.join(__dirname, "../cert/server.crt"), "utf8");
 
 var credentials: https.ServerOptions = {
     key: privateKey, cert: certificate,

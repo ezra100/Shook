@@ -19,6 +19,9 @@ router.post('/signup', async function(req: express.Request, res) {
     res.status(500).end(
         'Failed to add user, reason: ' + JSON.stringify(reason));
   });
+  if (!user) {
+    return;
+  }
   let password = req.body.password;
   createUserData(user.username, password);
   res.status(201).end();
@@ -34,4 +37,12 @@ router.post('/update-details', function(req, res) {
   let username = req.user.username;
   let response = db.updateUserById(username, user);
   res.status(201).end();
+});
+
+router.get('/user-details', function(req, res) {
+  if (req.user) {
+    res.json(req.user);
+    return;
+  }
+  res.status(404).end();
 });

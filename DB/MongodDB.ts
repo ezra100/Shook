@@ -2,6 +2,7 @@ import {resolve} from 'dns';
 // import the mongoose module
 import * as mongoose from 'mongoose';
 
+import {validateEmail} from '../helpers';
 import {User, UserAuthData} from '../types';
 
 
@@ -22,11 +23,17 @@ let Schema: any = mongoose.Schema;
 
 let userSchema: mongoose.Schema = new Schema({
   _id: String,
-  className: String,
-  firstName: String,
-  lastName: String,
-  username: String,  // key/id field
-  email: String,
+  userType: {type: String, required: true},
+  firstName: {type: String, required: true},
+  lastName: {type: String, required: true},
+  username: {type: String, required: true},  // key/id field
+  email: {
+    type: String,
+    index: {unique: true},
+    required: function() {
+      return validateEmail(this.email)
+    }
+  },
   gender: Number,
   address: String,
   image: String,
@@ -36,7 +43,7 @@ let userDataSchema: mongoose.Schema = new Schema({
   _id: String,
   username: String,  // key/id field
   recoveryKey: String,
-  creationDate: Date,
+  recoveryCreationDate: Date,
   salt: String,
   hashedPassword: String,
 });
@@ -73,7 +80,8 @@ class MongoDB {
     });
   }
 
-  updateUserAuthData(username: string,  data: Partial<UserAuthData>): Promise<void> {
+  updateUserAuthData(username: string, data: Partial<UserAuthData>):
+      Promise<void> {
     return new Promise((resolve, reject) => {
       userDataModel.findByIdAndUpdate(
           username, data, {upsert: true}, (err: Error, data: UserAuthData) => {
@@ -87,14 +95,13 @@ class MongoDB {
   }
   createUserAuthData(data: UserAuthData): Promise<void> {
     return new Promise((resolve, reject) => {
-      userDataModel.create(
-          data, {upsert: true}, (err: Error, data: UserAuthData) => {
-            if (err) {
-              reject(err);
-              return;
-            }
-            resolve();
-          });
+      userDataModel.create(data, (err: Error, rData: UserAuthData) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve();
+      });
     });
   }
 
@@ -102,7 +109,7 @@ class MongoDB {
 
   findUserByEmail(email: string): Promise<User> {
     return new Promise<User|null>((resolve, reject) => {
-      userModel.findOne({email}, (err: Error, user: User) => {
+      userModel.findOne({email: email}, (err: Error, user: User) => {
         if (err) {
           reject(err);
           return;
@@ -114,13 +121,7 @@ class MongoDB {
 
   //#region users
   // todo: update this
-  getUsers(types?: any[], filter: any = {}): Promise<User[]> {
-    if (types) {
-      // types = types.map((v, i, a) => v.replace(/[-[\]{}()*+?.,\\^$|#\s]/g,
-      // "\\$&"));
-      filter.className = new RegExp(
-          '^(' + types.map((clss) => clss.className).join('|') + ')$');
-    }
+  getUsers(filter: any = {}): Promise<User[]> {
     for (const key of Object.keys(filter)) {
       if (filter[key] === '') {
         delete filter[key];
@@ -181,20 +182,10 @@ class MongoDB {
       });
     });
   }
-  updateUser(user: Partial<User>): Promise<User|null> {
-    return new Promise((resolve, reject) => {
-      userModel.findByIdAndUpdate(
-          user.username, user, (err: Error, oldUser: User) => {
-            if (err) {
-              reject(err);
-              return;
-            }
-            // we want to send back the new one
-            resolve(Object.assign({}, oldUser, user));
-          });
-    });
-  }
+
   updateUserById(username: string, user: Partial<User>): Promise<User> {
+    // prevent changing the username
+    delete user.username;
     return new Promise((resolve, reject) => {
       userModel.findByIdAndUpdate(
           username, user, (err: Error, oldUser: User) => {

@@ -36,7 +36,7 @@ router.post('/logout', function(req: express.Request, res) {
 
 // requests the salts for the challengs
 router.post('/salts', async function(req, res) {
-  let username = req.body.user.username;
+  let username = req.body.username;
   tempSalts[username] = getRandomString(hashLength);
   res.json({
     tempSalt: tempSalts[username],
