@@ -1,11 +1,13 @@
 import {resolve} from 'dns';
 // import the mongoose module
 import * as mongoose from 'mongoose';
-
 import {helpers} from '../helpers';
-import {Gender, User, UserAuthData, UserType} from '../types';
+import {Gender, IComment, IProduct, IReview, User, UserAuthData, UserType} from '../types';
+
+import {productModel, reviewModel, userAuthDataModel, userModel} from './Models';
 
 
+let ObjectId = mongoose.Schema.Types.ObjectId;
 
 // set up default mongoose connection
 var connectionString: string = 'mongodb://127.0.0.1/shook';
@@ -13,86 +15,6 @@ mongoose.connect(connectionString);
 
 // get the default connection
 var mdb: mongoose.Connection = mongoose.connection;
-
-//#region schema
-
-// define a schema
-let Schema: any = mongoose.Schema;
-
-
-
-let userSchema: mongoose.Schema = new Schema({
-  _id: String,
-  userType: {
-    type: Number,
-    required: function() {
-      return this.userType in UserType;
-    }
-  },
-  firstName: {type: String, required: true},
-  lastName: {type: String, required: true},
-  username: {
-    type: String,
-    required: [
-      function() {
-        // username must be at least 6 letters, and english alphabet, underscore
-        // and number only
-        return /^[a-zA-Z0-9_]{6,}$/.test(this.username);
-      },
-      'username must be at least 6 characters. English alphabet, underscore and numbers only'
-    ]
-  },  // key/id field
-  email: {
-    type: String,
-    index: {unique: true},
-    required: function() {
-      return helpers.validateEmail(this.email)
-    }
-  },
-  gender: {
-    type: Number,
-    required: function() {
-      return this.gender in Gender;
-    }
-  },
-  address: {type: String, required: true},
-  imageURL: {type: String, required : function(){
-    return helpers.isValidURL(this.imageURL)
-  }},
-});
-
-let userDataSchema: mongoose.Schema = new Schema({
-  _id: String,
-  username: {
-    type: String,
-    required: [
-      function() {
-        // username must be at least 6 letters, and english alphabet, underscore
-        // and number only
-        return /^[a-zA-Z0-9_]{6,}$/.test(this.username);
-      },
-      'username must be at least 6 characters. English alphabet, underscore and numbers only'
-    ]
-  },  // key/id field
-  recoveryKey: String,
-  recoveryCreationDate: Date,
-  salt: {type: String, required: true},
-  hashedPassword: {type: String, required: true},
-});
-userDataSchema.pre('save', function(next: Function): void {
-  this._id = (<any>this).username.toLowerCase();
-  next();
-});
-userSchema.pre('save', function(next: Function): void {
-  this._id = (<any>this).username.toLowerCase();
-  next();
-});
-let userModel: mongoose.Model<any> = mongoose.model('User', userSchema);
-let userDataModel: mongoose.Model<any> =
-    mongoose.model('UserData', userDataSchema);
-
-
-//#endregion
 
 
 
@@ -103,7 +25,7 @@ class MongoDB {
   getUserAuthData(username: string): Promise<UserAuthData> {
     username = username.toLowerCase();
     return new Promise<UserAuthData>((resolve, reject) => {
-      userDataModel.findById(username, (err: Error, data: UserAuthData) => {
+      userAuthDataModel.findById(username, (err: Error, data: UserAuthData) => {
         if (err) {
           reject(err);
           return;
@@ -117,7 +39,7 @@ class MongoDB {
       Promise<void> {
     username = username.toLowerCase();
     return new Promise((resolve, reject) => {
-      userDataModel.findByIdAndUpdate(
+      userAuthDataModel.findByIdAndUpdate(
           username, data, {upsert: true}, (err: Error, data: UserAuthData) => {
             if (err) {
               reject(err);
@@ -129,7 +51,7 @@ class MongoDB {
   }
   createUserAuthData(data: UserAuthData): Promise<void> {
     return new Promise((resolve, reject) => {
-      userDataModel.create(data, (err: Error, rData: UserAuthData) => {
+      userAuthDataModel.create(data, (err: Error, rData: UserAuthData) => {
         if (err) {
           reject(err);
           return;
@@ -205,7 +127,7 @@ class MongoDB {
       });
     });
   }
-  findUser(username: string): Promise<User|null> {
+  getUser(username: string): Promise<User|null> {
     return new Promise<User|null>((resolve, reject) => {
       userModel.findById(username, (err: Error, user: User) => {
         if (err) {
@@ -218,8 +140,6 @@ class MongoDB {
   }
 
   updateUserById(username: string, user: Partial<User>): Promise<User> {
-    // prevent changing the username
-    delete user.username;
     username = username.toLowerCase();
     return new Promise((resolve, reject) => {
       userModel.findByIdAndUpdate(
@@ -258,6 +178,26 @@ class MongoDB {
     });
   }
   //#endregion
+
+  async addProduct(product: IProduct) {
+    return (await productModel.create(product));
+  }
+  async updateProduct(id: string, product: IProduct) {
+    productModel.findByIdAndUpdate(new ObjectId(id), product);
+  }
+  async getProductByID(id: string): Promise<IProduct> {
+    // todo - check that the returned object returns a string for objectID's
+    return (await productModel.findById(new ObjectId(id))).toObject();
+  }
+  async getLatestProducts(
+      username?: string, offset: number = 0,
+      limit?: number): Promise<IProduct[]> {
+    let res = productModel.find({username}).sort('-creationDate').skip(offset);
+    if (limit) {
+      res.limit(limit);
+    }
+    return (await res.exec()).map(doc => doc.toObject());
+  }
 }
 
 function getUserKeyType(key: string): string {

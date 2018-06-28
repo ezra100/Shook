@@ -31,7 +31,7 @@ passportMod.serializeUser(function (user, cb) {
 });
 passportMod.deserializeUser(function (username, cb) {
     return __awaiter(this, void 0, void 0, function* () {
-        MongodDB_1.db.findUser(username).catch(cb).then((user) => cb(null, user));
+        MongodDB_1.db.getUser(username).catch(cb).then((user) => cb(null, user));
     });
 });
 exports.passport = passportMod;

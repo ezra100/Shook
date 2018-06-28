@@ -8,6 +8,8 @@ var Gender;
 var UserType;
 (function (UserType) {
     UserType[UserType["Basic"] = 1] = "Basic";
-    UserType[UserType["Admin"] = 2] = "Admin";
+    UserType[UserType["ExternalWebsite"] = 2] = "ExternalWebsite";
+    UserType[UserType["Mod"] = 3] = "Mod";
+    UserType[UserType["Admin"] = 4] = "Admin";
 })(UserType = exports.UserType || (exports.UserType = {}));
 //# sourceMappingURL=types.js.map

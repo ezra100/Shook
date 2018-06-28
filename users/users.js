@@ -15,13 +15,13 @@ exports.router = express.Router();
 let userProperties = [
     'address', 'username', 'firstName', 'lastName', 'email', 'gender', 'className'
 ];
+// create a new user
 exports.router.post('/signup', function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let user = {};
         for (let key of userProperties) {
             user[key] = req.body[key];
         }
-        // todo validation here or on the DB
         user = yield MongodDB_1.db.addUser(user).catch(function (reason) {
             res.status(500).end('Failed to add user, reason: ' + JSON.stringify(reason));
         });
@@ -33,7 +33,8 @@ exports.router.post('/signup', function (req, res) {
         res.status(201).end();
     });
 });
-exports.router.post('/update-details', function (req, res) {
+// update details about the current user
+exports.router.put('/update-details', function (req, res) {
     let user = {};
     for (let key of userProperties) {
         if (req.body[key]) {
@@ -44,6 +45,7 @@ exports.router.post('/update-details', function (req, res) {
     let response = MongodDB_1.db.updateUserById(username, user);
     res.status(201).end();
 });
+//returns the details about the current logged in user
 exports.router.get('/user-details', function (req, res) {
     if (req.user) {
         res.json(req.user);

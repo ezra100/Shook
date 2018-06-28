@@ -40,7 +40,8 @@ var credentials: https.ServerOptions = {
 
 let server: https.Server = httpolyglot.createServer(credentials, function (req, res) {
     if (!(<any>req.socket).encrypted) {
-        res.writeHead(301, { "Location": "https://" + req.headers.host + req.url });
+        // non permanent redirect
+        res.writeHead(307, { "Location": "https://" + req.headers.host + req.url });
         return res.end();
     }
     app(req, res);

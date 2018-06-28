@@ -16,7 +16,7 @@ router.post('/request', async function(req, res) {
   if (req.body.email) {
     user = await db.findUserByEmail(req.body.email);
   } else if (req.body.username) {
-    user = await db.findUser(req.body.username);
+    user = await db.getUser(req.body.username);
   }
   if (!user) {
     res.status(400).end('user not found');

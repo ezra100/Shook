@@ -26,7 +26,7 @@ passportMod.serializeUser(function(user: User, cb) {
 });
 
 passportMod.deserializeUser(async function(username: string, cb) {
-  db.findUser(username).catch(cb).then((user) => cb(null, <User>user));
+  db.getUser(username).catch(cb).then((user) => cb(null, <User>user));
 });
 
 export var passport: passportMod.PassportStatic = passportMod;

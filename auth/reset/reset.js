@@ -24,7 +24,7 @@ exports.router.post('/request', function (req, res) {
             user = yield MongodDB_1.db.findUserByEmail(req.body.email);
         }
         else if (req.body.username) {
-            user = yield MongodDB_1.db.findUser(req.body.username);
+            user = yield MongodDB_1.db.getUser(req.body.username);
         }
         if (!user) {
             res.status(400).end('user not found');

@@ -9,12 +9,12 @@ export var router = express.Router();
 let userProperties: string[] = [
   'address', 'username', 'firstName', 'lastName', 'email', 'gender', 'className'
 ];
+// create a new user
 router.post('/signup', async function(req: express.Request, res) {
   let user: any = {};
   for (let key of userProperties) {
     user[key] = req.body[key];
   }
-  // todo validation here or on the DB
   user = await db.addUser(<User>user).catch(function(reason: any) {
     res.status(500).end(
         'Failed to add user, reason: ' + JSON.stringify(reason));
@@ -27,7 +27,8 @@ router.post('/signup', async function(req: express.Request, res) {
   res.status(201).end();
 });
 
-router.post('/update-details', function(req, res) {
+// update details about the current user
+router.put('/update-details', function(req, res) {
   let user: any = {};
   for (let key of userProperties) {
     if (req.body[key]) {
@@ -38,7 +39,7 @@ router.post('/update-details', function(req, res) {
   let response = db.updateUserById(username, user);
   res.status(201).end();
 });
-
+//returns the details about the current logged in user
 router.get('/user-details', function(req, res) {
   if (req.user) {
     res.json(req.user);
