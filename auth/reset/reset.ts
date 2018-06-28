@@ -1,6 +1,6 @@
 import * as express from 'express';
 import {message} from '../../data.json';
-import {db} from '../../DB/MongodDB';
+import {db} from '../../DB/MongoDB';
 import {helpers} from '../../helpers';
 import {User} from '../../types';
 import {getRandomString, hashLength, sha512} from '../crypto';
@@ -57,7 +57,7 @@ router.post('/complete', async function(req, res) {
       return;
     }
     // deletes the key
-    // todo - make sure that the key is actually deleted in mongodDB
+    // todo - make sure that the key is actually deleted in MongoDB
 
     // new salt, because why not
     let newSalt = getRandomString(hashLength);

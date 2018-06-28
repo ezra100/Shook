@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const data_json_1 = require("../../data.json");
-const MongodDB_1 = require("../../DB/MongodDB");
+const MongoDB_1 = require("../../DB/MongoDB");
 const helpers_1 = require("../../helpers");
 const crypto_1 = require("../crypto");
 exports.router = express.Router();
@@ -21,10 +21,10 @@ exports.router.post('/request', function (req, res) {
         let user;
         // the user can send an email or a username to reset
         if (req.body.email) {
-            user = yield MongodDB_1.db.findUserByEmail(req.body.email);
+            user = yield MongoDB_1.db.findUserByEmail(req.body.email);
         }
         else if (req.body.username) {
-            user = yield MongodDB_1.db.getUser(req.body.username);
+            user = yield MongoDB_1.db.getUser(req.body.username);
         }
         if (!user) {
             res.status(400).end('user not found');
@@ -35,7 +35,7 @@ exports.router.post('/request', function (req, res) {
             console.log(user);
             console.error(user.username + ' not found');
         }
-        MongodDB_1.db.updateUserAuthData(user.username, { recoveryKey: key, recoveryCreationDate: new Date() });
+        MongoDB_1.db.updateUserAuthData(user.username, { recoveryKey: key, recoveryCreationDate: new Date() });
         helpers_1.helpers.sendEmail(user.email, user.firstName + ' ' + user.lastName, 'Password reset for your account at flowers++', data_json_1.message.replace('placeholder', 'https://localhost:3000/complete?key=' + key +
             '&&username=' + user.username));
         // don't show the email unless the user sent it
@@ -49,7 +49,7 @@ exports.router.post('/complete', function (req, res) {
         let key = req.body.key;
         let username = req.body.username;
         let newPassword = req.body.password;
-        let userData = yield MongodDB_1.db.getUserAuthData(username);
+        let userData = yield MongoDB_1.db.getUserAuthData(username);
         if (newPassword && userData && userData.recoveryKey === key) {
             // if more than 24 hours past since the creation
             if ((new Date()).getTime() - userData.recoveryCreationDate.getTime() >=
@@ -58,11 +58,11 @@ exports.router.post('/complete', function (req, res) {
                 return;
             }
             // deletes the key
-            // todo - make sure that the key is actually deleted in mongodDB
+            // todo - make sure that the key is actually deleted in MongoDB
             // new salt, because why not
             let newSalt = crypto_1.getRandomString(crypto_1.hashLength);
             let newPasswordHash = crypto_1.sha512(newPassword, newSalt);
-            MongodDB_1.db.updateUserAuthData(username, {
+            MongoDB_1.db.updateUserAuthData(username, {
                 recoveryKey: undefined,
                 hashedPassword: newPasswordHash,
                 salt: newSalt

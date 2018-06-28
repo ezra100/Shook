@@ -2,7 +2,7 @@ import * as passportMod from 'passport';
 import {Strategy} from 'passport-local';
 
 import {getRandomString, hashLength, sha512} from './crypto';
-import {db} from '../DB/MongodDB';
+import {db} from '../DB/MongoDB';
 import {User, UserAuthData} from '../types'
 
 export let tempSalts: {[username: string]: string} = {};

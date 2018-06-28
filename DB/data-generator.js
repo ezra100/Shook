@@ -9,11 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const faker = require("faker");
-const fs = require("fs");
 const path = require("path");
-const auth_1 = require("../auth/auth");
 const types_1 = require("../types");
-const MongodDB_1 = require("./MongodDB");
+const MongoDB_1 = require("./MongoDB");
 const logFile = path.join(__dirname, 'password.log');
 function generateUser() {
     let firstName = faker.name.firstName();
@@ -29,7 +27,7 @@ function generateUser() {
             ', ' + faker.address.country(),
         email: faker.internet.email(),
         gender: faker.random.boolean ? types_1.Gender.Male : types_1.Gender.Female,
-        imageURL: "/img/default.png"
+        imageURL: '/img/default.png'
     };
     return { user, password: password };
 }
@@ -40,21 +38,38 @@ function getFakeUsers(num) {
     }
     return arr;
 }
-function initDB(usersSize = 50, logPasswod = true) {
+function getFakeProduct(users) {
+    return {
+        title: faker.lorem.sentence(),
+        subtitle: faker.lorem.paragraph(),
+        link: faker.internet.url(),
+        username: users[faker.random.number(users.length - 1)].username
+    };
+}
+function initProducts(size = 1500) {
     return __awaiter(this, void 0, void 0, function* () {
-        for (let pack of getFakeUsers(usersSize)) {
-            MongodDB_1.db.addUser(pack.user);
-            auth_1.createUserData(pack.user.username, pack.password);
-            // log
-            if (logPasswod) {
-                let logText = pack.user.username + ' : ' + pack.password + '\n';
-                fs.appendFile(logFile, logText, function (err) {
-                    if (err) {
-                        console.error(err);
-                    }
-                });
-            }
+        let users = yield MongoDB_1.db.getUsers();
+        for (let i = 0; i < size; i++) {
+            MongoDB_1.db.addProduct(getFakeProduct(users));
         }
+    });
+}
+function initDB(size = 50, logPasswod = true) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // for (let pack of getFakeUsers(size)) {
+        //   db.addUser(pack.user);
+        //   createUserData(pack.user.username, pack.password);
+        //   // log
+        //   if (logPasswod) {
+        //     let logText = pack.user.username + ' : ' + pack.password + '\n';
+        //     fs.appendFile(logFile, logText, function(err) {
+        //       if (err) {
+        //         console.error(err);
+        //       }
+        //     });
+        //   }
+        // }
+        initProducts();
     });
 }
 exports.initDB = initDB;

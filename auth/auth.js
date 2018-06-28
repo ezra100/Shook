@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
-const MongodDB_1 = require("../DB/MongodDB");
+const MongoDB_1 = require("../DB/MongoDB");
 const crypto_1 = require("./crypto");
 const passport_1 = require("./passport");
 const reset = require("./reset/reset");
@@ -36,7 +36,7 @@ exports.router.post('/salts', function (req, res) {
         passport_1.tempSalts[username] = crypto_1.getRandomString(crypto_1.hashLength);
         res.json({
             tempSalt: passport_1.tempSalts[username],
-            permSalt: (yield MongodDB_1.db.getUserAuthData(username)).salt
+            permSalt: (yield MongoDB_1.db.getUserAuthData(username)).salt
         });
     });
 });
@@ -45,7 +45,7 @@ function createUserData(username, password) {
     let salt = crypto_1.getRandomString();
     let hash = crypto_1.sha512(password, salt);
     let userAuthData = { salt, username, hashedPassword: hash };
-    MongodDB_1.db.createUserAuthData(userAuthData);
+    MongoDB_1.db.createUserAuthData(userAuthData);
 }
 exports.createUserData = createUserData;
 //# sourceMappingURL=auth.js.map

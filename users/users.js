@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const auth_1 = require("../auth/auth");
-const MongodDB_1 = require("../DB/MongodDB");
+const MongoDB_1 = require("../DB/MongoDB");
 exports.router = express.Router();
 let userProperties = [
     'address', 'username', 'firstName', 'lastName', 'email', 'gender', 'className'
@@ -22,7 +22,7 @@ exports.router.post('/signup', function (req, res) {
         for (let key of userProperties) {
             user[key] = req.body[key];
         }
-        user = yield MongodDB_1.db.addUser(user).catch(function (reason) {
+        user = yield MongoDB_1.db.addUser(user).catch(function (reason) {
             res.status(500).end('Failed to add user, reason: ' + JSON.stringify(reason));
         });
         if (!user) {
@@ -42,7 +42,7 @@ exports.router.put('/update-details', function (req, res) {
         }
     }
     let username = req.user.username;
-    let response = MongodDB_1.db.updateUserById(username, user);
+    let response = MongoDB_1.db.updateUserById(username, user);
     res.status(201).end();
 });
 //returns the details about the current logged in user

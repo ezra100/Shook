@@ -2,7 +2,7 @@ import {resolve} from 'dns';
 // import the mongoose module
 import * as mongoose from 'mongoose';
 import {helpers} from '../helpers';
-import {Gender, IComment, IProduct, IReview, User, UserAuthData, UserType} from '../types';
+import {Gender, IComment, IProduct, IReview, User, UserAuthData, UserType, IMinProduct} from '../types';
 
 import {productModel, reviewModel, userAuthDataModel, userModel} from './Models';
 
@@ -14,12 +14,13 @@ var connectionString: string = 'mongodb://127.0.0.1/shook';
 mongoose.connect(connectionString);
 
 // get the default connection
-var mdb: mongoose.Connection = mongoose.connection;
+export var mongoConnection: mongoose.Connection = mongoose.connection;
 
 
 
 // bind connection to error event (to get notification of connection errors)
-mdb.on('error', console.error.bind(console, 'MongoDB connection error:'));
+mongoConnection.on(
+    'error', console.error.bind(console, 'MongoDB connection error:'));
 
 class MongoDB {
   getUserAuthData(username: string): Promise<UserAuthData> {
@@ -179,20 +180,25 @@ class MongoDB {
   }
   //#endregion
 
-  async addProduct(product: IProduct) {
-    return (await productModel.create(product));
+  async addProduct(product: IMinProduct): Promise<IProduct> {
+    (<any>product._id) = mongoose.Types.ObjectId();
+    return (await productModel.create(product)).toObject();
   }
-  async updateProduct(id: string, product: IProduct) {
-    productModel.findByIdAndUpdate(new ObjectId(id), product);
+
+  async updateProduct(product: IProduct): Promise<IProduct|null> {
+    return (await productModel.findByIdAndUpdate(
+                new ObjectId(product._id), product))
+        .toObject();
   }
   async getProductByID(id: string): Promise<IProduct> {
     // todo - check that the returned object returns a string for objectID's
-    return (await productModel.findById(new ObjectId(id))).toObject();
+    return (await productModel.findById(id)).toObject();
   }
   async getLatestProducts(
       username?: string, offset: number = 0,
       limit?: number): Promise<IProduct[]> {
-    let res = productModel.find({username}).sort('-creationDate').skip(offset);
+    let filter = username?{username}:username;
+    let res = productModel.find(filter).sort('-creationDate').skip(offset);
     if (limit) {
       res.limit(limit);
     }

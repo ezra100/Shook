@@ -16,9 +16,9 @@ let ObjectId = mongoose.Schema.Types.ObjectId;
 var connectionString = 'mongodb://127.0.0.1/shook';
 mongoose.connect(connectionString);
 // get the default connection
-var mdb = mongoose.connection;
+exports.mongoConnection = mongoose.connection;
 // bind connection to error event (to get notification of connection errors)
-mdb.on('error', console.error.bind(console, 'MongoDB connection error:'));
+exports.mongoConnection.on('error', console.error.bind(console, 'MongoDB connection error:'));
 class MongoDB {
     getUserAuthData(username) {
         username = username.toLowerCase();
@@ -171,18 +171,20 @@ class MongoDB {
     }
     updateProduct(product) {
         return __awaiter(this, void 0, void 0, function* () {
-            return (yield Models_1.productModel.findByIdAndUpdate(new ObjectId(product._id), product)).toObject();
+            return (yield Models_1.productModel.findByIdAndUpdate(new ObjectId(product._id), product))
+                .toObject();
         });
     }
     getProductByID(id) {
         return __awaiter(this, void 0, void 0, function* () {
             // todo - check that the returned object returns a string for objectID's
-            return (yield Models_1.productModel.findById(new ObjectId(id))).toObject();
+            return (yield Models_1.productModel.findById(id)).toObject();
         });
     }
     getLatestProducts(username, offset = 0, limit) {
         return __awaiter(this, void 0, void 0, function* () {
-            let res = Models_1.productModel.find({ username }).sort('-creationDate').skip(offset);
+            let filter = username ? { username } : username;
+            let res = Models_1.productModel.find(filter).sort('-creationDate').skip(offset);
             if (limit) {
                 res.limit(limit);
             }
@@ -194,4 +196,4 @@ function getUserKeyType(key) {
     return Models_1.userModel.schema.paths[key].instance.toLowerCase();
 }
 exports.db = new MongoDB();
-//# sourceMappingURL=MongodDB.js.map
+//# sourceMappingURL=MongoDB.js.map

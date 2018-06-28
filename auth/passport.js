@@ -11,11 +11,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const passportMod = require("passport");
 const passport_local_1 = require("passport-local");
 const crypto_1 = require("./crypto");
-const MongodDB_1 = require("../DB/MongodDB");
+const MongoDB_1 = require("../DB/MongoDB");
 exports.tempSalts = {};
 passportMod.use(new passport_local_1.Strategy(function (username, password, cb) {
     return __awaiter(this, void 0, void 0, function* () {
-        MongodDB_1.db.getUserAuthData(username).catch(cb).then((userAuthData) => {
+        MongoDB_1.db.getUserAuthData(username).catch(cb).then((userAuthData) => {
             if (userAuthData) {
                 let hashedPassword = crypto_1.sha512(userAuthData.hashedPassword, exports.tempSalts[username]);
                 if (hashedPassword === password) {
@@ -31,7 +31,7 @@ passportMod.serializeUser(function (user, cb) {
 });
 passportMod.deserializeUser(function (username, cb) {
     return __awaiter(this, void 0, void 0, function* () {
-        MongodDB_1.db.getUser(username).catch(cb).then((user) => cb(null, user));
+        MongoDB_1.db.getUser(username).catch(cb).then((user) => cb(null, user));
     });
 });
 exports.passport = passportMod;

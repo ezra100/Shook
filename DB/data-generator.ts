@@ -1,14 +1,13 @@
 
 
-import {SSL_OP_LEGACY_SERVER_CONNECT} from 'constants';
 import * as faker from 'faker';
 import * as fs from 'fs';
 import * as path from 'path';
 
 import {createUserData} from '../auth/auth';
-import {Gender, User, UserAuthData, UserType} from '../types';
+import {Gender, IMinProduct, IProduct, User, UserAuthData, UserType} from '../types';
 
-import {db} from './MongodDB';
+import {db} from './MongoDB';
 
 
 const logFile: string = path.join(__dirname, 'password.log');
@@ -32,7 +31,7 @@ function generateUser(): IInitPackage {
         ', ' + faker.address.country(),
     email: faker.internet.email(),
     gender: faker.random.boolean ? Gender.Male : Gender.Female,
-    imageURL: "/img/default.png"
+    imageURL: '/img/default.png'
   };
 
   return {user, password: password};
@@ -46,19 +45,36 @@ function getFakeUsers(num: number): IInitPackage[] {
   return arr;
 }
 
-export async function initDB(
-    usersSize: number = 50, logPasswod: boolean = true) {
-  for (let pack of getFakeUsers(usersSize)) {
-    db.addUser(pack.user);
-    createUserData(pack.user.username, pack.password);
-    // log
-    if (logPasswod) {
-      let logText = pack.user.username + ' : ' + pack.password + '\n';
-      fs.appendFile(logFile, logText, function(err) {
-        if (err) {
-          console.error(err);
-        }
-      });
-    }
+function getFakeProduct(users: User[]): IMinProduct {
+  return {
+    title: faker.lorem.sentence(),
+    subtitle: faker.lorem.paragraph(),
+    link: faker.internet.url(),
+    username: users[faker.random.number(users.length - 1)].username
+  };
+}
+
+async function initProducts(size: number = 1500) {
+  let users = await db.getUsers();
+  for (let i = 0; i < size; i++) {
+    db.addProduct(getFakeProduct(users));
   }
+}
+
+export async function initDB(size: number = 50, logPasswod: boolean = true) {
+  // for (let pack of getFakeUsers(size)) {
+  //   db.addUser(pack.user);
+  //   createUserData(pack.user.username, pack.password);
+  //   // log
+  //   if (logPasswod) {
+  //     let logText = pack.user.username + ' : ' + pack.password + '\n';
+  //     fs.appendFile(logFile, logText, function(err) {
+  //       if (err) {
+  //         console.error(err);
+  //       }
+  //     });
+  //   }
+  // }
+
+  initProducts();
 }

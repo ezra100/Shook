@@ -169,7 +169,7 @@ productSchema.pre('save', function(next: Function): void {
 });
 productSchema.postAnyFInd(function(
     doc: mongoose.Document, next: Function): void {
-  this._id = this._id.toString();
+  console.log(doc);
   next();
 });
 
@@ -216,11 +216,10 @@ commentSchema.preAnyUpdate(function(next: Function): void {
 });
 
 commentSchema.postAnyFInd(function(doc, next: Function): void {
-  this._id = this._id.toString();
-  (<any>this).reviewID =
-      (<any>this).reviewID.toString(); 
+  console.log(doc);
   next();
 });
+
 
 //#endregion
 

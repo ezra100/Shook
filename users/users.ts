@@ -1,7 +1,7 @@
 import * as express from 'express';
 
 import {createUserData} from '../auth/auth';
-import {db} from '../DB/MongodDB';
+import {db} from '../DB/MongoDB';
 import {User} from '../types';
 
 export var router = express.Router();

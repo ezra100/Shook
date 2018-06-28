@@ -1,6 +1,6 @@
 import * as express from 'express';
 
-import {db} from '../DB/MongodDB';
+import {db} from '../DB/MongoDB';
 import {UserAuthData} from '../types';
 
 import {getRandomString, hashLength, sha512} from './crypto';

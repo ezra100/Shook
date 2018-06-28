@@ -23,10 +23,7 @@ PUT for update, POST for create, GET for get (no changes on server side)
         1. GET
         1. limit
         2. offset
-    * getByUser
-        1. GET
-        1. offset
-        2. limit
+        3. optional - username (owner of the product)
 * review
     * add
         1. POST

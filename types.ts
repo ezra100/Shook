@@ -28,13 +28,20 @@ export interface UserAuthData {
   salt?: string;
 }
 
-export interface IProduct {
-  _id: string;
-  creationDate : Date;
+export interface IMinProduct{
+  _id?: string;
+  username?: string;  // publisher of the product - must exist
+
   title: string;
   subtitle: string;
-  username: string;  // publisher of the product - must exist
   link?: string;
+}
+
+export interface IProduct extends IMinProduct {
+  _id: string;
+  creationDate : Date;
+
+  username: string;  // publisher of the product - must exist in users collection
 }
 
 export interface IReview {

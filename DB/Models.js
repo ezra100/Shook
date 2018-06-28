@@ -92,6 +92,7 @@ userSchema.preAnyUpdate(function (next) {
 });
 let productSchema = new Schema({
     _id: { type: mongoose.Schema.Types.ObjectId, required: true },
+    creationDate: { type: Date, default: Date.now },
     title: { type: String, required: true, minlength: 6, maxlength: 140 },
     subtitle: { type: String, required: true },
     username: { type: String, required: true, ref: 'User' },
@@ -104,6 +105,7 @@ let productSchema = new Schema({
 });
 let reviewSchema = new Schema({
     _id: { type: Schema.Types.ObjectId, required: true },
+    creationDate: { type: Date, default: Date.now },
     username: { type: String, required: true, ref: 'User' },
     productID: {
         type: Schema.Types.ObjectId,
@@ -119,6 +121,7 @@ let reviewSchema = new Schema({
 let commentSchema = new Schema({
     _id: { type: mongoose.Schema.Types.ObjectId, required: true },
     username: { type: String, required: true, ref: 'User' },
+    creationDate: { type: Date, default: Date.now },
     reviewID: {
         type: Schema.Types.ObjectId,
         ref: 'Review',
@@ -143,8 +146,7 @@ productSchema.pre('save', function (next) {
     next();
 });
 productSchema.postAnyFInd(function (doc, next) {
-    this._id = this._id.toString();
-    this.username = this.username.toString();
+    console.log(doc);
     next();
 });
 reviewSchema.preAnyUpdate(function (next) {
@@ -156,16 +158,24 @@ reviewSchema.pre('save', function (next) {
     if (typeof this._id === 'string') {
         this._id = new mongoose.Schema.Types.ObjectId(this._id);
     }
+    let th = this;
+    if (typeof th.productID === 'string') {
+        th.productID = new mongoose.Schema.Types.ObjectId(th.productID);
+    }
     next();
 });
 reviewSchema.postAnyFInd(function (doc, next) {
     this._id = this._id.toString();
-    this.productID = this.productID.toString(); // don't change the product id
+    this.productID = this.productID.toString();
     next();
 });
 commentSchema.pre('save', function (next) {
     if (typeof this._id === 'string') {
         this._id = new mongoose.Schema.Types.ObjectId(this._id);
+    }
+    let th = this;
+    if (typeof th.reviewID === 'string') {
+        th.reviewID = new mongoose.Schema.Types.ObjectId(th.reviewID);
     }
     next();
 });
@@ -175,9 +185,7 @@ commentSchema.preAnyUpdate(function (next) {
     next();
 });
 commentSchema.postAnyFInd(function (doc, next) {
-    this._id = this._id.toString();
-    this.reviewID =
-        this.reviewID.toString(); // don't change the product id
+    console.log(doc);
     next();
 });
 //#endregion
