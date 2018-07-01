@@ -31,14 +31,21 @@ PUT for update, POST for create, GET for get (no changes on server side)
         1. delete HTTP method
     * update
         1. PUT
-    * delete
-        1. DELTE
     * getByID
         1. GET
     * getLatest
-        GET,offset,limit
-    * getByUser
-        GET, offset, limit
+        * GET
+        * offset
+        * limit
+        * username
+        * product id
+        * likes array limit
+* comment
+    * add
+    * remove
+    * update (?)
+    * getById
+    * getByReviewID
 
 * u2u-chat
     * sendMessage
@@ -63,6 +70,6 @@ PUT for update, POST for create, GET for get (no changes on server side)
 
 ### todo
 
-* product
 * review
 * chats
+* indexes

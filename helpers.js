@@ -6,6 +6,10 @@ var helpers;
 (function (helpers) {
     let reallySendEmail = true;
     let transporter = nodemailer.createTransport({ service: 'gmail', auth: { user: data.email, pass: data.password } });
+    function escapeRegExp(str) {
+        return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
+    }
+    helpers.escapeRegExp = escapeRegExp;
     function sendEmail(email, name, subject, msg) {
         if (!reallySendEmail) {
             return;
@@ -34,7 +38,8 @@ var helpers;
     helpers.validateEmail = validateEmail;
     // checks if url is a valid URL, includes relative url
     function isValidURL(url) {
-        return /^((http[s]?):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?$/i.test(url);
+        return /^((http[s]?):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?$/i
+            .test(url);
     }
     helpers.isValidURL = isValidURL;
 })(helpers = exports.helpers || (exports.helpers = {}));

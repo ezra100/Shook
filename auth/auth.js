@@ -42,10 +42,12 @@ exports.router.post('/salts', function (req, res) {
 });
 //------------------------------------------------------------
 function createUserData(username, password) {
-    let salt = crypto_1.getRandomString();
-    let hash = crypto_1.sha512(password, salt);
-    let userAuthData = { salt, username, hashedPassword: hash };
-    MongoDB_1.db.createUserAuthData(userAuthData);
+    return __awaiter(this, void 0, void 0, function* () {
+        let salt = crypto_1.getRandomString();
+        let hash = crypto_1.sha512(password, salt);
+        let userAuthData = { salt, username, hashedPassword: hash };
+        yield MongoDB_1.db.createUserAuthData(userAuthData);
+    });
 }
 exports.createUserData = createUserData;
 //# sourceMappingURL=auth.js.map

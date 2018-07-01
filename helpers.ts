@@ -10,6 +10,10 @@ export namespace helpers {
       {service: 'gmail', auth: {user: data.email, pass: data.password}});
 
 
+
+  export function escapeRegExp(str: string): string {
+    return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
+  }
   export function sendEmail(
       email: string, name: string, subject: string, msg: string): void {
     if (!reallySendEmail) {
@@ -38,7 +42,8 @@ export namespace helpers {
   }
 
   // checks if url is a valid URL, includes relative url
-  export function isValidURL(url : string){
-    return /^((http[s]?):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?$/i.test(url);
+  export function isValidURL(url: string) {
+    return /^((http[s]?):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?$/i
+        .test(url);
   }
 }

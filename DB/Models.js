@@ -87,11 +87,11 @@ userSchema.pre('save', function (next) {
     next();
 });
 userSchema.preAnyUpdate(function (next) {
-    delete this.getUpdate().username;
+    let update = this.getUpdate();
+    delete update.username;
     next();
 });
 let productSchema = new Schema({
-    _id: { type: mongoose.Schema.Types.ObjectId, required: true },
     creationDate: { type: Date, default: Date.now },
     title: { type: String, required: true, minlength: 6, maxlength: 140 },
     subtitle: { type: String, required: true },
@@ -104,7 +104,6 @@ let productSchema = new Schema({
     },
 });
 let reviewSchema = new Schema({
-    _id: { type: Schema.Types.ObjectId, required: true },
     creationDate: { type: Date, default: Date.now },
     username: { type: String, required: true, ref: 'User' },
     productID: {
@@ -115,11 +114,10 @@ let reviewSchema = new Schema({
     title: { type: String, required: true, minlength: 5, maxlength: 140 },
     fullReview: { type: String, required: true },
     rating: { type: Number, min: 1, max: 5 },
-    helpful: [{ type: String, required: true }],
-    notHelpful: [{ type: String, required: true }],
+    likes: [{ type: String, required: true }],
+    dislikes: [{ type: String, required: true }],
 });
 let commentSchema = new Schema({
-    _id: { type: mongoose.Schema.Types.ObjectId, required: true },
     username: { type: String, required: true, ref: 'User' },
     creationDate: { type: Date, default: Date.now },
     reviewID: {
@@ -135,57 +133,55 @@ let commentSchema = new Schema({
     dislike: [{ type: String, required: true }],
 });
 //#region hooks
+// productSchema.preAnyUpdate(function(next: Function) {
+//   delete this.getUpdate().username;
+//   next();
+// });
+// productSchema.postAnyFInd(function(
+//     doc: mongoose.Document, next: Function): void {
+//   console.log(doc);
+//   next();
+// });
+// reviewSchema.preAnyUpdate(function(next: Function): void {
+//   delete this.getUpdate().productID;  // don't change the product id
+//   delete this.getUpdate().username;
+//   next();
+// });
+reviewSchema.postAnyFInd(function (doc, next) {
+    let d = doc;
+    d.likesCount = d.likes.length;
+    d.dislikesCount = d.dislikes.length;
+    next();
+});
+// commentSchema.preAnyUpdate(function(next: Function): void {
+//   delete (<any>this).reviewID;  // prevent changing the review id
+//   delete (<any>this).username;  // prevent changing the username
+//   next();
+// });
+commentSchema.postAnyFInd(function (doc, next) {
+    let d = doc;
+    d.likesCount = d.likes.length;
+    d.dislikesCount = d.dislikes.length;
+    next();
+});
 productSchema.preAnyUpdate(function (next) {
-    delete this.getUpdate().username;
-    next();
-});
-productSchema.pre('save', function (next) {
-    if (typeof this._id === 'string') {
-        this._id = new mongoose.Schema.Types.ObjectId(this._id);
-    }
-    next();
-});
-productSchema.postAnyFInd(function (doc, next) {
-    console.log(doc);
+    let update = this.getUpdate();
+    delete update.username;
+    delete update.creationDate;
     next();
 });
 reviewSchema.preAnyUpdate(function (next) {
-    delete this.getUpdate().productID; // don't change the product id
-    delete this.getUpdate().username;
-    next();
-});
-reviewSchema.pre('save', function (next) {
-    if (typeof this._id === 'string') {
-        this._id = new mongoose.Schema.Types.ObjectId(this._id);
-    }
-    let th = this;
-    if (typeof th.productID === 'string') {
-        th.productID = new mongoose.Schema.Types.ObjectId(th.productID);
-    }
-    next();
-});
-reviewSchema.postAnyFInd(function (doc, next) {
-    this._id = this._id.toString();
-    this.productID = this.productID.toString();
-    next();
-});
-commentSchema.pre('save', function (next) {
-    if (typeof this._id === 'string') {
-        this._id = new mongoose.Schema.Types.ObjectId(this._id);
-    }
-    let th = this;
-    if (typeof th.reviewID === 'string') {
-        th.reviewID = new mongoose.Schema.Types.ObjectId(th.reviewID);
-    }
+    let update = this.getUpdate();
+    delete update.username;
+    delete update.creationDate;
+    delete update.productID;
     next();
 });
 commentSchema.preAnyUpdate(function (next) {
-    delete this.reviewID; // prevent changing the review id
-    delete this.username; // prevent changing the username
-    next();
-});
-commentSchema.postAnyFInd(function (doc, next) {
-    console.log(doc);
+    let update = this.getUpdate();
+    delete update.username;
+    delete update.creationDate;
+    delete update.reviewID;
     next();
 });
 //#endregion

@@ -61,20 +61,32 @@ async function initProducts(size: number = 1500) {
   }
 }
 
-export async function initDB(size: number = 50, logPasswod: boolean = true) {
-  // for (let pack of getFakeUsers(size)) {
-  //   db.addUser(pack.user);
-  //   createUserData(pack.user.username, pack.password);
-  //   // log
-  //   if (logPasswod) {
-  //     let logText = pack.user.username + ' : ' + pack.password + '\n';
-  //     fs.appendFile(logFile, logText, function(err) {
-  //       if (err) {
-  //         console.error(err);
-  //       }
-  //     });
-  //   }
-  // }
+async function initUsers(size: number = 50, logPasswod: boolean = true) {
+  for (let pack of getFakeUsers(size)) {
+    db.addUser(pack.user);
+    await createUserData(pack.user.username, pack.password);
+    // log
+    if (logPasswod) {
+      let logText = pack.user.username + ' : ' + pack.password + '\n';
+      fs.appendFile(logFile, logText, function(err) {
+        if (err) {
+          console.error(err);
+        }
+      });
+    }
+  }
+}
 
-  initProducts();
+export async function initDB(
+    usersSize: number = 50, avgProductsPerUser = 20) {
+  let users = await db.getUsers();
+  let products = await db.getLatestProducts();
+  if (users.length < usersSize) {
+    await initUsers(usersSize - users.length);
+    users = await db.getUsers();
+  }
+  if (products.length < usersSize * avgProductsPerUser) {
+    await initProducts((usersSize * avgProductsPerUser) - products.length);
+    products = await db.getLatestProducts();
+  }
 }

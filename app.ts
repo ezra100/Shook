@@ -7,16 +7,16 @@ import * as express from 'express';
 import {Request} from 'express';
 import {Response} from 'express-serve-static-core';
 import * as session from 'express-session';
-import * as fs from 'fs';
 import * as path from 'path';
 
 import * as auth from './auth/auth';
 import {passport} from './auth/passport';
 import {initDB} from './DB/data-generator';
 import {mongoConnection} from './DB/MongoDB';
-import * as product from './product/product';
+import * as products from './products/products';
 import * as users from './users/users';
-
+import * as comments from './comments/comments';
+import * as reviews from './reviews/reviews';
 
 // init the data base with fake data
 initDB();
@@ -34,7 +34,7 @@ let mongoStore = connMongo(session);
 let options:
     connMongo.MogooseConnectionOptions = {mongooseConnection: mongoConnection};
 let store = new mongoStore(options);
-app.use(session({secret, store}));
+app.use(session({secret, store, resave: false, saveUninitialized: false}));
 
 // this must become before loginRouter
 app.use(passport.initialize());
@@ -42,7 +42,9 @@ app.use(passport.session());
 
 app.use('/auth', auth.router);
 app.use('/users', users.router);
-app.use('/product', product.router);
+app.use('/products', products.router);
+app.use('/comments', comments.router);
+app.use('/reviews', reviews.router);
 app.use('/', express.static(path.join(__dirname, 'public')));
 
 

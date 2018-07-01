@@ -31,7 +31,6 @@ export interface UserAuthData {
 export interface IMinProduct{
   _id?: string;
   username?: string;  // publisher of the product - must exist
-
   title: string;
   subtitle: string;
   link?: string;
@@ -48,16 +47,15 @@ export interface IReview {
   _id: string;
   creationDate : Date;
   username: string;  // publisher of the review
-  productID: number;  // product.id
+  productID: string;  // product.id
   title: string;
   fullReview: string;
   rating: number;  // 1-5 stars
-  helpful: string[];
-  helpfulCount? : number;
-  notHelpful: string[];
-  notHelpfulCount: number;
-  // helpful and notHelpful must not intersect, must not have duplicates, and
-  // usernames must exist
+  likes: string[];
+  likesCount? : number;
+  dislikes: string[];
+  dislikesCount: number;
+
 }
 
 // a comment on a review
@@ -65,12 +63,12 @@ export interface IComment {
   _id: string;
   creationDate : Date;
   username: string;  // publisher of the comment
-  reviewID: number;  // review.id
+  reviewID: string;  // review.id
   comment: string;
   likes: string[];    // array of usernames of those who liked the comment
   likesCount? : number;
-  dislike: string[];  // array of username of dislikes
-  dislikeCount? : number;
+  dislikes: string[];  // array of username of dislikes
+  dislikesCount? : number;
   // likes and dislikes must not intersect, must not have duplicates, and
   // usernames must exist
 }

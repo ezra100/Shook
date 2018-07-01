@@ -10,40 +10,55 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const MongoDB_1 = require("../DB/MongoDB");
+const helpers_1 = require("../helpers");
 exports.router = express.Router();
 exports.router.post('/add', function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        let product = req.body;
-        product.username = req.user.username;
-        product = yield MongoDB_1.db.addProduct(product);
-        res.status(201).json(product);
+        let comment = req.body;
+        comment.username = req.user.username;
+        comment = yield MongoDB_1.db.addComment(comment);
+        res.status(201).json(comment);
     });
 });
 exports.router.put('/update', function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        let product = req.body;
-        product.username = req.user.username;
-        let oldProduct = yield MongoDB_1.db.getProductByID(product._id);
-        if (req.user.username != oldProduct.username) {
+        let comment = req.body;
+        comment.username = req.user.username;
+        let oldComment = yield MongoDB_1.db.getCommentByID(comment._id);
+        if (req.user.username !== oldComment.username) {
             res.status(401).end();
             return;
         }
-        product = yield MongoDB_1.db.updateProduct(product);
-        res.status(201).json(product);
+        comment = yield MongoDB_1.db.updateComment(comment);
+        res.status(201).json(comment);
     });
 });
 exports.router.get('/getByID', function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let id = req.query.id;
-        res.json(yield MongoDB_1.db.getProductByID(id));
+        res.json(yield MongoDB_1.db.getCommentByID(id));
     });
 });
 exports.router.get('/getLatest', function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        let username = req.query.username || undefined;
+        let filter = {};
+        let username = req.query.username;
+        // from the likes/dislikes array - how many elements to show
+        let likesLimit = Number(req.query.likesArrLimit) || 10;
+        if (req.query.username) {
+            filter.username = new RegExp(helpers_1.helpers.escapeRegExp(username), 'i');
+        }
+        if (req.query.productID) {
+            filter.productID = req.query.productID;
+        }
         let limit = req.query.limit ? Number(req.query.limit) : undefined;
         let offset = Number(req.query.offset || 0);
-        res.json(yield MongoDB_1.db.getLatestProducts(username, offset, limit));
+        let products = yield MongoDB_1.db.getLatestComments(filter, offset, limit);
+        products.forEach((product) => {
+            product.likes.splice(likesLimit);
+            product.dislike.splice(likesLimit);
+        });
+        res.json(products);
     });
 });
-//# sourceMappingURL=product.js.map
+//# sourceMappingURL=router.js.map

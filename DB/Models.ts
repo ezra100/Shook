@@ -2,7 +2,7 @@ import * as mongoose from 'mongoose';
 import {Aggregate, Model, NativeError} from 'mongoose';
 
 import {helpers} from '../helpers';
-import {Gender, User, UserAuthData, UserType} from '../types';
+import {Gender, User, UserAuthData,IReview, UserType, IComment} from '../types';
 
 
 // define a schema
@@ -96,16 +96,16 @@ userSchema.pre('save', function(next: Function): void {
   this._id = (<any>this).username.toLowerCase();
   next();
 });
-userSchema.preAnyUpdate(function(next: Function): void {
-  delete this.getUpdate().username;
+userSchema.preAnyUpdate(function(next) {
+  let update: any = this.getUpdate();
+  delete update.username;
   next();
-});
+})
 
 
 
 let productSchema: Schema = new Schema({
-  _id: {type: mongoose.Schema.Types.ObjectId, required: true},
-  creationDate: { type: Date, default: Date.now },
+  creationDate: {type: Date, default: Date.now},
   title: {type: String, required: true, minlength: 6, maxlength: 140},
   subtitle: {type: String, required: true},
   username: {type: String, required: true, ref: 'User'},
@@ -119,8 +119,7 @@ let productSchema: Schema = new Schema({
 
 
 let reviewSchema = new Schema({
-  _id: {type: Schema.Types.ObjectId, required: true},
-  creationDate: { type: Date, default: Date.now },
+  creationDate: {type: Date, default: Date.now},
   username: {type: String, required: true, ref: 'User'},
   productID: {
     type: Schema.Types.ObjectId,
@@ -130,18 +129,16 @@ let reviewSchema = new Schema({
   title: {type: String, required: true, minlength: 5, maxlength: 140},
   fullReview: {type: String, required: true},
   rating: {type: Number, min: 1, max: 5},  // 1-5 stars
-  helpful: [{type: String, required: true}],
-  notHelpful: [{type: String, required: true}],
-  // helpful and notHelpful must not intersect, must not have duplicates, and
-  // usernames must exist
+  likes: [{type: String, required: true}],
+  dislikes: [{type: String, required: true}],
+
 });
 
 
 
 let commentSchema = new Schema({
-  _id: {type: mongoose.Schema.Types.ObjectId, required: true},
   username: {type: String, required: true, ref: 'User'},
-  creationDate: { type: Date, default: Date.now },
+  creationDate: {type: Date, default: Date.now},
   reviewID: {
     type: Schema.Types.ObjectId,
     ref: 'Review',
@@ -157,66 +154,69 @@ let commentSchema = new Schema({
 
 
 //#region hooks
-productSchema.preAnyUpdate(function(next: Function) {
-  delete this.getUpdate().username;
-  next();
-});
-productSchema.pre('save', function(next: Function): void {
-  if (typeof this._id === 'string') {
-    this._id = new mongoose.Schema.Types.ObjectId(this._id);
-  }
-  next();
-});
-productSchema.postAnyFInd(function(
-    doc: mongoose.Document, next: Function): void {
-  console.log(doc);
-  next();
-});
+// productSchema.preAnyUpdate(function(next: Function) {
+//   delete this.getUpdate().username;
+//   next();
+// });
+
+// productSchema.postAnyFInd(function(
+//     doc: mongoose.Document, next: Function): void {
+//   console.log(doc);
+//   next();
+// });
 
 
 
-reviewSchema.preAnyUpdate(function(next: Function): void {
-  delete this.getUpdate().productID;  // don't change the product id
-  delete this.getUpdate().username;
+// reviewSchema.preAnyUpdate(function(next: Function): void {
+//   delete this.getUpdate().productID;  // don't change the product id
+//   delete this.getUpdate().username;
 
-  next();
-});
-reviewSchema.pre('save', function(next: Function): void {
-  if (typeof this._id === 'string') {
-    this._id = new mongoose.Schema.Types.ObjectId(this._id);
-  }
-  let th : any = this;
-  if (typeof th.productID === 'string') {
-    th.productID = new mongoose.Schema.Types.ObjectId(th.productID);
-  }
-  next();
-});
+//   next();
+// });
+
 reviewSchema.postAnyFInd(function(doc, next: Function): void {
-  this._id = this._id.toString();
-  this.productID = this.productID.toString(); 
+  let d : mongoose.Document & IReview = <any>doc;
+  d.likesCount = d.likes.length;
+  d.dislikesCount = d.dislikes.length;
   next();
 });
 
 
 
-commentSchema.pre('save', function(next: Function): void {
-  if (typeof this._id === 'string') {
-    this._id = new mongoose.Schema.Types.ObjectId(this._id);
-  }
-  let th : any = this;
-  if (typeof th.reviewID === 'string') {
-    th.reviewID = new mongoose.Schema.Types.ObjectId(th.reviewID);
-  }
+// commentSchema.preAnyUpdate(function(next: Function): void {
+//   delete (<any>this).reviewID;  // prevent changing the review id
+//   delete (<any>this).username;  // prevent changing the username
+//   next();
+// });
+
+commentSchema.postAnyFInd(function(doc, next: Function): void {
+  let d : mongoose.Document & IComment = <any>doc;
+  d.likesCount = d.likes.length;
+  d.dislikesCount = d.dislikes.length;
+  next();
+});
+
+productSchema.preAnyUpdate(function(next: Function): void {
+  let update: any = this.getUpdate();
+  delete update.username;
+  delete update.creationDate;
+
+  next();
+});
+reviewSchema.preAnyUpdate(function(next: Function): void {
+  let update: any = this.getUpdate();
+  delete update.username;
+  delete update.creationDate;
+  delete update.productID;
+
   next();
 });
 commentSchema.preAnyUpdate(function(next: Function): void {
-  delete (<any>this).reviewID;  // prevent changing the review id
-  delete (<any>this).username;  // prevent changing the username
-  next();
-});
+  let update: any = this.getUpdate();
+  delete update.username;
+  delete update.creationDate;
+  delete update.reviewID;
 
-commentSchema.postAnyFInd(function(doc, next: Function): void {
-  console.log(doc);
   next();
 });
 

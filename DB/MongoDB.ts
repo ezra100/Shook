@@ -1,13 +1,13 @@
 import {resolve} from 'dns';
 // import the mongoose module
 import * as mongoose from 'mongoose';
+
 import {helpers} from '../helpers';
-import {Gender, IComment, IProduct, IReview, User, UserAuthData, UserType, IMinProduct} from '../types';
+import {Gender, IComment, IMinProduct, IProduct, IReview, User, UserAuthData, UserType} from '../types';
 
-import {productModel, reviewModel, userAuthDataModel, userModel} from './Models';
+import {commentModel, productModel, reviewModel, userAuthDataModel, userModel} from './Models';
 
 
-let ObjectId = mongoose.Schema.Types.ObjectId;
 
 // set up default mongoose connection
 var connectionString: string = 'mongodb://127.0.0.1/shook';
@@ -23,17 +23,9 @@ mongoConnection.on(
     'error', console.error.bind(console, 'MongoDB connection error:'));
 
 class MongoDB {
-  getUserAuthData(username: string): Promise<UserAuthData> {
+  async getUserAuthData(username: string): Promise<UserAuthData> {
     username = username.toLowerCase();
-    return new Promise<UserAuthData>((resolve, reject) => {
-      userAuthDataModel.findById(username, (err: Error, data: UserAuthData) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve(data);
-      });
-    });
+    return (await userAuthDataModel.findById(username)).toObject();
   }
 
   updateUserAuthData(username: string, data: Partial<UserAuthData>):
@@ -64,16 +56,8 @@ class MongoDB {
 
 
 
-  findUserByEmail(email: string): Promise<User> {
-    return new Promise<User|null>((resolve, reject) => {
-      userModel.findOne({email: email}, (err: Error, user: User) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve(user);
-      });
-    });
+  async findUserByEmail(email: string): Promise<User> {
+    return (await userModel.findOne({email: email})).toObject();
   }
 
   //#region users
@@ -86,25 +70,29 @@ class MongoDB {
       }
       switch (getUserKeyType(key)) {
         case 'string':
-          // replace it with a regex that will search for any one of the given
-          // words
-          filter[key] = new RegExp(
-              filter[key]
-                  .split(/\s+/)
-                  // escape regex characters
-                  .map(
-                      (v: any) => v.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'))
-                  .join('|'),
-              'gi');
+
+          if (key === 'username') {
+            // it it's username, just make sure that the search is case
+            // insensitive
+            filter[key] = new RegExp(helpers.escapeRegExp(filter[key]), 'i');
+          } else {
+            // replace it with a regex that will search for any one of the given
+            // words
+            filter[key] = new RegExp(
+                filter[key]
+                    .split(/\s+/)
+                    // escape regex characters
+                    .map(
+                        (v: any) =>
+                            v.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'))
+                    .join('|'),
+                'gi');
+          }
           break;
         case 'boolean':
 
           if (typeof filter[key] === 'string') {
-            if (filter[key] === '') {
-              delete filter[key];
-            } else {
-              filter[key] = (filter[key] === 'true');
-            }
+            filter[key] = (filter[key] === 'true');
           }
           break;
         case 'number':
@@ -130,7 +118,7 @@ class MongoDB {
   }
   getUser(username: string): Promise<User|null> {
     return new Promise<User|null>((resolve, reject) => {
-      userModel.findById(username, (err: Error, user: User) => {
+      userModel.findById(username.toLowerCase(), (err: Error, user: User) => {
         if (err) {
           reject(err);
           return;
@@ -179,31 +167,102 @@ class MongoDB {
     });
   }
   //#endregion
-
+  //#region  product
   async addProduct(product: IMinProduct): Promise<IProduct> {
-    (<any>product._id) = mongoose.Types.ObjectId();
     return (await productModel.create(product)).toObject();
   }
 
   async updateProduct(product: IProduct): Promise<IProduct|null> {
     return (await productModel.findByIdAndUpdate(
-                new ObjectId(product._id), product))
+                product._id, product, {new /* return the new document*/: true}))
         .toObject();
   }
+  async deleteProduct(id: string, removeReviews: boolean = true) {
+    if (removeReviews) {
+      this.deleteReviewsByProductID(id);
+    }
+    return (await productModel.findByIdAndRemove(id)).toObject();
+    ;
+  }
   async getProductByID(id: string): Promise<IProduct> {
-    // todo - check that the returned object returns a string for objectID's
     return (await productModel.findById(id)).toObject();
   }
   async getLatestProducts(
-      username?: string, offset: number = 0,
+      filter: Partial<IProduct> = {}, offset: number = 0,
       limit?: number): Promise<IProduct[]> {
-    let filter = username?{username}:username;
     let res = productModel.find(filter).sort('-creationDate').skip(offset);
     if (limit) {
       res.limit(limit);
     }
     return (await res.exec()).map(doc => doc.toObject());
   }
+  //#endregion
+
+  //#region review
+  async addReview(review: IReview): Promise<IReview> {
+    return (await productModel.create(review)).toObject();
+  }
+
+  async updateReview(review: IReview): Promise<IReview|null> {
+    return (await productModel.findByIdAndUpdate(
+                review._id, review, {new /* return the new document*/: true}))
+        .toObject();
+  }
+  async deleteReview(id: string, removeComments: boolean = true) {
+    if (removeComments) {
+      this.deleteCommentsByReviewID(id);
+    }
+    return (await reviewModel.findByIdAndRemove(id)).toObject();
+  }
+  async deleteReviewsByProductID(productID: string) {
+    let reviews = await this.getLatestReviews({productID: productID});
+    reviews.forEach((review) => {
+      this.deleteCommentsByReviewID(review._id);
+    });
+    reviewModel.deleteMany({productID});
+  }
+  async getReviewByID(id: string): Promise<IReview> {
+    return (await productModel.findById(id)).toObject();
+  }
+  async getLatestReviews(
+      filter: Partial<IReview> = {}, offset: number = 0,
+      limit?: number): Promise<IReview[]> {
+    let res = productModel.find(filter).sort('-creationDate').skip(offset);
+    if (limit) {
+      res.limit(limit);
+    }
+    return (await res.exec()).map(doc => doc.toObject());
+  }
+  //#endregion
+
+  //#region comment
+  async addComment(comment: IComment): Promise<IComment> {
+    return (await commentModel.create(comment)).toObject();
+  }
+  async deleteComment(id: string) {
+    commentModel.findByIdAndRemove(id);
+  }
+  async deleteCommentsByReviewID(reviewID: string) {
+    commentModel.deleteMany({reviewID});
+  }
+  async updateComment(comment: IComment): Promise<IComment|null> {
+    return (await commentModel.findByIdAndUpdate(
+                comment._id, comment, {new: /* return the new document*/ true}))
+        .toObject();
+  }
+  async getCommentByID(id: string): Promise<IComment> {
+    return (await commentModel.findById(id)).toObject();
+  }
+  async getLatestComments(
+      filter: Partial<IComment> = {}, offset: number = 0,
+      limit?: number): Promise<IComment[]> {
+    let res = commentModel.find(filter).sort('-creationDate').skip(offset);
+    if (limit) {
+      res.limit(limit);
+    }
+    return (await res.exec()).map(doc => doc.toObject());
+  }
+  //#endregion
 }
 
 function getUserKeyType(key: string): string {

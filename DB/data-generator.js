@@ -9,7 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const faker = require("faker");
+const fs = require("fs");
 const path = require("path");
+const auth_1 = require("../auth/auth");
 const types_1 = require("../types");
 const MongoDB_1 = require("./MongoDB");
 const logFile = path.join(__dirname, 'password.log');
@@ -54,22 +56,35 @@ function initProducts(size = 1500) {
         }
     });
 }
-function initDB(size = 50, logPasswod = true) {
+function initUsers(size = 50, logPasswod = true) {
     return __awaiter(this, void 0, void 0, function* () {
-        // for (let pack of getFakeUsers(size)) {
-        //   db.addUser(pack.user);
-        //   createUserData(pack.user.username, pack.password);
-        //   // log
-        //   if (logPasswod) {
-        //     let logText = pack.user.username + ' : ' + pack.password + '\n';
-        //     fs.appendFile(logFile, logText, function(err) {
-        //       if (err) {
-        //         console.error(err);
-        //       }
-        //     });
-        //   }
-        // }
-        initProducts();
+        for (let pack of getFakeUsers(size)) {
+            MongoDB_1.db.addUser(pack.user);
+            yield auth_1.createUserData(pack.user.username, pack.password);
+            // log
+            if (logPasswod) {
+                let logText = pack.user.username + ' : ' + pack.password + '\n';
+                fs.appendFile(logFile, logText, function (err) {
+                    if (err) {
+                        console.error(err);
+                    }
+                });
+            }
+        }
+    });
+}
+function initDB(usersSize = 50, avgProductsPerUser = 20) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let users = yield MongoDB_1.db.getUsers();
+        let products = yield MongoDB_1.db.getLatestProducts();
+        if (users.length < usersSize) {
+            yield initUsers(usersSize - users.length);
+            users = yield MongoDB_1.db.getUsers();
+        }
+        if (products.length < usersSize * avgProductsPerUser) {
+            yield initProducts((usersSize * avgProductsPerUser) - products.length);
+            products = yield MongoDB_1.db.getLatestProducts();
+        }
     });
 }
 exports.initDB = initDB;

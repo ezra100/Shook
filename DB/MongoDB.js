@@ -10,8 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 // import the mongoose module
 const mongoose = require("mongoose");
+const helpers_1 = require("../helpers");
 const Models_1 = require("./Models");
-let ObjectId = mongoose.Schema.Types.ObjectId;
 // set up default mongoose connection
 var connectionString = 'mongodb://127.0.0.1/shook';
 mongoose.connect(connectionString);
@@ -21,15 +21,9 @@ exports.mongoConnection = mongoose.connection;
 exports.mongoConnection.on('error', console.error.bind(console, 'MongoDB connection error:'));
 class MongoDB {
     getUserAuthData(username) {
-        username = username.toLowerCase();
-        return new Promise((resolve, reject) => {
-            Models_1.userAuthDataModel.findById(username, (err, data) => {
-                if (err) {
-                    reject(err);
-                    return;
-                }
-                resolve(data);
-            });
+        return __awaiter(this, void 0, void 0, function* () {
+            username = username.toLowerCase();
+            return (yield Models_1.userAuthDataModel.findById(username)).toObject();
         });
     }
     updateUserAuthData(username, data) {
@@ -56,14 +50,8 @@ class MongoDB {
         });
     }
     findUserByEmail(email) {
-        return new Promise((resolve, reject) => {
-            Models_1.userModel.findOne({ email: email }, (err, user) => {
-                if (err) {
-                    reject(err);
-                    return;
-                }
-                resolve(user);
-            });
+        return __awaiter(this, void 0, void 0, function* () {
+            return (yield Models_1.userModel.findOne({ email: email })).toObject();
         });
     }
     //#region users
@@ -76,22 +64,24 @@ class MongoDB {
             }
             switch (getUserKeyType(key)) {
                 case 'string':
-                    // replace it with a regex that will search for any one of the given
-                    // words
-                    filter[key] = new RegExp(filter[key]
-                        .split(/\s+/)
-                        // escape regex characters
-                        .map((v) => v.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'))
-                        .join('|'), 'gi');
+                    if (key === 'username') {
+                        // it it's username, just make sure that the search is case
+                        // insensitive
+                        filter[key] = new RegExp(helpers_1.helpers.escapeRegExp(filter[key]), 'i');
+                    }
+                    else {
+                        // replace it with a regex that will search for any one of the given
+                        // words
+                        filter[key] = new RegExp(filter[key]
+                            .split(/\s+/)
+                            // escape regex characters
+                            .map((v) => v.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'))
+                            .join('|'), 'gi');
+                    }
                     break;
                 case 'boolean':
                     if (typeof filter[key] === 'string') {
-                        if (filter[key] === '') {
-                            delete filter[key];
-                        }
-                        else {
-                            filter[key] = (filter[key] === 'true');
-                        }
+                        filter[key] = (filter[key] === 'true');
                     }
                     break;
                 case 'number':
@@ -117,7 +107,7 @@ class MongoDB {
     }
     getUser(username) {
         return new Promise((resolve, reject) => {
-            Models_1.userModel.findById(username, (err, user) => {
+            Models_1.userModel.findById(username.toLowerCase(), (err, user) => {
                 if (err) {
                     reject(err);
                     return;
@@ -163,28 +153,116 @@ class MongoDB {
         });
     }
     //#endregion
+    //#region  product
     addProduct(product) {
         return __awaiter(this, void 0, void 0, function* () {
-            product._id = mongoose.Types.ObjectId();
             return (yield Models_1.productModel.create(product)).toObject();
         });
     }
     updateProduct(product) {
         return __awaiter(this, void 0, void 0, function* () {
-            return (yield Models_1.productModel.findByIdAndUpdate(new ObjectId(product._id), product))
+            return (yield Models_1.productModel.findByIdAndUpdate(product._id, product, { new /* return the new document*/: true }))
                 .toObject();
+        });
+    }
+    deleteProduct(id, removeReviews = true) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (removeReviews) {
+                this.deleteReviewsByProductID(id);
+            }
+            return (yield Models_1.productModel.findByIdAndRemove(id)).toObject();
+            ;
         });
     }
     getProductByID(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            // todo - check that the returned object returns a string for objectID's
             return (yield Models_1.productModel.findById(id)).toObject();
         });
     }
-    getLatestProducts(username, offset = 0, limit) {
+    getLatestProducts(filter = {}, offset = 0, limit) {
         return __awaiter(this, void 0, void 0, function* () {
-            let filter = username ? { username } : username;
             let res = Models_1.productModel.find(filter).sort('-creationDate').skip(offset);
+            if (limit) {
+                res.limit(limit);
+            }
+            return (yield res.exec()).map(doc => doc.toObject());
+        });
+    }
+    //#endregion
+    //#region review
+    addReview(review) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return (yield Models_1.productModel.create(review)).toObject();
+        });
+    }
+    updateReview(review) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return (yield Models_1.productModel.findByIdAndUpdate(review._id, review, { new /* return the new document*/: true }))
+                .toObject();
+        });
+    }
+    deleteReview(id, removeComments = true) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (removeComments) {
+                this.deleteCommentsByReviewID(id);
+            }
+            return (yield Models_1.reviewModel.findByIdAndRemove(id)).toObject();
+        });
+    }
+    deleteReviewsByProductID(productID) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let reviews = yield this.getLatestReviews({ productID: productID });
+            reviews.forEach((review) => {
+                this.deleteCommentsByReviewID(review._id);
+            });
+            Models_1.reviewModel.deleteMany({ productID });
+        });
+    }
+    getReviewByID(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return (yield Models_1.productModel.findById(id)).toObject();
+        });
+    }
+    getLatestReviews(filter = {}, offset = 0, limit) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let res = Models_1.productModel.find(filter).sort('-creationDate').skip(offset);
+            if (limit) {
+                res.limit(limit);
+            }
+            return (yield res.exec()).map(doc => doc.toObject());
+        });
+    }
+    //#endregion
+    //#region comment
+    addComment(comment) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return (yield Models_1.commentModel.create(comment)).toObject();
+        });
+    }
+    deleteComment(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            Models_1.commentModel.findByIdAndRemove(id);
+        });
+    }
+    deleteCommentsByReviewID(reviewID) {
+        return __awaiter(this, void 0, void 0, function* () {
+            Models_1.commentModel.deleteMany({ reviewID });
+        });
+    }
+    updateComment(comment) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return (yield Models_1.commentModel.findByIdAndUpdate(comment._id, comment, { new: /* return the new document*/ true }))
+                .toObject();
+        });
+    }
+    getCommentByID(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return (yield Models_1.commentModel.findById(id)).toObject();
+        });
+    }
+    getLatestComments(filter = {}, offset = 0, limit) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let res = Models_1.commentModel.find(filter).sort('-creationDate').skip(offset);
             if (limit) {
                 res.limit(limit);
             }

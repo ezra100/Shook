@@ -46,9 +46,9 @@ router.post('/salts', async function(req, res) {
 
 //------------------------------------------------------------
 
-export function createUserData(username: string, password: string) {
+export async function createUserData(username: string, password: string) {
   let salt = getRandomString();
   let hash = sha512(password, salt);
   let userAuthData: UserAuthData = {salt, username, hashedPassword: hash};
-  db.createUserAuthData(userAuthData);
+  await db.createUserAuthData(userAuthData);
 }
