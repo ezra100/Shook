@@ -14,6 +14,10 @@ const path = require("path");
 const auth_1 = require("../auth/auth");
 const types_1 = require("../types");
 const MongoDB_1 = require("./MongoDB");
+let users;
+let products;
+let reviews;
+let comments;
 const logFile = path.join(__dirname, 'password.log');
 function generateUser() {
     let firstName = faker.name.firstName();
@@ -40,19 +44,58 @@ function getFakeUsers(num) {
     }
     return arr;
 }
-function getFakeProduct(users) {
+function getFakeProduct() {
     return {
         title: faker.lorem.sentence(),
         subtitle: faker.lorem.paragraph(),
         link: faker.internet.url(),
-        username: users[faker.random.number(users.length - 1)].username
+        username: users[faker.random.number(users.length - 1)].username,
+        creationDate: faker.date.past(5),
+    };
+}
+function getRandomUsernames(min = 5, max = 30) {
+    max = Math.max(max, users.length / 8);
+    let likesSize = faker.random.number({ min, max });
+    let dislikesSize = faker.random.number({ min, max });
+    let likes = [];
+    let dislikes = [];
+    let usernames = users.map(user => user.username);
+    while (likes.length < likesSize) {
+        likes.push(usernames.splice(faker.random.number(usernames.length - 1), 1)[0]);
+    }
+    while (dislikes.length < dislikesSize) {
+        dislikes.push(usernames.splice(faker.random.number(usernames.length - 1), 1)[0]);
+    }
+    return [likes, dislikes];
+}
+function getFakeReview() {
+    let likeDislike = getRandomUsernames();
+    let product = products[faker.random.number(products.length - 1)];
+    return {
+        username: users[faker.random.number(users.length - 1)].username,
+        title: faker.lorem.sentence(), fullReview: faker.lorem.paragraphs(3),
+        dislikes: likeDislike[1], likes: likeDislike[0],
+        rating: faker.random.number({ min: 1, max: 5 }),
+        productID: product._id,
+        creationDate: faker.date.between(product.creationDate, Date()),
+    };
+}
+function getFakeComment() {
+    let likeDislike = getRandomUsernames();
+    let review = reviews[faker.random.number(reviews.length - 1)];
+    return {
+        username: users[faker.random.number(users.length - 1)].username,
+        comment: faker.lorem.paragraphs(3), dislikes: likeDislike[1],
+        likes: likeDislike[0],
+        reviewID: review._id,
+        creationDate: faker.date.between(review.creationDate, Date()),
     };
 }
 function initProducts(size = 1500) {
     return __awaiter(this, void 0, void 0, function* () {
         let users = yield MongoDB_1.db.getUsers();
         for (let i = 0; i < size; i++) {
-            MongoDB_1.db.addProduct(getFakeProduct(users));
+            MongoDB_1.db.addProduct(getFakeProduct(), false);
         }
     });
 }
@@ -73,10 +116,12 @@ function initUsers(size = 50, logPasswod = true) {
         }
     });
 }
-function initDB(usersSize = 50, avgProductsPerUser = 20) {
+function initDB(usersSize = 250, avgProductsPerUser = 10, reviewsPerProduct = 20, commentsPerReview = 10) {
     return __awaiter(this, void 0, void 0, function* () {
-        let users = yield MongoDB_1.db.getUsers();
-        let products = yield MongoDB_1.db.getLatestProducts();
+        users = yield MongoDB_1.db.getUsers();
+        products = yield MongoDB_1.db.getLatestProducts();
+        reviews = yield MongoDB_1.db.getLatestReviews();
+        comments = yield MongoDB_1.db.getLatestComments();
         if (users.length < usersSize) {
             yield initUsers(usersSize - users.length);
             users = yield MongoDB_1.db.getUsers();
@@ -84,6 +129,18 @@ function initDB(usersSize = 50, avgProductsPerUser = 20) {
         if (products.length < usersSize * avgProductsPerUser) {
             yield initProducts((usersSize * avgProductsPerUser) - products.length);
             products = yield MongoDB_1.db.getLatestProducts();
+        }
+        if (reviews.length < products.length * reviewsPerProduct) {
+            for (let i = reviews.length; i < products.length * reviewsPerProduct; i++) {
+                yield MongoDB_1.db.addReview(getFakeReview(), false);
+            }
+            reviews = yield MongoDB_1.db.getLatestReviews();
+        }
+        if (comments.length < reviews.length * commentsPerReview) {
+            for (let i = comments.length; i < reviews.length * commentsPerReview; i++) {
+                yield MongoDB_1.db.addComment(getFakeComment(), false);
+            }
+            comments = yield MongoDB_1.db.getLatestComments();
         }
     });
 }

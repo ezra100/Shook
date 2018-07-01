@@ -20,7 +20,7 @@ router.put('/update', async function(req, res) {
   product.username = req.user.username;
   let oldProduct = await db.getProductByID(product._id);
   if (req.user.username !== oldProduct.username) {
-    res.status(401).end("You're not the owner of the product");
+    res.status(401).end('You\'re not the owner of the product');
     return;
   }
   product = await db.updateProduct(product);
@@ -37,20 +37,26 @@ router.get('/getLatest', async function(req, res) {
   let username = req.query.username;
   if (req.query.username) {
     filter.username = new RegExp(helpers.escapeRegExp(username), 'i');
-  }  
+  }
   let limit = req.query.limit ? Number(req.query.limit) : undefined;
   let offset = Number(req.query.offset || 0);
   res.json(await db.getLatestProducts(filter, offset, limit));
 });
 
-router.delete("/delete", async function(req, res){
+router.delete('/delete', async function(req, res) {
   let id = req.query._id;
   let recursive = req.query.recursive;
   let oldReview = await db.getProductByID(id);
-  if(oldReview.username.toLowerCase() === req.user.username.toLowerCase()){
-      db.deleteProduct(id, recursive);
-      res.end(id + " deleted successfully");
-  }else{
-    res.status(401).end("You're not the owner of " + id);
+  if (oldReview.username.toLowerCase() === req.user.username.toLowerCase()) {
+    db.deleteProduct(id, recursive);
+    res.end(id + ' deleted successfully');
+  } else {
+    res.status(401).end('You\'re not the owner of ' + id);
   }
+});
+
+router.get('/getAvgRating', async function(req, res) {
+  let id = req.query.id;
+  let rating = await db.getProductRating(id);
+  res.json(rating);
 });

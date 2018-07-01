@@ -26,7 +26,7 @@ exports.router.put('/update', function (req, res) {
         review.username = req.user.username;
         let oldReview = yield MongoDB_1.db.getReviewByID(review._id);
         if (req.user.username !== oldReview.username) {
-            res.status(401).end();
+            res.status(401).end('You\'re not the owner of the review');
             return;
         }
         review = yield MongoDB_1.db.updateReview(review);
@@ -61,17 +61,17 @@ exports.router.get('/getLatest', function (req, res) {
         res.json(products);
     });
 });
-exports.router.delete("/delete", function (req, res) {
+exports.router.delete('/delete', function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let id = req.query._id;
         let recursive = req.query.recursive;
         let oldReview = yield MongoDB_1.db.getReviewByID(id);
         if (oldReview.username.toLowerCase() === req.user.username.toLowerCase()) {
             MongoDB_1.db.deleteReview(id, recursive);
-            res.end(id + " deleted successfully");
+            res.end(id + ' deleted successfully');
         }
         else {
-            res.status(401).end("You're not the owner of " + id);
+            res.status(401).end('You\'re not the owner of ' + id);
         }
     });
 });

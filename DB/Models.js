@@ -13,8 +13,11 @@ class Schema extends mongoose.Schema {
         this.pre('findOneAndUpdate', func);
     }
     postAnyFInd(fn) {
-        this.post('find', fn);
         this.post('findOne', fn);
+        this.post('find', function (docs, next) {
+            Array.prototype.forEach.call(docs, (doc) => fn(doc, () => { }));
+            next();
+        });
         return this;
     }
 }
@@ -92,7 +95,7 @@ userSchema.preAnyUpdate(function (next) {
     next();
 });
 let productSchema = new Schema({
-    creationDate: { type: Date, default: Date.now },
+    creationDate: { type: Date, default: Date.now, index: true },
     title: { type: String, required: true, minlength: 6, maxlength: 140 },
     subtitle: { type: String, required: true },
     username: { type: String, required: true, ref: 'User' },
@@ -104,7 +107,7 @@ let productSchema = new Schema({
     },
 });
 let reviewSchema = new Schema({
-    creationDate: { type: Date, default: Date.now },
+    creationDate: { type: Date, default: Date.now, index: true },
     username: { type: String, required: true, ref: 'User' },
     productID: {
         type: Schema.Types.ObjectId,
@@ -115,11 +118,15 @@ let reviewSchema = new Schema({
     fullReview: { type: String, required: true },
     rating: { type: Number, min: 1, max: 5 },
     likes: [{ type: String, required: true }],
+    // the count is for cases when the likes array is spliced (for optimization)
+    // it isn't required for insertion, but supposed to created in the post find hooks
+    likesCount: Number,
     dislikes: [{ type: String, required: true }],
+    dislikesCount: Number,
 });
 let commentSchema = new Schema({
     username: { type: String, required: true, ref: 'User' },
-    creationDate: { type: Date, default: Date.now },
+    creationDate: { type: Date, default: Date.now, index: true },
     reviewID: {
         type: Schema.Types.ObjectId,
         ref: 'Review',
@@ -130,7 +137,9 @@ let commentSchema = new Schema({
             type: String,
             required: true
         }],
+    likesCount: Number,
     dislike: [{ type: String, required: true }],
+    dislikesCount: Number,
 });
 //#region hooks
 // productSchema.preAnyUpdate(function(next: Function) {
@@ -149,8 +158,10 @@ let commentSchema = new Schema({
 // });
 reviewSchema.postAnyFInd(function (doc, next) {
     let d = doc;
-    d.likesCount = d.likes.length;
-    d.dislikesCount = d.dislikes.length;
+    if (d.likes && d.dislikes) {
+        d.likesCount = d.likes.length;
+        d.dislikesCount = d.dislikes.length;
+    }
     next();
 });
 // commentSchema.preAnyUpdate(function(next: Function): void {
@@ -160,8 +171,10 @@ reviewSchema.postAnyFInd(function (doc, next) {
 // });
 commentSchema.postAnyFInd(function (doc, next) {
     let d = doc;
-    d.likesCount = d.likes.length;
-    d.dislikesCount = d.dislikes.length;
+    if (d.likes && d.dislikes) {
+        d.likesCount = d.likes.length;
+        d.dislikesCount = d.dislikes.length;
+    }
     next();
 });
 productSchema.preAnyUpdate(function (next) {

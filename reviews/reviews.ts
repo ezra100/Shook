@@ -20,7 +20,7 @@ router.put('/update', async function(req, res) {
   review.username = req.user.username;
   let oldReview = await db.getReviewByID(review._id);
   if (req.user.username !== oldReview.username) {
-    res.status(401).end("You're not the owner of the review");
+    res.status(401).end('You\'re not the owner of the review');
     return;
   }
   review = await db.updateReview(review);
@@ -53,14 +53,14 @@ router.get('/getLatest', async function(req, res) {
   res.json(products);
 });
 
-router.delete("/delete", async function(req, res){
+router.delete('/delete', async function(req, res) {
   let id = req.query._id;
   let recursive = req.query.recursive;
   let oldReview = await db.getReviewByID(id);
-  if(oldReview.username.toLowerCase() === req.user.username.toLowerCase()){
-      db.deleteReview(id, recursive);
-      res.end(id + " deleted successfully");
-  }else{
-    res.status(401).end("You're not the owner of " + id);
+  if (oldReview.username.toLowerCase() === req.user.username.toLowerCase()) {
+    db.deleteReview(id, recursive);
+    res.end(id + ' deleted successfully');
+  } else {
+    res.status(401).end('You\'re not the owner of ' + id);
   }
 });

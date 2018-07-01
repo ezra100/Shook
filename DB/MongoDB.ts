@@ -168,7 +168,11 @@ class MongoDB {
   }
   //#endregion
   //#region  product
-  async addProduct(product: IMinProduct): Promise<IProduct> {
+  async addProduct(product: Partial<IProduct>, secure: boolean = true):
+      Promise<IProduct> {
+    if (secure) {
+      product.creationDate = new Date();
+    }
     return (await productModel.create(product)).toObject();
   }
 
@@ -199,12 +203,17 @@ class MongoDB {
   //#endregion
 
   //#region review
-  async addReview(review: IReview): Promise<IReview> {
-    return (await productModel.create(review)).toObject();
+  async addReview(review: IReview, secure: boolean = true): Promise<IReview> {
+    if (secure) {
+      review.dislikes = [];
+      review.likes = [];
+      review.creationDate = new Date();
+    }
+    return (await reviewModel.create(review)).toObject();
   }
 
   async updateReview(review: IReview): Promise<IReview|null> {
-    return (await productModel.findByIdAndUpdate(
+    return (await reviewModel.findByIdAndUpdate(
                 review._id, review, {new /* return the new document*/: true}))
         .toObject();
   }
@@ -222,21 +231,34 @@ class MongoDB {
     reviewModel.deleteMany({productID});
   }
   async getReviewByID(id: string): Promise<IReview> {
-    return (await productModel.findById(id)).toObject();
+    return (await reviewModel.findById(id)).toObject();
   }
   async getLatestReviews(
       filter: Partial<IReview> = {}, offset: number = 0,
       limit?: number): Promise<IReview[]> {
-    let res = productModel.find(filter).sort('-creationDate').skip(offset);
+    let res = reviewModel.find(filter).sort('-creationDate').skip(offset);
     if (limit) {
       res.limit(limit);
     }
     return (await res.exec()).map(doc => doc.toObject());
   }
+
+  async getProductRating(productID: string): Promise<number> {
+    return (await reviewModel.aggregate()
+                .match({productID: mongoose.Types.ObjectId(productID)})
+                .group({_id: '$productID', avg: {$avg: '$rating'}}))[0]
+        .avg;
+  }
   //#endregion
 
   //#region comment
-  async addComment(comment: IComment): Promise<IComment> {
+  async addComment(comment: IComment, secure: boolean = true):
+      Promise<IComment> {
+    if (secure) {
+      comment.creationDate = new Date();
+      comment.dislikes = [];
+      comment.likes = [];
+    }
     return (await commentModel.create(comment)).toObject();
   }
   async deleteComment(id: string) {

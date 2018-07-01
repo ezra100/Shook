@@ -2,7 +2,7 @@ import * as mongoose from 'mongoose';
 import {Aggregate, Model, NativeError} from 'mongoose';
 
 import {helpers} from '../helpers';
-import {Gender, User, UserAuthData,IReview, UserType, IComment} from '../types';
+import {Gender, IComment, IReview, User, UserAuthData, UserType} from '../types';
 
 
 // define a schema
@@ -19,8 +19,14 @@ class Schema extends mongoose.Schema {
   postAnyFInd<T extends Document>(
       fn: (doc: mongoose.Document, next: (err?: NativeError) => void) => void):
       this {
-    this.post('find', fn);
     this.post('findOne', fn);
+    this.post(
+        'find',
+        function(docs: mongoose.Document, next: (err?: NativeError) => void) {
+          Array.prototype.forEach.call(
+              docs, (doc: mongoose.Document) => fn(doc, () => {}));
+          next();
+        });
     return this;
   }
 }
@@ -105,7 +111,7 @@ userSchema.preAnyUpdate(function(next) {
 
 
 let productSchema: Schema = new Schema({
-  creationDate: {type: Date, default: Date.now},
+  creationDate: {type: Date, default: Date.now, index: true},
   title: {type: String, required: true, minlength: 6, maxlength: 140},
   subtitle: {type: String, required: true},
   username: {type: String, required: true, ref: 'User'},
@@ -119,7 +125,7 @@ let productSchema: Schema = new Schema({
 
 
 let reviewSchema = new Schema({
-  creationDate: {type: Date, default: Date.now},
+  creationDate: {type: Date, default: Date.now, index: true},
   username: {type: String, required: true, ref: 'User'},
   productID: {
     type: Schema.Types.ObjectId,
@@ -130,7 +136,12 @@ let reviewSchema = new Schema({
   fullReview: {type: String, required: true},
   rating: {type: Number, min: 1, max: 5},  // 1-5 stars
   likes: [{type: String, required: true}],
+
+  // the count is for cases when the likes array is spliced (for optimization)
+  // it isn't required for insertion, but supposed to created in the post find hooks
+  likesCount: Number,
   dislikes: [{type: String, required: true}],
+  dislikesCount: Number,
 
 });
 
@@ -138,7 +149,7 @@ let reviewSchema = new Schema({
 
 let commentSchema = new Schema({
   username: {type: String, required: true, ref: 'User'},
-  creationDate: {type: Date, default: Date.now},
+  creationDate: {type: Date, default: Date.now, index: true},
   reviewID: {
     type: Schema.Types.ObjectId,
     ref: 'Review',
@@ -149,7 +160,11 @@ let commentSchema = new Schema({
     type: String,
     required: true
   }],  // array of usernames of those who liked the comment
+  likesCount: Number,
+
   dislike: [{type: String, required: true}],  // array of username of dislikes
+  dislikesCount: Number,
+
 })
 
 
@@ -175,9 +190,11 @@ let commentSchema = new Schema({
 // });
 
 reviewSchema.postAnyFInd(function(doc, next: Function): void {
-  let d : mongoose.Document & IReview = <any>doc;
-  d.likesCount = d.likes.length;
-  d.dislikesCount = d.dislikes.length;
+  let d: mongoose.Document&IReview = <any>doc;
+  if (d.likes && d.dislikes) {
+    d.likesCount = d.likes.length;
+    d.dislikesCount = d.dislikes.length;
+  }
   next();
 });
 
@@ -190,9 +207,11 @@ reviewSchema.postAnyFInd(function(doc, next: Function): void {
 // });
 
 commentSchema.postAnyFInd(function(doc, next: Function): void {
-  let d : mongoose.Document & IComment = <any>doc;
-  d.likesCount = d.likes.length;
-  d.dislikesCount = d.dislikes.length;
+  let d: mongoose.Document&IComment = <any>doc;
+  if (d.likes && d.dislikes) {
+    d.likesCount = d.likes.length;
+    d.dislikesCount = d.dislikes.length;
+  }
   next();
 });
 

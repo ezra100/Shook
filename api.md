@@ -24,6 +24,10 @@ PUT for update, POST for create, GET for get (no changes on server side)
         1. limit
         2. offset
         3. optional - username (owner of the product)
+    * get product rating
+        * productID
+        * GET request
+        * returns a number (float)
 * review
     * add
         1. POST
@@ -70,6 +74,5 @@ PUT for update, POST for create, GET for get (no changes on server side)
 
 ### todo
 
-* review
 * chats
-* indexes
+* filter by creation date range

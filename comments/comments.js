@@ -26,7 +26,7 @@ exports.router.put('/update', function (req, res) {
         comment.username = req.user.username;
         let oldComment = yield MongoDB_1.db.getCommentByID(comment._id);
         if (req.user.username !== oldComment.username) {
-            res.status(401).end();
+            res.status(401).end("You're not the owner of the comment");
             return;
         }
         comment = yield MongoDB_1.db.updateComment(comment);

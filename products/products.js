@@ -26,7 +26,7 @@ exports.router.put('/update', function (req, res) {
         product.username = req.user.username;
         let oldProduct = yield MongoDB_1.db.getProductByID(product._id);
         if (req.user.username !== oldProduct.username) {
-            res.status(401).end();
+            res.status(401).end('You\'re not the owner of the product');
             return;
         }
         product = yield MongoDB_1.db.updateProduct(product);
@@ -51,18 +51,25 @@ exports.router.get('/getLatest', function (req, res) {
         res.json(yield MongoDB_1.db.getLatestProducts(filter, offset, limit));
     });
 });
-exports.router.delete("/delete", function (req, res) {
+exports.router.delete('/delete', function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let id = req.query._id;
         let recursive = req.query.recursive;
         let oldReview = yield MongoDB_1.db.getProductByID(id);
         if (oldReview.username.toLowerCase() === req.user.username.toLowerCase()) {
             MongoDB_1.db.deleteProduct(id, recursive);
-            res.end(id + " deleted successfully");
+            res.end(id + ' deleted successfully');
         }
         else {
-            res.status(401).end("You're not the owner of " + id);
+            res.status(401).end('You\'re not the owner of ' + id);
         }
+    });
+});
+exports.router.get('/getAvgRating', function (req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let id = req.query.id;
+        let rating = yield MongoDB_1.db.getProductRating(id);
+        res.json(rating);
     });
 });
 //# sourceMappingURL=products.js.map

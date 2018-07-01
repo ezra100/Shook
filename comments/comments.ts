@@ -11,6 +11,7 @@ router.post(
     '/add', async function(req: express.Request, res: express.Response) {
       let comment: IComment = req.body;
       comment.username = req.user.username;
+
       comment = await db.addComment(comment);
       res.status(201).json(comment);
     });

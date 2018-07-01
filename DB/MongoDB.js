@@ -154,8 +154,11 @@ class MongoDB {
     }
     //#endregion
     //#region  product
-    addProduct(product) {
+    addProduct(product, secure = true) {
         return __awaiter(this, void 0, void 0, function* () {
+            if (secure) {
+                product.creationDate = new Date();
+            }
             return (yield Models_1.productModel.create(product)).toObject();
         });
     }
@@ -190,14 +193,19 @@ class MongoDB {
     }
     //#endregion
     //#region review
-    addReview(review) {
+    addReview(review, secure = true) {
         return __awaiter(this, void 0, void 0, function* () {
-            return (yield Models_1.productModel.create(review)).toObject();
+            if (secure) {
+                review.dislikes = [];
+                review.likes = [];
+                review.creationDate = new Date();
+            }
+            return (yield Models_1.reviewModel.create(review)).toObject();
         });
     }
     updateReview(review) {
         return __awaiter(this, void 0, void 0, function* () {
-            return (yield Models_1.productModel.findByIdAndUpdate(review._id, review, { new /* return the new document*/: true }))
+            return (yield Models_1.reviewModel.findByIdAndUpdate(review._id, review, { new /* return the new document*/: true }))
                 .toObject();
         });
     }
@@ -220,22 +228,35 @@ class MongoDB {
     }
     getReviewByID(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            return (yield Models_1.productModel.findById(id)).toObject();
+            return (yield Models_1.reviewModel.findById(id)).toObject();
         });
     }
     getLatestReviews(filter = {}, offset = 0, limit) {
         return __awaiter(this, void 0, void 0, function* () {
-            let res = Models_1.productModel.find(filter).sort('-creationDate').skip(offset);
+            let res = Models_1.reviewModel.find(filter).sort('-creationDate').skip(offset);
             if (limit) {
                 res.limit(limit);
             }
             return (yield res.exec()).map(doc => doc.toObject());
         });
     }
+    getProductRating(productID) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return (yield Models_1.reviewModel.aggregate()
+                .match({ productID: mongoose.Types.ObjectId(productID) })
+                .group({ _id: '$productID', avg: { $avg: '$rating' } }))[0]
+                .avg;
+        });
+    }
     //#endregion
     //#region comment
-    addComment(comment) {
+    addComment(comment, secure = true) {
         return __awaiter(this, void 0, void 0, function* () {
+            if (secure) {
+                comment.creationDate = new Date();
+                comment.dislikes = [];
+                comment.likes = [];
+            }
             return (yield Models_1.commentModel.create(comment)).toObject();
         });
     }

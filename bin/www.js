@@ -25,7 +25,7 @@ let server = httpolyglot.createServer(credentials, function (req, res) {
     if (!req.socket.encrypted) {
         // non permanent redirect
         res.writeHead(307, { "Location": "https://" + req.headers.host + req.url });
-        return res.end();
+        return res.end("redirecting you to a secured connection...");
     }
     app(req, res);
 });

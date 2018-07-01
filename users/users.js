@@ -43,14 +43,14 @@ exports.router.put('/update-details', function (req, res) {
     }
     let username = req.user.username;
     let response = MongoDB_1.db.updateUserById(username, user);
-    res.status(201).end();
+    res.status(201).end('Your details were updated successfully');
 });
-//returns the details about the current logged in user
+// returns the details about the current logged in user
 exports.router.get('/user-details', function (req, res) {
     if (req.user) {
         res.json(req.user);
         return;
     }
-    res.status(404).end();
+    res.status(404).end('You\'re not logged in');
 });
 //# sourceMappingURL=users.js.map
