@@ -1,5 +1,4 @@
 "use strict";
-// tslint:disable:typedef
 Object.defineProperty(exports, "__esModule", { value: true });
 const bodyParser = require("body-parser");
 const connMongo = require("connect-mongo");

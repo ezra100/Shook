@@ -67,7 +67,7 @@ router.post('/complete', async function(req, res) {
       hashedPassword: newPasswordHash,
       salt: newSalt
     });
-    res.status(201).end();
+    res.status(201).end("reset complete");
     return;
   } else {
     res.status(400).end(

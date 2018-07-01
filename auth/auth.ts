@@ -24,14 +24,14 @@ router.post(
         'local', {failureMessage: 'wrong username or password'}),
     function(req, res) {
       if (req.user) {
-        res.status(201).json({userType: req.user.className});
+        res.status(201).end("login successful");
         return;
       }
       res.status(400).end('Wrong username or password');
     });
 router.post('/logout', function(req: express.Request, res) {
   req.logout();
-  res.end();
+  res.end("You've logged successfully");
 });
 
 // requests the salts for the challengs

@@ -20,7 +20,7 @@ router.put('/update', async function(req, res) {
   product.username = req.user.username;
   let oldProduct = await db.getProductByID(product._id);
   if (req.user.username !== oldProduct.username) {
-    res.status(401).end();
+    res.status(401).end("You're not the owner of the product");
     return;
   }
   product = await db.updateProduct(product);

@@ -20,7 +20,7 @@ router.put('/update', async function(req, res) {
   review.username = req.user.username;
   let oldReview = await db.getReviewByID(review._id);
   if (req.user.username !== oldReview.username) {
-    res.status(401).end();
+    res.status(401).end("You're not the owner of the review");
     return;
   }
   review = await db.updateReview(review);

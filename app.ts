@@ -1,5 +1,3 @@
-// tslint:disable:typedef
-
 import * as bodyParser from 'body-parser';
 import * as connMongo from 'connect-mongo';
 import * as cookieParser from 'cookie-parser';
