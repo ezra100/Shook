@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const MongoDB_1 = require("../DB/MongoDB");
 const helpers_1 = require("../helpers");
+const constants_1 = require("../constants");
 exports.router = express.Router();
 exports.router.post('/add', function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -23,19 +24,13 @@ exports.router.post('/add', function (req, res) {
 exports.router.put('/update', function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let review = req.body;
-        review.username = req.user.username;
-        let oldReview = yield MongoDB_1.db.getReviewByID(review._id);
-        if (req.user.username !== oldReview.username) {
-            res.status(401).end('You\'re not the owner of the review');
-            return;
-        }
-        review = yield MongoDB_1.db.updateReview(review);
+        review = yield MongoDB_1.db.updateReview(review, req.user.username);
         res.status(201).json(review);
     });
 });
 exports.router.get('/getByID', function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        let id = req.query.id;
+        let id = req.query._id || req.query.id;
         res.json(yield MongoDB_1.db.getReviewByID(id));
     });
 });
@@ -44,26 +39,21 @@ exports.router.get('/getLatest', function (req, res) {
         let filter = {};
         let username = req.query.username;
         // from the likes/dislikes array - how many elements to show
-        let likesLimit = Number(req.query.likesArrLimit) || 10;
         if (req.query.username) {
             filter.username = new RegExp(helpers_1.helpers.escapeRegExp(username), 'i');
         }
         if (req.query.productID) {
             filter.productID = req.query.productID;
         }
-        let limit = req.query.limit ? Number(req.query.limit) : undefined;
+        let limit = Number(req.query.limit) || constants_1.LIMIT;
         let offset = Number(req.query.offset || 0);
         let products = yield MongoDB_1.db.getLatestReviews(filter, offset, limit);
-        products.forEach((product) => {
-            product.likes.splice(likesLimit);
-            product.dislikes.splice(likesLimit);
-        });
         res.json(products);
     });
 });
 exports.router.delete('/delete', function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        let id = req.query._id;
+        let id = req.query._id || req.query.id;
         let recursive = req.query.recursive;
         let oldReview = yield MongoDB_1.db.getReviewByID(id);
         if (oldReview.username.toLowerCase() === req.user.username.toLowerCase()) {
@@ -73,6 +63,37 @@ exports.router.delete('/delete', function (req, res) {
         else {
             res.status(401).end('You\'re not the owner of ' + id);
         }
+    });
+});
+exports.router.put("/like", function (req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let id = req.query._id || req.query.id;
+        if (!req.user) {
+            res.status(401).end("you're not logged in");
+            return;
+        }
+        res.json(yield MongoDB_1.db.likeReview(id, req.user.username));
+    });
+});
+exports.router.put("/dislike", function (req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let id = req.query._id || req.query.id;
+        if (!req.user) {
+            res.status(401).end("you're not logged in");
+            return;
+        }
+        res.json(yield MongoDB_1.db.dislikeReview(id, req.user.username));
+    });
+});
+// removes both likes and dislikes
+exports.router.put(/\/removeLike/i, function (req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let id = req.query._id || req.query.id;
+        if (!req.user) {
+            res.status(401).end("you're not logged in");
+            return;
+        }
+        res.json(yield MongoDB_1.db.removeLikeDislikeFromReview(id, req.user.username));
     });
 });
 //# sourceMappingURL=reviews.js.map

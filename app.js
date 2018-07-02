@@ -27,7 +27,7 @@ app.use(cookieParser(secret));
 let mongoStore = connMongo(session);
 let options = { mongooseConnection: MongoDB_1.mongoConnection };
 let store = new mongoStore(options);
-app.use(session({ secret, store, resave: false, saveUninitialized: false }));
+app.use(session({ secret, store: store, resave: false, saveUninitialized: false }));
 // this must become before loginRouter
 app.use(passport_1.passport.initialize());
 app.use(passport_1.passport.session());

@@ -28,7 +28,7 @@ router.post('/signup', async function(req: express.Request, res) {
 });
 
 // update details about the current user
-router.put('/update-details', function(req, res) {
+router.put('/updateDetails', function(req, res) {
   let user: any = {};
   for (let key of userProperties) {
     if (req.body[key]) {
@@ -40,10 +40,24 @@ router.put('/update-details', function(req, res) {
   res.status(201).end('Your details were updated successfully');
 });
 // returns the details about the current logged in user
-router.get('/user-details', function(req, res) {
+router.get('/getDetails', function(req, res) {
   if (req.user) {
     res.json(req.user);
     return;
   }
   res.status(404).end('You\'re not logged in');
+});
+
+router.put("/follow", async function(req, res){
+  let followee = req.query.followee;
+  let follower = req.user.username;
+  let dbRes = await db.addFollowee(follower, followee);
+  res.json(dbRes);
+});
+
+router.put("/unfollow", async function(req, res){
+  let followee = req.query.followee;
+  let follower = req.user.username;
+  let dbRes = await db.removeFollowee(follower, followee);
+  res.json(dbRes);
 });

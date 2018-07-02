@@ -33,7 +33,8 @@ function generateUser() {
             ', ' + faker.address.country(),
         email: faker.internet.email(),
         gender: faker.random.boolean ? types_1.Gender.Male : types_1.Gender.Female,
-        imageURL: '/img/default.png'
+        imageURL: '/img/default.png',
+        follows: []
     };
     return { user, password: password };
 }
@@ -59,7 +60,7 @@ function getRandomUsernames(min = 5, max = 30) {
     let dislikesSize = faker.random.number({ min, max });
     let likes = [];
     let dislikes = [];
-    let usernames = users.map(user => user.username);
+    let usernames = users.map(user => user.username.toLowerCase());
     while (likes.length < likesSize) {
         likes.push(usernames.splice(faker.random.number(usernames.length - 1), 1)[0]);
     }
@@ -116,7 +117,7 @@ function initUsers(size = 50, logPasswod = true) {
         }
     });
 }
-function initDB(usersSize = 250, avgProductsPerUser = 10, reviewsPerProduct = 20, commentsPerReview = 10) {
+function initDB(usersSize = 100, avgProductsPerUser = 5, reviewsPerProduct = 5, commentsPerReview = 8) {
     return __awaiter(this, void 0, void 0, function* () {
         users = yield MongoDB_1.db.getUsers();
         products = yield MongoDB_1.db.getLatestProducts();

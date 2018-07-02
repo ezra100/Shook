@@ -76,3 +76,6 @@ PUT for update, POST for create, GET for get (no changes on server side)
 
 * chats
 * filter by creation date range
+* follow list and post list
+* categories (?)
+* products list

@@ -35,7 +35,8 @@ function generateUser(): IInitPackage {
         ', ' + faker.address.country(),
     email: faker.internet.email(),
     gender: faker.random.boolean ? Gender.Male : Gender.Female,
-    imageURL: '/img/default.png'
+    imageURL: '/img/default.png',
+    follows : []
   };
 
   return {user, password: password};
@@ -68,7 +69,7 @@ function getRandomUsernames(
   let likes: string[] = [];
   let dislikes: string[] = [];
 
-  let usernames = users.map(user => user.username);
+  let usernames = users.map(user => user.username.toLowerCase());
   while (likes.length < likesSize) {
     likes.push(
         usernames.splice(faker.random.number(usernames.length - 1), 1)[0]);
@@ -136,7 +137,7 @@ async function initUsers(size: number = 50, logPasswod: boolean = true) {
 
 export async function initDB(
     usersSize: number = 100, avgProductsPerUser = 5,
-    reviewsPerProduct: number = 5, commentsPerReview = 10) {
+    reviewsPerProduct: number = 5, commentsPerReview = 8) {
   users = await db.getUsers();
   products = await db.getLatestProducts();
   reviews = await db.getLatestReviews();

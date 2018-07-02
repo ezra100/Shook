@@ -3,7 +3,7 @@ import * as express from 'express';
 import {db} from '../DB/MongoDB';
 import {helpers} from '../helpers';
 import {IReview} from '../types';
-
+import {LIMIT} from "../constants";
 
 export var router = express.Router();
 
@@ -17,18 +17,12 @@ router.post(
 
 router.put('/update', async function(req, res) {
   let review: IReview = req.body;
-  review.username = req.user.username;
-  let oldReview = await db.getReviewByID(review._id);
-  if (req.user.username !== oldReview.username) {
-    res.status(401).end('You\'re not the owner of the review');
-    return;
-  }
-  review = await db.updateReview(review);
+  review = await db.updateReview(review, req.user.username);
   res.status(201).json(review);
 });
 
 router.get('/getByID', async function(req, res) {
-  let id: string = req.query.id;
+  let id: string = req.query._id || req.query.id;
   res.json(await db.getReviewByID(id));
 });
 
@@ -36,25 +30,20 @@ router.get('/getLatest', async function(req, res) {
   let filter: any = {};
   let username = req.query.username;
   // from the likes/dislikes array - how many elements to show
-  let likesLimit = Number(req.query.likesArrLimit) || 10;
   if (req.query.username) {
     filter.username = new RegExp(helpers.escapeRegExp(username), 'i');
   }
   if (req.query.productID) {
     filter.productID = req.query.productID;
   }
-  let limit = req.query.limit ? Number(req.query.limit) : undefined;
+  let limit = Number(req.query.limit)  || LIMIT;
   let offset = Number(req.query.offset || 0);
   let products = await db.getLatestReviews(filter, offset, limit);
-  products.forEach((product) => {
-    product.likes.splice(likesLimit);
-    product.dislikes.splice(likesLimit);
-  });
   res.json(products);
 });
 
 router.delete('/delete', async function(req, res) {
-  let id = req.query._id;
+  let id = req.query._id || req.query.id;
   let recursive = req.query.recursive;
   let oldReview = await db.getReviewByID(id);
   if (oldReview.username.toLowerCase() === req.user.username.toLowerCase()) {
@@ -63,4 +52,33 @@ router.delete('/delete', async function(req, res) {
   } else {
     res.status(401).end('You\'re not the owner of ' + id);
   }
+});
+
+router.put("/like", async function(req, res){
+  let id= req.query._id || req.query.id;
+  if(!req.user){
+    res.status(401).end("you're not logged in");
+    return;
+  }
+  res.json(await db.likeReview(id, req.user.username));
+
+});
+
+router.put("/dislike", async function(req, res){
+  let id= req.query._id || req.query.id;
+  if(!req.user){
+    res.status(401).end("you're not logged in");
+    return;
+  }
+  res.json(await db.dislikeReview(id, req.user.username));
+});
+
+// removes both likes and dislikes
+router.put(/\/removeLike/i, async function(req, res){
+  let id= req.query._id || req.query.id;
+  if(!req.user){
+    res.status(401).end("you're not logged in");
+    return;
+  }
+  res.json(await db.removeLikeDislikeFromReview(id, req.user.username));
 });

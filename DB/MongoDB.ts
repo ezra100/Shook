@@ -7,7 +7,7 @@ import {Gender, IComment, IMinProduct, IProduct, IReview, User, UserAuthData, Us
 
 import {commentModel, productModel, reviewModel, userAuthDataModel, userModel} from './Models';
 
-
+let ObjectId = mongoose.Types.ObjectId;
 
 // set up default mongoose connection
 var connectionString: string = 'mongodb://127.0.0.1/shook';
@@ -128,8 +128,40 @@ class MongoDB {
     });
   }
 
+  async addFollowee(follower: string, followee: string) {
+    followee = followee.toLowerCase();
+    follower = follower.toLowerCase();
+    // validate the followee, we assume the follower is validated by the calling
+    // function
+    let doc = (await userModel.findById(followee).exec());
+    if (!doc) {
+      return 'followee doesn\'t exist';
+    }
+    return (
+        await userModel
+            .update(
+                {_id: follower.toLowerCase()}, {$addToSet: {follows: followee}})
+            .exec());
+  }
+  async removeFollowee(follower: string, followee: string) {
+    followee = followee.toLowerCase();
+    follower = follower.toLowerCase();
+    return (
+        await userModel
+            .update({_id: follower.toLowerCase()}, {$pull: {follows: followee}})
+            .exec());
+  }
+
   updateUserById(username: string, user: Partial<User>): Promise<User> {
     username = username.toLowerCase();
+    user = {
+      address: user.address,
+      email: user.email,
+      imageURL: user.imageURL,
+      gender: user.gender,
+      firstName: user.firstName,
+      lastName: user.lastName
+    };
     return new Promise((resolve, reject) => {
       userModel.findByIdAndUpdate(
           username, user, (err: Error, oldUser: User) => {
@@ -176,9 +208,16 @@ class MongoDB {
     return (await productModel.create(product)).toObject();
   }
 
-  async updateProduct(product: IProduct): Promise<IProduct|null> {
-    return (await productModel.findByIdAndUpdate(
-                product._id, product, {new /* return the new document*/: true}))
+  async updateProduct(product: Partial<IProduct>, owner: string):
+      Promise<IProduct|null> {
+    product = {
+      link: product.link,
+      subtitle: product.subtitle,
+      title: product.title
+    };
+    return (await productModel.findOneAndUpdate(
+                {_id: product._id, username: owner || 'block undefined'},
+                product, {new /* return the new document*/: true}))
         .toObject();
   }
   async deleteProduct(id: string, removeReviews: boolean = true) {
@@ -200,6 +239,19 @@ class MongoDB {
     }
     return (await res.exec()).map(doc => doc.toObject());
   }
+  async getProductsFromFollowees(
+      username: string, offset: number = 0,
+      limit?: number): Promise<IProduct[]> {
+    username = username.toLowerCase();
+    let followees = (await userModel.findById(username)).toObject().follows;
+    let agg = productModel.aggregate().match({"username":{$in: followees}})
+                  .sort('-creationDate')
+                  .skip(offset);
+    if (limit) {
+      agg.limit(limit);
+    }
+    return await agg;
+  }
   //#endregion
 
   //#region review
@@ -212,9 +264,16 @@ class MongoDB {
     return (await reviewModel.create(review)).toObject();
   }
 
-  async updateReview(review: IReview): Promise<IReview|null> {
-    return (await reviewModel.findByIdAndUpdate(
-                review._id, review, {new /* return the new document*/: true}))
+  async updateReview(review: Partial<IReview>, owner: string):
+      Promise<IReview|null> {
+    review = {
+      title: review.title,
+      rating: review.rating,
+      fullReview: review.fullReview
+    };
+    return (await reviewModel.findOneAndUpdate(
+                {_id: review._id, username: owner || 'block undefined'}, review,
+                {new /* return the new document*/: true}))
         .toObject();
   }
   async deleteReview(id: string, removeComments: boolean = true) {
@@ -228,7 +287,9 @@ class MongoDB {
     reviews.forEach((review) => {
       this.deleteCommentsByReviewID(review._id);
     });
-    reviewModel.deleteMany({productID});
+    let results =
+        (await reviewModel.remove({productID: new ObjectId(productID)}));
+    return results;
   }
   async getReviewByID(id: string): Promise<IReview> {
     return (await reviewModel.findById(id)).toObject();
@@ -249,6 +310,28 @@ class MongoDB {
                 .group({_id: '$productID', avg: {$avg: '$rating'}}))[0]
         .avg;
   }
+  async likeReview(id: string, username: string) {
+    username = username.toLowerCase();
+    return (await reviewModel
+                .update(
+                    {_id: id},
+                    {$addToSet: {likes: username}, $pull: {dislikes: username}})
+                .exec());
+  }
+  async dislikeReview(id: string, username: string) {
+    username = username.toLowerCase();
+    return await reviewModel
+        .update(
+            {_id: id},
+            {$pull: {likes: username}, $addToSet: {dislikes: username}})
+        .exec();
+  }
+  async removeLikeDislikeFromReview(id: string, username: string) {
+    username = username.toLowerCase();
+    return await reviewModel
+        .update({_id: id}, {$pull: {likes: username, dislikes: username}})
+        .exec();
+  }
   //#endregion
 
   //#region comment
@@ -265,11 +348,15 @@ class MongoDB {
     commentModel.findByIdAndRemove(id);
   }
   async deleteCommentsByReviewID(reviewID: string) {
-    commentModel.deleteMany({reviewID});
+    let results = await commentModel.remove({reviewID: new ObjectId(reviewID)});
+    return results;
   }
-  async updateComment(comment: IComment): Promise<IComment|null> {
-    return (await commentModel.findByIdAndUpdate(
-                comment._id, comment, {new: /* return the new document*/ true}))
+  async updateComment(comment: Partial<IComment>, owner: string):
+      Promise<IComment|null> {
+    comment = {comment: comment.comment};
+    return (await commentModel.findOneAndUpdate(
+                {_id: comment._id, username: owner || 'block undefined'},
+                comment, {new: /* return the new document*/ true}))
         .toObject();
   }
   async getCommentByID(id: string): Promise<IComment> {
@@ -283,6 +370,29 @@ class MongoDB {
       res.limit(limit);
     }
     return (await res.exec()).map(doc => doc.toObject());
+  }
+
+  async likeComment(id: string, username: string) {
+    username = username.toLowerCase();
+    return (await commentModel
+                .update(
+                    {_id: id},
+                    {$addToSet: {likes: username}, $pull: {dislikes: username}})
+                .exec());
+  }
+  async dislikeComment(id: string, username: string) {
+    username = username.toLowerCase();
+    return await commentModel
+        .update(
+            {_id: id},
+            {$pull: {likes: username}, $addToSet: {dislikes: username}})
+        .exec();
+  }
+  async removeLikeDislikeFromComment(id: string, username: string) {
+    username = username.toLowerCase();
+    return await commentModel
+        .update({_id: id}, {$pull: {likes: username, dislikes: username}})
+        .exec();
   }
   //#endregion
 }

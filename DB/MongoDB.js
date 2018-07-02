@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose = require("mongoose");
 const helpers_1 = require("../helpers");
 const Models_1 = require("./Models");
+let ObjectId = mongoose.Types.ObjectId;
 // set up default mongoose connection
 var connectionString = 'mongodb://127.0.0.1/shook';
 mongoose.connect(connectionString);
@@ -116,8 +117,40 @@ class MongoDB {
             });
         });
     }
+    addFollowee(follower, followee) {
+        return __awaiter(this, void 0, void 0, function* () {
+            followee = followee.toLowerCase();
+            follower = follower.toLowerCase();
+            // validate the followee, we assume the follower is validated by the calling
+            // function
+            let doc = (yield Models_1.userModel.findById(followee).exec());
+            if (!doc) {
+                return 'followee doesn\'t exist';
+            }
+            return (yield Models_1.userModel
+                .update({ _id: follower.toLowerCase() }, { $addToSet: { follows: followee } })
+                .exec());
+        });
+    }
+    removeFollowee(follower, followee) {
+        return __awaiter(this, void 0, void 0, function* () {
+            followee = followee.toLowerCase();
+            follower = follower.toLowerCase();
+            return (yield Models_1.userModel
+                .update({ _id: follower.toLowerCase() }, { $pull: { follows: followee } })
+                .exec());
+        });
+    }
     updateUserById(username, user) {
         username = username.toLowerCase();
+        user = {
+            address: user.address,
+            email: user.email,
+            imageURL: user.imageURL,
+            gender: user.gender,
+            firstName: user.firstName,
+            lastName: user.lastName
+        };
         return new Promise((resolve, reject) => {
             Models_1.userModel.findByIdAndUpdate(username, user, (err, oldUser) => {
                 if (err) {
@@ -162,9 +195,14 @@ class MongoDB {
             return (yield Models_1.productModel.create(product)).toObject();
         });
     }
-    updateProduct(product) {
+    updateProduct(product, owner) {
         return __awaiter(this, void 0, void 0, function* () {
-            return (yield Models_1.productModel.findByIdAndUpdate(product._id, product, { new /* return the new document*/: true }))
+            product = {
+                link: product.link,
+                subtitle: product.subtitle,
+                title: product.title
+            };
+            return (yield Models_1.productModel.findOneAndUpdate({ _id: product._id, username: owner || 'block undefined' }, product, { new /* return the new document*/: true }))
                 .toObject();
         });
     }
@@ -191,6 +229,19 @@ class MongoDB {
             return (yield res.exec()).map(doc => doc.toObject());
         });
     }
+    getProductsFromFollowees(username, offset = 0, limit) {
+        return __awaiter(this, void 0, void 0, function* () {
+            username = username.toLowerCase();
+            let followees = (yield Models_1.userModel.findById(username)).toObject().follows;
+            let agg = Models_1.productModel.aggregate().match({ "username": { $in: followees } })
+                .sort('-creationDate')
+                .skip(offset);
+            if (limit) {
+                agg.limit(limit);
+            }
+            return yield agg;
+        });
+    }
     //#endregion
     //#region review
     addReview(review, secure = true) {
@@ -203,9 +254,14 @@ class MongoDB {
             return (yield Models_1.reviewModel.create(review)).toObject();
         });
     }
-    updateReview(review) {
+    updateReview(review, owner) {
         return __awaiter(this, void 0, void 0, function* () {
-            return (yield Models_1.reviewModel.findByIdAndUpdate(review._id, review, { new /* return the new document*/: true }))
+            review = {
+                title: review.title,
+                rating: review.rating,
+                fullReview: review.fullReview
+            };
+            return (yield Models_1.reviewModel.findOneAndUpdate({ _id: review._id, username: owner || 'block undefined' }, review, { new /* return the new document*/: true }))
                 .toObject();
         });
     }
@@ -223,7 +279,8 @@ class MongoDB {
             reviews.forEach((review) => {
                 this.deleteCommentsByReviewID(review._id);
             });
-            Models_1.reviewModel.deleteMany({ productID });
+            let results = (yield Models_1.reviewModel.remove({ productID: new ObjectId(productID) }));
+            return results;
         });
     }
     getReviewByID(id) {
@@ -248,6 +305,30 @@ class MongoDB {
                 .avg;
         });
     }
+    likeReview(id, username) {
+        return __awaiter(this, void 0, void 0, function* () {
+            username = username.toLowerCase();
+            return (yield Models_1.reviewModel
+                .update({ _id: id }, { $addToSet: { likes: username }, $pull: { dislikes: username } })
+                .exec());
+        });
+    }
+    dislikeReview(id, username) {
+        return __awaiter(this, void 0, void 0, function* () {
+            username = username.toLowerCase();
+            return yield Models_1.reviewModel
+                .update({ _id: id }, { $pull: { likes: username }, $addToSet: { dislikes: username } })
+                .exec();
+        });
+    }
+    removeLikeDislikeFromReview(id, username) {
+        return __awaiter(this, void 0, void 0, function* () {
+            username = username.toLowerCase();
+            return yield Models_1.reviewModel
+                .update({ _id: id }, { $pull: { likes: username, dislikes: username } })
+                .exec();
+        });
+    }
     //#endregion
     //#region comment
     addComment(comment, secure = true) {
@@ -267,12 +348,14 @@ class MongoDB {
     }
     deleteCommentsByReviewID(reviewID) {
         return __awaiter(this, void 0, void 0, function* () {
-            Models_1.commentModel.deleteMany({ reviewID });
+            let results = yield Models_1.commentModel.remove({ reviewID: new ObjectId(reviewID) });
+            return results;
         });
     }
-    updateComment(comment) {
+    updateComment(comment, owner) {
         return __awaiter(this, void 0, void 0, function* () {
-            return (yield Models_1.commentModel.findByIdAndUpdate(comment._id, comment, { new: /* return the new document*/ true }))
+            comment = { comment: comment.comment };
+            return (yield Models_1.commentModel.findOneAndUpdate({ _id: comment._id, username: owner || 'block undefined' }, comment, { new: /* return the new document*/ true }))
                 .toObject();
         });
     }
@@ -288,6 +371,30 @@ class MongoDB {
                 res.limit(limit);
             }
             return (yield res.exec()).map(doc => doc.toObject());
+        });
+    }
+    likeComment(id, username) {
+        return __awaiter(this, void 0, void 0, function* () {
+            username = username.toLowerCase();
+            return (yield Models_1.commentModel
+                .update({ _id: id }, { $addToSet: { likes: username }, $pull: { dislikes: username } })
+                .exec());
+        });
+    }
+    dislikeComment(id, username) {
+        return __awaiter(this, void 0, void 0, function* () {
+            username = username.toLowerCase();
+            return yield Models_1.commentModel
+                .update({ _id: id }, { $pull: { likes: username }, $addToSet: { dislikes: username } })
+                .exec();
+        });
+    }
+    removeLikeDislikeFromComment(id, username) {
+        return __awaiter(this, void 0, void 0, function* () {
+            username = username.toLowerCase();
+            return yield Models_1.commentModel
+                .update({ _id: id }, { $pull: { likes: username, dislikes: username } })
+                .exec();
         });
     }
 }

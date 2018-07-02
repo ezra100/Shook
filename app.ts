@@ -32,7 +32,7 @@ let mongoStore = connMongo(session);
 let options:
     connMongo.MogooseConnectionOptions = {mongooseConnection: mongoConnection};
 let store = new mongoStore(options);
-app.use(session({secret, store, resave: false, saveUninitialized: false}));
+app.use(session({secret, store: store, resave: false, saveUninitialized: false}));
 
 // this must become before loginRouter
 app.use(passport.initialize());

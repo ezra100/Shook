@@ -18,6 +18,7 @@ export interface User {
   gender: Gender;
   address: string;
   imageURL: string;
+  follows: string[]
 }
 
 export interface UserAuthData {

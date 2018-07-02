@@ -34,7 +34,7 @@ exports.router.post('/signup', function (req, res) {
     });
 });
 // update details about the current user
-exports.router.put('/update-details', function (req, res) {
+exports.router.put('/updateDetails', function (req, res) {
     let user = {};
     for (let key of userProperties) {
         if (req.body[key]) {
@@ -46,11 +46,27 @@ exports.router.put('/update-details', function (req, res) {
     res.status(201).end('Your details were updated successfully');
 });
 // returns the details about the current logged in user
-exports.router.get('/user-details', function (req, res) {
+exports.router.get('/getDetails', function (req, res) {
     if (req.user) {
         res.json(req.user);
         return;
     }
     res.status(404).end('You\'re not logged in');
+});
+exports.router.put("/follow", function (req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let followee = req.query.followee;
+        let follower = req.user.username;
+        let dbRes = yield MongoDB_1.db.addFollowee(follower, followee);
+        res.json(dbRes);
+    });
+});
+exports.router.put("/unfollow", function (req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let followee = req.query.followee;
+        let follower = req.user.username;
+        let dbRes = yield MongoDB_1.db.removeFollowee(follower, followee);
+        res.json(dbRes);
+    });
 });
 //# sourceMappingURL=users.js.map

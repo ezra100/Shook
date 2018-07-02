@@ -62,6 +62,7 @@ let userSchema = new Schema({
             return helpers_1.helpers.isValidURL(this.imageURL);
         }
     },
+    follows: [{ type: String, required: true, ref: 'User' }],
 });
 let userDataSchema = new Schema({
     _id: String,
@@ -117,11 +118,12 @@ let reviewSchema = new Schema({
     title: { type: String, required: true, minlength: 5, maxlength: 140 },
     fullReview: { type: String, required: true },
     rating: { type: Number, min: 1, max: 5 },
-    likes: [{ type: String, required: true }],
+    likes: [{ type: String, required: true, ref: 'User' }],
     // the count is for cases when the likes array is spliced (for optimization)
-    // it isn't required for insertion, but supposed to created in the post find hooks
+    // it isn't required for insertion, but supposed to created in the post find
+    // hooks
     likesCount: Number,
-    dislikes: [{ type: String, required: true }],
+    dislikes: [{ type: String, required: true, ref: 'User' }],
     dislikesCount: Number,
 });
 let commentSchema = new Schema({
@@ -135,10 +137,15 @@ let commentSchema = new Schema({
     comment: { type: String, minlength: 1, required: true },
     likes: [{
             type: String,
-            required: true
+            required: true,
+            ref: 'User'
         }],
     likesCount: Number,
-    dislike: [{ type: String, required: true }],
+    dislikes: [{
+            type: String,
+            required: true,
+            ref: 'User'
+        }],
     dislikesCount: Number,
 });
 //#region hooks

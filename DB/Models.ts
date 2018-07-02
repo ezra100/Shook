@@ -74,6 +74,7 @@ let userSchema: Schema = new Schema({
       return helpers.isValidURL(this.imageURL)
     }
   },
+  follows: [{type: String, required: true, ref: 'User'}],
 });
 
 let userDataSchema: Schema = new Schema({
@@ -135,12 +136,13 @@ let reviewSchema = new Schema({
   title: {type: String, required: true, minlength: 5, maxlength: 140},
   fullReview: {type: String, required: true},
   rating: {type: Number, min: 1, max: 5},  // 1-5 stars
-  likes: [{type: String, required: true}],
+  likes: [{type: String, required: true, ref: 'User'}],
 
   // the count is for cases when the likes array is spliced (for optimization)
-  // it isn't required for insertion, but supposed to created in the post find hooks
+  // it isn't required for insertion, but supposed to created in the post find
+  // hooks
   likesCount: Number,
-  dislikes: [{type: String, required: true}],
+  dislikes: [{type: String, required: true, ref: 'User'}],
   dislikesCount: Number,
 
 });
@@ -158,11 +160,16 @@ let commentSchema = new Schema({
   comment: {type: String, minlength: 1, required: true},
   likes: [{
     type: String,
-    required: true
+    required: true,
+    ref: 'User'
   }],  // array of usernames of those who liked the comment
   likesCount: Number,
 
-  dislike: [{type: String, required: true}],  // array of username of dislikes
+  dislikes: [{
+    type: String,
+    required: true,
+    ref: 'User'
+  }],  // array of username of dislikes
   dislikesCount: Number,
 
 })
@@ -240,7 +247,10 @@ commentSchema.preAnyUpdate(function(next: Function): void {
 });
 
 
+
 //#endregion
+
+
 
 export let userModel: mongoose.Model<any> = mongoose.model('User', userSchema);
 export let userAuthDataModel: mongoose.Model<any> =
