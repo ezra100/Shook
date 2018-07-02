@@ -15,9 +15,6 @@ const passport_1 = require("./passport");
 const reset = require("./reset/reset");
 exports.router = express.Router();
 exports.router.use('/reset', reset.router);
-let userProperties = [
-    'address', 'username', 'firstName', 'lastName', 'email', 'gender', 'className'
-];
 exports.router.post('/login', passport_1.passport.authenticate('local', { failureMessage: 'wrong username or password' }), function (req, res) {
     if (req.user) {
         res.status(201).end("login successful");
@@ -45,7 +42,7 @@ function createUserData(username, password) {
     return __awaiter(this, void 0, void 0, function* () {
         let salt = crypto_1.getRandomString();
         let hash = crypto_1.sha512(password, salt);
-        let userAuthData = { salt, username, hashedPassword: hash };
+        let userAuthData = { salt, _id: username, hashedPassword: hash };
         yield MongoDB_1.db.createUserAuthData(userAuthData);
     });
 }

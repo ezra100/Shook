@@ -13,7 +13,7 @@ export interface User {
   userType: UserType;
   firstName: string;
   lastName: string;
-  username: string;  // key/id field
+  _id: string;  // username
   email: string;
   gender: Gender;
   address: string;
@@ -22,32 +22,29 @@ export interface User {
 }
 
 export interface UserAuthData {
-  username: string;
+  _id: string;
   recoveryKey?: string;
   recoveryCreationDate?: Date;
   hashedPassword?: string;
   salt?: string;
 }
 
-export interface IMinProduct{
-  _id?: string;
-  username?: string;  // publisher of the product - must exist
+
+
+export interface IProduct{
   title: string;
   subtitle: string;
   link?: string;
-}
-
-export interface IProduct extends IMinProduct {
   _id: string;
   creationDate : Date;
 
-  username: string;  // publisher of the product - must exist in users collection
+  owner: string;  // publisher of the product - must exist in users collection
 }
 
 export interface IReview {
   _id: string;
   creationDate : Date;
-  username: string;  // publisher of the review
+  owner: string;  // publisher of the review
   productID: string;  // product.id
   title: string;
   fullReview: string;
@@ -63,7 +60,7 @@ export interface IReview {
 export interface IComment {
   _id: string;
   creationDate : Date;
-  username: string;  // publisher of the comment
+  owner: string;  // publisher of the comment
   reviewID: string;  // review.id
   comment: string;
   likes: string[];    // array of usernames of those who liked the comment

@@ -31,17 +31,6 @@ let userSchema = new Schema({
     },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
-    username: {
-        type: String,
-        required: [
-            function () {
-                // username must be at least 6 letters, and english alphabet, underscore
-                // and number only
-                return /^[a-zA-Z0-9_]{6,}$/.test(this.username);
-            },
-            'username must be at least 6 characters. English alphabet, underscore and numbers only'
-        ]
-    },
     email: {
         type: String,
         required: function () {
@@ -66,40 +55,24 @@ let userSchema = new Schema({
 });
 let userDataSchema = new Schema({
     _id: String,
-    username: {
-        type: String,
-        required: [
-            function () {
-                // username must be at least 6 letters, and english alphabet, underscore
-                // and number only
-                return /^[a-zA-Z0-9_]{6,}$/.test(this.username);
-            },
-            'username must be at least 6 characters. English alphabet, underscore and numbers only'
-        ]
-    },
     recoveryKey: String,
     recoveryCreationDate: Date,
     salt: { type: String, required: true },
     hashedPassword: { type: String, required: true },
 });
 userDataSchema.pre('save', function (next) {
-    this._id = this.username.toLowerCase();
+    this._id = this._id.toLowerCase();
     next();
 });
 userSchema.pre('save', function (next) {
-    this._id = this.username.toLowerCase();
-    next();
-});
-userSchema.preAnyUpdate(function (next) {
-    let update = this.getUpdate();
-    delete update.username;
+    this._id = this._id.toLowerCase();
     next();
 });
 let productSchema = new Schema({
     creationDate: { type: Date, default: Date.now, index: true },
     title: { type: String, required: true, minlength: 6, maxlength: 140 },
     subtitle: { type: String, required: true },
-    username: { type: String, required: true, ref: 'User' },
+    owner: { type: String, required: true, ref: 'User' },
     link: {
         type: String,
         required: function () {
@@ -109,7 +82,7 @@ let productSchema = new Schema({
 });
 let reviewSchema = new Schema({
     creationDate: { type: Date, default: Date.now, index: true },
-    username: { type: String, required: true, ref: 'User' },
+    owner: { type: String, required: true, ref: 'User' },
     productID: {
         type: Schema.Types.ObjectId,
         ref: 'Product',
@@ -127,7 +100,7 @@ let reviewSchema = new Schema({
     dislikesCount: Number,
 });
 let commentSchema = new Schema({
-    username: { type: String, required: true, ref: 'User' },
+    owner: { type: String, required: true, ref: 'User' },
     creationDate: { type: Date, default: Date.now, index: true },
     reviewID: {
         type: Schema.Types.ObjectId,
@@ -149,20 +122,6 @@ let commentSchema = new Schema({
     dislikesCount: Number,
 });
 //#region hooks
-// productSchema.preAnyUpdate(function(next: Function) {
-//   delete this.getUpdate().username;
-//   next();
-// });
-// productSchema.postAnyFInd(function(
-//     doc: mongoose.Document, next: Function): void {
-//   console.log(doc);
-//   next();
-// });
-// reviewSchema.preAnyUpdate(function(next: Function): void {
-//   delete this.getUpdate().productID;  // don't change the product id
-//   delete this.getUpdate().username;
-//   next();
-// });
 reviewSchema.postAnyFInd(function (doc, next) {
     let d = doc;
     if (d.likes && d.dislikes) {
@@ -171,11 +130,6 @@ reviewSchema.postAnyFInd(function (doc, next) {
     }
     next();
 });
-// commentSchema.preAnyUpdate(function(next: Function): void {
-//   delete (<any>this).reviewID;  // prevent changing the review id
-//   delete (<any>this).username;  // prevent changing the username
-//   next();
-// });
 commentSchema.postAnyFInd(function (doc, next) {
     let d = doc;
     if (d.likes && d.dislikes) {
@@ -186,20 +140,20 @@ commentSchema.postAnyFInd(function (doc, next) {
 });
 productSchema.preAnyUpdate(function (next) {
     let update = this.getUpdate();
-    delete update.username;
+    delete update.owner;
     delete update.creationDate;
     next();
 });
 reviewSchema.preAnyUpdate(function (next) {
     let update = this.getUpdate();
-    delete update.username;
+    delete update.owner;
     delete update.creationDate;
     delete update.productID;
     next();
 });
 commentSchema.preAnyUpdate(function (next) {
     let update = this.getUpdate();
-    delete update.username;
+    delete update.owner;
     delete update.creationDate;
     delete update.reviewID;
     next();

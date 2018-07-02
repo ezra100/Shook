@@ -23,12 +23,10 @@ exports.mongoConnection.on('error', console.error.bind(console, 'MongoDB connect
 class MongoDB {
     getUserAuthData(username) {
         return __awaiter(this, void 0, void 0, function* () {
-            username = username.toLowerCase();
             return (yield Models_1.userAuthDataModel.findById(username)).toObject();
         });
     }
     updateUserAuthData(username, data) {
-        username = username.toLowerCase();
         return new Promise((resolve, reject) => {
             Models_1.userAuthDataModel.findByIdAndUpdate(username, data, { upsert: true }, (err, data) => {
                 if (err) {
@@ -65,7 +63,7 @@ class MongoDB {
             }
             switch (getUserKeyType(key)) {
                 case 'string':
-                    if (key === 'username') {
+                    if (key === '_id') {
                         // it it's username, just make sure that the search is case
                         // insensitive
                         filter[key] = new RegExp(helpers_1.helpers.escapeRegExp(filter[key]), 'i');
@@ -142,7 +140,6 @@ class MongoDB {
         });
     }
     updateUserById(username, user) {
-        username = username.toLowerCase();
         user = {
             address: user.address,
             email: user.email,
@@ -176,7 +173,7 @@ class MongoDB {
     }
     deleteUser(user) {
         return new Promise((resolve, reject) => {
-            Models_1.userModel.findByIdAndRemove(user.username.toLowerCase(), (err, user) => {
+            Models_1.userModel.findByIdAndRemove(user._id, (err, user) => {
                 if (err) {
                     reject(err);
                     return;
@@ -202,7 +199,7 @@ class MongoDB {
                 subtitle: product.subtitle,
                 title: product.title
             };
-            return (yield Models_1.productModel.findOneAndUpdate({ _id: product._id, username: owner || 'block undefined' }, product, { new /* return the new document*/: true }))
+            return (yield Models_1.productModel.findOneAndUpdate({ _id: product._id, owner: owner || 'block undefined' }, product, { new /* return the new document*/: true }))
                 .toObject();
         });
     }
@@ -231,9 +228,9 @@ class MongoDB {
     }
     getProductsFromFollowees(username, offset = 0, limit) {
         return __awaiter(this, void 0, void 0, function* () {
-            username = username.toLowerCase();
             let followees = (yield Models_1.userModel.findById(username)).toObject().follows;
-            let agg = Models_1.productModel.aggregate().match({ "username": { $in: followees } })
+            let agg = Models_1.productModel.aggregate()
+                .match({ 'owner': { $in: followees } })
                 .sort('-creationDate')
                 .skip(offset);
             if (limit) {
@@ -261,7 +258,7 @@ class MongoDB {
                 rating: review.rating,
                 fullReview: review.fullReview
             };
-            return (yield Models_1.reviewModel.findOneAndUpdate({ _id: review._id, username: owner || 'block undefined' }, review, { new /* return the new document*/: true }))
+            return (yield Models_1.reviewModel.findOneAndUpdate({ _id: review._id, owner: owner || 'block undefined' }, review, { new /* return the new document*/: true }))
                 .toObject();
         });
     }
@@ -307,7 +304,6 @@ class MongoDB {
     }
     likeReview(id, username) {
         return __awaiter(this, void 0, void 0, function* () {
-            username = username.toLowerCase();
             return (yield Models_1.reviewModel
                 .update({ _id: id }, { $addToSet: { likes: username }, $pull: { dislikes: username } })
                 .exec());
@@ -315,7 +311,6 @@ class MongoDB {
     }
     dislikeReview(id, username) {
         return __awaiter(this, void 0, void 0, function* () {
-            username = username.toLowerCase();
             return yield Models_1.reviewModel
                 .update({ _id: id }, { $pull: { likes: username }, $addToSet: { dislikes: username } })
                 .exec();
@@ -323,7 +318,6 @@ class MongoDB {
     }
     removeLikeDislikeFromReview(id, username) {
         return __awaiter(this, void 0, void 0, function* () {
-            username = username.toLowerCase();
             return yield Models_1.reviewModel
                 .update({ _id: id }, { $pull: { likes: username, dislikes: username } })
                 .exec();
@@ -355,7 +349,7 @@ class MongoDB {
     updateComment(comment, owner) {
         return __awaiter(this, void 0, void 0, function* () {
             comment = { comment: comment.comment };
-            return (yield Models_1.commentModel.findOneAndUpdate({ _id: comment._id, username: owner || 'block undefined' }, comment, { new: /* return the new document*/ true }))
+            return (yield Models_1.commentModel.findOneAndUpdate({ _id: comment._id, owner: owner || 'block undefined' }, comment, { new: /* return the new document*/ true }))
                 .toObject();
         });
     }
@@ -375,7 +369,6 @@ class MongoDB {
     }
     likeComment(id, username) {
         return __awaiter(this, void 0, void 0, function* () {
-            username = username.toLowerCase();
             return (yield Models_1.commentModel
                 .update({ _id: id }, { $addToSet: { likes: username }, $pull: { dislikes: username } })
                 .exec());
@@ -383,7 +376,6 @@ class MongoDB {
     }
     dislikeComment(id, username) {
         return __awaiter(this, void 0, void 0, function* () {
-            username = username.toLowerCase();
             return yield Models_1.commentModel
                 .update({ _id: id }, { $pull: { likes: username }, $addToSet: { dislikes: username } })
                 .exec();
@@ -391,7 +383,6 @@ class MongoDB {
     }
     removeLikeDislikeFromComment(id, username) {
         return __awaiter(this, void 0, void 0, function* () {
-            username = username.toLowerCase();
             return yield Models_1.commentModel
                 .update({ _id: id }, { $pull: { likes: username, dislikes: username } })
                 .exec();

@@ -12,11 +12,6 @@ export var router = express.Router();
 router.use('/reset', reset.router);
 
 
-let userProperties: string[] = [
-  'address', 'username', 'firstName', 'lastName', 'email', 'gender', 'className'
-];
-
-
 
 router.post(
     '/login',
@@ -49,6 +44,6 @@ router.post('/salts', async function(req, res) {
 export async function createUserData(username: string, password: string) {
   let salt = getRandomString();
   let hash = sha512(password, salt);
-  let userAuthData: UserAuthData = {salt, username, hashedPassword: hash};
+  let userAuthData: UserAuthData = {salt, _id: username, hashedPassword: hash};
   await db.createUserAuthData(userAuthData);
 }

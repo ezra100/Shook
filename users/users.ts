@@ -7,7 +7,7 @@ import {User} from '../types';
 export var router = express.Router();
 
 let userProperties: string[] = [
-  'address', 'username', 'firstName', 'lastName', 'email', 'gender', 'className'
+ '_id', 'address', 'firstName', 'lastName', 'email', 'gender', 'className'
 ];
 // create a new user
 router.post('/signup', async function(req: express.Request, res) {
@@ -23,7 +23,7 @@ router.post('/signup', async function(req: express.Request, res) {
     return;
   }
   let password = req.body.password;
-  createUserData(user.username, password);
+  createUserData(user._id, password);
   res.status(201).end();
 });
 
@@ -35,7 +35,7 @@ router.put('/updateDetails', function(req, res) {
       user[key] = req.body[key];
     }
   }
-  let username = req.user.username;
+  let username = req.user._id;
   let response = db.updateUserById(username, user);
   res.status(201).end('Your details were updated successfully');
 });
@@ -50,14 +50,14 @@ router.get('/getDetails', function(req, res) {
 
 router.put("/follow", async function(req, res){
   let followee = req.query.followee;
-  let follower = req.user.username;
+  let follower = req.user._id;
   let dbRes = await db.addFollowee(follower, followee);
   res.json(dbRes);
 });
 
 router.put("/unfollow", async function(req, res){
   let followee = req.query.followee;
-  let follower = req.user.username;
+  let follower = req.user._id;
   let dbRes = await db.removeFollowee(follower, followee);
   res.json(dbRes);
 });

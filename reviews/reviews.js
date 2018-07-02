@@ -16,7 +16,7 @@ exports.router = express.Router();
 exports.router.post('/add', function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let review = req.body;
-        review.username = req.user.username;
+        review.owner = req.user._id;
         review = yield MongoDB_1.db.addReview(review);
         res.status(201).json(review);
     });
@@ -24,7 +24,7 @@ exports.router.post('/add', function (req, res) {
 exports.router.put('/update', function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let review = req.body;
-        review = yield MongoDB_1.db.updateReview(review, req.user.username);
+        review = yield MongoDB_1.db.updateReview(review, req.user._id);
         res.status(201).json(review);
     });
 });
@@ -40,7 +40,7 @@ exports.router.get('/getLatest', function (req, res) {
         let username = req.query.username;
         // from the likes/dislikes array - how many elements to show
         if (req.query.username) {
-            filter.username = new RegExp(helpers_1.helpers.escapeRegExp(username), 'i');
+            filter.owner = new RegExp(helpers_1.helpers.escapeRegExp(username), 'i');
         }
         if (req.query.productID) {
             filter.productID = req.query.productID;
@@ -56,7 +56,7 @@ exports.router.delete('/delete', function (req, res) {
         let id = req.query._id || req.query.id;
         let recursive = req.query.recursive;
         let oldReview = yield MongoDB_1.db.getReviewByID(id);
-        if (oldReview.username.toLowerCase() === req.user.username.toLowerCase()) {
+        if (oldReview.owner.toLowerCase() === req.user._id.toLowerCase()) {
             MongoDB_1.db.deleteReview(id, recursive);
             res.end(id + ' deleted successfully');
         }
@@ -72,7 +72,7 @@ exports.router.put("/like", function (req, res) {
             res.status(401).end("you're not logged in");
             return;
         }
-        res.json(yield MongoDB_1.db.likeReview(id, req.user.username));
+        res.json(yield MongoDB_1.db.likeReview(id, req.user._id));
     });
 });
 exports.router.put("/dislike", function (req, res) {
@@ -82,7 +82,7 @@ exports.router.put("/dislike", function (req, res) {
             res.status(401).end("you're not logged in");
             return;
         }
-        res.json(yield MongoDB_1.db.dislikeReview(id, req.user.username));
+        res.json(yield MongoDB_1.db.dislikeReview(id, req.user._id));
     });
 });
 // removes both likes and dislikes
@@ -93,7 +93,7 @@ exports.router.put(/\/removeLike/i, function (req, res) {
             res.status(401).end("you're not logged in");
             return;
         }
-        res.json(yield MongoDB_1.db.removeLikeDislikeFromReview(id, req.user.username));
+        res.json(yield MongoDB_1.db.removeLikeDislikeFromReview(id, req.user._id));
     });
 });
 //# sourceMappingURL=reviews.js.map

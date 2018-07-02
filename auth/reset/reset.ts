@@ -24,19 +24,19 @@ router.post('/request', async function(req, res) {
   }
   let key = getRandomString(16);
 
-  if (!user.username) {
+  if (!user._id) {
     console.log(user);
-    console.error(user.username + ' not found');
+    console.error(user._id + ' not found');
   }
   db.updateUserAuthData(
-      user.username, {recoveryKey: key, recoveryCreationDate: new Date()});
+      user._id, {recoveryKey: key, recoveryCreationDate: new Date()});
   helpers.sendEmail(
       user.email, user.firstName + ' ' + user.lastName,
       'Password reset for your account at flowers++',
       message.replace(
           'placeholder',
           'https://localhost:3000/complete?key=' + key +
-              '&&username=' + user.username));
+              '&&username=' + user._id));
   // don't show the email unless the user sent it
   res.status(201).end('reset email sent to' + (req.body.email || 'your email'));
 });

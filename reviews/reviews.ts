@@ -10,14 +10,14 @@ export var router = express.Router();
 router.post(
     '/add', async function(req: express.Request, res: express.Response) {
       let review: IReview = req.body;
-      review.username = req.user.username;
+      review.owner = req.user._id;
       review = await db.addReview(review);
       res.status(201).json(review);
     });
 
 router.put('/update', async function(req, res) {
   let review: IReview = req.body;
-  review = await db.updateReview(review, req.user.username);
+  review = await db.updateReview(review, req.user._id);
   res.status(201).json(review);
 });
 
@@ -31,7 +31,7 @@ router.get('/getLatest', async function(req, res) {
   let username = req.query.username;
   // from the likes/dislikes array - how many elements to show
   if (req.query.username) {
-    filter.username = new RegExp(helpers.escapeRegExp(username), 'i');
+    filter.owner = new RegExp(helpers.escapeRegExp(username), 'i');
   }
   if (req.query.productID) {
     filter.productID = req.query.productID;
@@ -46,7 +46,7 @@ router.delete('/delete', async function(req, res) {
   let id = req.query._id || req.query.id;
   let recursive = req.query.recursive;
   let oldReview = await db.getReviewByID(id);
-  if (oldReview.username.toLowerCase() === req.user.username.toLowerCase()) {
+  if (oldReview.owner.toLowerCase() === req.user._id.toLowerCase()) {
     db.deleteReview(id, recursive);
     res.end(id + ' deleted successfully');
   } else {
@@ -60,7 +60,7 @@ router.put("/like", async function(req, res){
     res.status(401).end("you're not logged in");
     return;
   }
-  res.json(await db.likeReview(id, req.user.username));
+  res.json(await db.likeReview(id, req.user._id));
 
 });
 
@@ -70,7 +70,7 @@ router.put("/dislike", async function(req, res){
     res.status(401).end("you're not logged in");
     return;
   }
-  res.json(await db.dislikeReview(id, req.user.username));
+  res.json(await db.dislikeReview(id, req.user._id));
 });
 
 // removes both likes and dislikes
@@ -80,5 +80,5 @@ router.put(/\/removeLike/i, async function(req, res){
     res.status(401).end("you're not logged in");
     return;
   }
-  res.json(await db.removeLikeDislikeFromReview(id, req.user.username));
+  res.json(await db.removeLikeDislikeFromReview(id, req.user._id));
 });

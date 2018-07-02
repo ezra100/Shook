@@ -10,7 +10,7 @@ export var router = express.Router();
 router.post(
     '/add', async function(req: express.Request, res: express.Response) {
       let product: IProduct = req.body;
-      product.username = req.user.username;
+      product.owner = req.user._id;
       product = await db.addProduct(product);
       res.status(201).json(product);
     });
@@ -18,7 +18,7 @@ router.post(
 router.put('/update', async function(req, res) {
   let product: IProduct = req.body;
 
-  product = await db.updateProduct(product, req.user.username);
+  product = await db.updateProduct(product, req.user._id);
   res.status(201).json(product);
 });
 
@@ -31,7 +31,7 @@ router.get('/getLatest', async function(req, res) {
   let filter: any = {};
   let username = req.query.username;
   if (req.query.username) {
-    filter.username = new RegExp(helpers.escapeRegExp(username), 'i');
+    filter.owner = new RegExp(helpers.escapeRegExp(username), 'i');
   }
   let limit = Number(req.query.limit) || LIMIT;
   let offset = Number(req.query.offset || 0);
@@ -42,7 +42,7 @@ router.delete('/delete', async function(req, res) {
   let id = req.query._id || req.query.id;
   let recursive = req.query.recursive;
   let oldReview = await db.getProductByID(id);
-  if (oldReview.username.toLowerCase() === req.user.username.toLowerCase()) {
+  if (oldReview.owner === req.user._id) {
     db.deleteProduct(id, recursive);
     res.end(id + ' deleted successfully');
   } else {
@@ -57,6 +57,6 @@ router.get('/getAvgRating', async function(req, res) {
 });
 
 router.get(/\/myFeed/i, async function(req, res){
-  let dbRes = await db.getProductsFromFollowees(req.user.username);
+  let dbRes = await db.getProductsFromFollowees(req.user._id);
   res.json(dbRes);
 });

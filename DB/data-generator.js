@@ -28,7 +28,7 @@ function generateUser() {
         userType: faker.random.number(20) > 19 ? types_1.UserType.Admin : types_1.UserType.Basic,
         firstName,
         lastName,
-        username,
+        _id: username,
         address: faker.address.streetAddress() + ', ' + faker.address.city() +
             ', ' + faker.address.country(),
         email: faker.internet.email(),
@@ -50,7 +50,7 @@ function getFakeProduct() {
         title: faker.lorem.sentence(),
         subtitle: faker.lorem.paragraph(),
         link: faker.internet.url(),
-        username: users[faker.random.number(users.length - 1)].username,
+        owner: users[faker.random.number(users.length - 1)]._id,
         creationDate: faker.date.past(5),
     };
 }
@@ -60,7 +60,7 @@ function getRandomUsernames(min = 5, max = 30) {
     let dislikesSize = faker.random.number({ min, max });
     let likes = [];
     let dislikes = [];
-    let usernames = users.map(user => user.username.toLowerCase());
+    let usernames = users.map(user => user._id.toLowerCase());
     while (likes.length < likesSize) {
         likes.push(usernames.splice(faker.random.number(usernames.length - 1), 1)[0]);
     }
@@ -73,7 +73,7 @@ function getFakeReview() {
     let likeDislike = getRandomUsernames();
     let product = products[faker.random.number(products.length - 1)];
     return {
-        username: users[faker.random.number(users.length - 1)].username,
+        owner: users[faker.random.number(users.length - 1)]._id,
         title: faker.lorem.sentence(), fullReview: faker.lorem.paragraphs(3),
         dislikes: likeDislike[1], likes: likeDislike[0],
         rating: faker.random.number({ min: 1, max: 5 }),
@@ -85,7 +85,7 @@ function getFakeComment() {
     let likeDislike = getRandomUsernames();
     let review = reviews[faker.random.number(reviews.length - 1)];
     return {
-        username: users[faker.random.number(users.length - 1)].username,
+        owner: users[faker.random.number(users.length - 1)]._id,
         comment: faker.lorem.paragraphs(3), dislikes: likeDislike[1],
         likes: likeDislike[0],
         reviewID: review._id,
@@ -104,10 +104,10 @@ function initUsers(size = 50, logPasswod = true) {
     return __awaiter(this, void 0, void 0, function* () {
         for (let pack of getFakeUsers(size)) {
             MongoDB_1.db.addUser(pack.user);
-            yield auth_1.createUserData(pack.user.username, pack.password);
+            yield auth_1.createUserData(pack.user._id, pack.password);
             // log
             if (logPasswod) {
-                let logText = pack.user.username + ' : ' + pack.password + '\n';
+                let logText = pack.user._id + ' : ' + pack.password + '\n';
                 fs.appendFile(logFile, logText, function (err) {
                     if (err) {
                         console.error(err);

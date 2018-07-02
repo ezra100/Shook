@@ -16,7 +16,7 @@ exports.router = express.Router();
 exports.router.post('/add', function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let product = req.body;
-        product.username = req.user.username;
+        product.owner = req.user._id;
         product = yield MongoDB_1.db.addProduct(product);
         res.status(201).json(product);
     });
@@ -24,7 +24,7 @@ exports.router.post('/add', function (req, res) {
 exports.router.put('/update', function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let product = req.body;
-        product = yield MongoDB_1.db.updateProduct(product, req.user.username);
+        product = yield MongoDB_1.db.updateProduct(product, req.user._id);
         res.status(201).json(product);
     });
 });
@@ -39,7 +39,7 @@ exports.router.get('/getLatest', function (req, res) {
         let filter = {};
         let username = req.query.username;
         if (req.query.username) {
-            filter.username = new RegExp(helpers_1.helpers.escapeRegExp(username), 'i');
+            filter.owner = new RegExp(helpers_1.helpers.escapeRegExp(username), 'i');
         }
         let limit = Number(req.query.limit) || constants_1.LIMIT;
         let offset = Number(req.query.offset || 0);
@@ -51,7 +51,7 @@ exports.router.delete('/delete', function (req, res) {
         let id = req.query._id || req.query.id;
         let recursive = req.query.recursive;
         let oldReview = yield MongoDB_1.db.getProductByID(id);
-        if (oldReview.username.toLowerCase() === req.user.username.toLowerCase()) {
+        if (oldReview.owner === req.user._id) {
             MongoDB_1.db.deleteProduct(id, recursive);
             res.end(id + ' deleted successfully');
         }
@@ -69,7 +69,7 @@ exports.router.get('/getAvgRating', function (req, res) {
 });
 exports.router.get(/\/myFeed/i, function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        let dbRes = yield MongoDB_1.db.getProductsFromFollowees(req.user.username);
+        let dbRes = yield MongoDB_1.db.getProductsFromFollowees(req.user._id);
         res.json(dbRes);
     });
 });

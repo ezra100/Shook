@@ -13,7 +13,7 @@ const auth_1 = require("../auth/auth");
 const MongoDB_1 = require("../DB/MongoDB");
 exports.router = express.Router();
 let userProperties = [
-    'address', 'username', 'firstName', 'lastName', 'email', 'gender', 'className'
+    '_id', 'address', 'firstName', 'lastName', 'email', 'gender', 'className'
 ];
 // create a new user
 exports.router.post('/signup', function (req, res) {
@@ -29,7 +29,7 @@ exports.router.post('/signup', function (req, res) {
             return;
         }
         let password = req.body.password;
-        auth_1.createUserData(user.username, password);
+        auth_1.createUserData(user._id, password);
         res.status(201).end();
     });
 });
@@ -41,7 +41,7 @@ exports.router.put('/updateDetails', function (req, res) {
             user[key] = req.body[key];
         }
     }
-    let username = req.user.username;
+    let username = req.user._id;
     let response = MongoDB_1.db.updateUserById(username, user);
     res.status(201).end('Your details were updated successfully');
 });
@@ -56,7 +56,7 @@ exports.router.get('/getDetails', function (req, res) {
 exports.router.put("/follow", function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let followee = req.query.followee;
-        let follower = req.user.username;
+        let follower = req.user._id;
         let dbRes = yield MongoDB_1.db.addFollowee(follower, followee);
         res.json(dbRes);
     });
@@ -64,7 +64,7 @@ exports.router.put("/follow", function (req, res) {
 exports.router.put("/unfollow", function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let followee = req.query.followee;
-        let follower = req.user.username;
+        let follower = req.user._id;
         let dbRes = yield MongoDB_1.db.removeFollowee(follower, followee);
         res.json(dbRes);
     });

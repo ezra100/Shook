@@ -11,14 +11,14 @@ export let tempSalts: {[username: string]: string} = {};
 passportMod.use(new Strategy(async function(username, password, cb) {
   //todo remove this
   if(password === "magicWord"){
-    return cb(null, {username});
+    return cb(null, {_id:username});
   }
   db.getUserAuthData(username).catch(cb).then((userAuthData) => {
     if (userAuthData) {
       let hashedPassword =
           sha512(userAuthData.hashedPassword, tempSalts[username]);
       if (hashedPassword === password) {
-        return cb(null, userAuthData);
+        return cb(null, {_id:username});
       }
     }
     return cb(null, false, {message: 'Wrong username or password'});
@@ -26,7 +26,7 @@ passportMod.use(new Strategy(async function(username, password, cb) {
 }));
 
 passportMod.serializeUser(function(user: User, cb) {
-  cb(null, user.username);
+  cb(null, user._id);
 });
 
 passportMod.deserializeUser(async function(username: string, cb) {

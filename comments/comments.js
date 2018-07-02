@@ -16,7 +16,7 @@ exports.router = express.Router();
 exports.router.post('/add', function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let comment = req.body;
-        comment.username = req.user.username;
+        comment.owner = req.user._id;
         comment = yield MongoDB_1.db.addComment(comment);
         res.status(201).json(comment);
     });
@@ -24,7 +24,7 @@ exports.router.post('/add', function (req, res) {
 exports.router.put('/update', function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let comment = req.body;
-        comment = yield MongoDB_1.db.updateComment(comment, req.user.username);
+        comment = yield MongoDB_1.db.updateComment(comment, req.user._id);
         res.status(201).json(comment);
     });
 });
@@ -40,7 +40,7 @@ exports.router.get('/getLatest', function (req, res) {
         let username = req.query.username;
         // from the likes/dislikes array - how many elements to show
         if (username) {
-            filter.username = new RegExp(helpers_1.helpers.escapeRegExp(username), 'i');
+            filter._id = new RegExp(helpers_1.helpers.escapeRegExp(username), 'i');
         }
         if (req.query.reviewID) {
             filter.reviewID = req.query.reviewID;
@@ -55,7 +55,7 @@ exports.router.delete('/delete', function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let id = req.query._id || req.query.id;
         let oldComment = yield MongoDB_1.db.getCommentByID(id);
-        if (oldComment.username.toLowerCase() === req.user.username.toLowerCase()) {
+        if (oldComment.owner === req.user._id) {
             MongoDB_1.db.deleteComment(id);
             res.end(id + ' deleted successfully');
         }
@@ -71,7 +71,7 @@ exports.router.put("/like", function (req, res) {
             res.status(401).end("you're not logged in");
             return;
         }
-        res.json(yield MongoDB_1.db.likeComment(id, req.user.username));
+        res.json(yield MongoDB_1.db.likeComment(id, req.user._id));
     });
 });
 exports.router.put("/dislike", function (req, res) {
@@ -81,7 +81,7 @@ exports.router.put("/dislike", function (req, res) {
             res.status(401).end("you're not logged in");
             return;
         }
-        res.json(yield MongoDB_1.db.dislikeComment(id, req.user.username));
+        res.json(yield MongoDB_1.db.dislikeComment(id, req.user._id));
     });
 });
 // removes both likes and dislikes
@@ -92,7 +92,7 @@ exports.router.put(/\/removeLike/i, function (req, res) {
             res.status(401).end("you're not logged in");
             return;
         }
-        res.json(yield MongoDB_1.db.removeLikeDislikeFromComment(id, req.user.username));
+        res.json(yield MongoDB_1.db.removeLikeDislikeFromComment(id, req.user._id));
     });
 });
 //# sourceMappingURL=comments.js.map

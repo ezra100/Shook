@@ -3,7 +3,7 @@ import {resolve} from 'dns';
 import * as mongoose from 'mongoose';
 
 import {helpers} from '../helpers';
-import {Gender, IComment, IMinProduct, IProduct, IReview, User, UserAuthData, UserType} from '../types';
+import {Gender, IComment, IProduct, IReview, User, UserAuthData, UserType} from '../types';
 
 import {commentModel, productModel, reviewModel, userAuthDataModel, userModel} from './Models';
 
@@ -24,13 +24,11 @@ mongoConnection.on(
 
 class MongoDB {
   async getUserAuthData(username: string): Promise<UserAuthData> {
-    username = username.toLowerCase();
     return (await userAuthDataModel.findById(username)).toObject();
   }
 
   updateUserAuthData(username: string, data: Partial<UserAuthData>):
       Promise<void> {
-    username = username.toLowerCase();
     return new Promise((resolve, reject) => {
       userAuthDataModel.findByIdAndUpdate(
           username, data, {upsert: true}, (err: Error, data: UserAuthData) => {
@@ -71,7 +69,7 @@ class MongoDB {
       switch (getUserKeyType(key)) {
         case 'string':
 
-          if (key === 'username') {
+          if (key === '_id') {
             // it it's username, just make sure that the search is case
             // insensitive
             filter[key] = new RegExp(helpers.escapeRegExp(filter[key]), 'i');
@@ -153,7 +151,6 @@ class MongoDB {
   }
 
   updateUserById(username: string, user: Partial<User>): Promise<User> {
-    username = username.toLowerCase();
     user = {
       address: user.address,
       email: user.email,
@@ -188,14 +185,13 @@ class MongoDB {
   }
   deleteUser(user: User): Promise<User|null> {
     return new Promise((resolve, reject) => {
-      userModel.findByIdAndRemove(
-          user.username.toLowerCase(), (err: Error, user: User) => {
-            if (err) {
-              reject(err);
-              return;
-            }
-            resolve(user);
-          });
+      userModel.findByIdAndRemove(user._id, (err: Error, user: User) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(user);
+      });
     });
   }
   //#endregion
@@ -216,8 +212,8 @@ class MongoDB {
       title: product.title
     };
     return (await productModel.findOneAndUpdate(
-                {_id: product._id, username: owner || 'block undefined'},
-                product, {new /* return the new document*/: true}))
+                {_id: product._id, owner: owner || 'block undefined'}, product,
+                {new /* return the new document*/: true}))
         .toObject();
   }
   async deleteProduct(id: string, removeReviews: boolean = true) {
@@ -242,9 +238,9 @@ class MongoDB {
   async getProductsFromFollowees(
       username: string, offset: number = 0,
       limit?: number): Promise<IProduct[]> {
-    username = username.toLowerCase();
     let followees = (await userModel.findById(username)).toObject().follows;
-    let agg = productModel.aggregate().match({"username":{$in: followees}})
+    let agg = productModel.aggregate()
+                  .match({'owner': {$in: followees}})
                   .sort('-creationDate')
                   .skip(offset);
     if (limit) {
@@ -272,7 +268,7 @@ class MongoDB {
       fullReview: review.fullReview
     };
     return (await reviewModel.findOneAndUpdate(
-                {_id: review._id, username: owner || 'block undefined'}, review,
+                {_id: review._id, owner: owner || 'block undefined'}, review,
                 {new /* return the new document*/: true}))
         .toObject();
   }
@@ -311,7 +307,6 @@ class MongoDB {
         .avg;
   }
   async likeReview(id: string, username: string) {
-    username = username.toLowerCase();
     return (await reviewModel
                 .update(
                     {_id: id},
@@ -319,7 +314,6 @@ class MongoDB {
                 .exec());
   }
   async dislikeReview(id: string, username: string) {
-    username = username.toLowerCase();
     return await reviewModel
         .update(
             {_id: id},
@@ -327,7 +321,6 @@ class MongoDB {
         .exec();
   }
   async removeLikeDislikeFromReview(id: string, username: string) {
-    username = username.toLowerCase();
     return await reviewModel
         .update({_id: id}, {$pull: {likes: username, dislikes: username}})
         .exec();
@@ -355,8 +348,8 @@ class MongoDB {
       Promise<IComment|null> {
     comment = {comment: comment.comment};
     return (await commentModel.findOneAndUpdate(
-                {_id: comment._id, username: owner || 'block undefined'},
-                comment, {new: /* return the new document*/ true}))
+                {_id: comment._id, owner: owner || 'block undefined'}, comment,
+                {new: /* return the new document*/ true}))
         .toObject();
   }
   async getCommentByID(id: string): Promise<IComment> {
@@ -373,7 +366,6 @@ class MongoDB {
   }
 
   async likeComment(id: string, username: string) {
-    username = username.toLowerCase();
     return (await commentModel
                 .update(
                     {_id: id},
@@ -381,7 +373,6 @@ class MongoDB {
                 .exec());
   }
   async dislikeComment(id: string, username: string) {
-    username = username.toLowerCase();
     return await commentModel
         .update(
             {_id: id},
@@ -389,7 +380,6 @@ class MongoDB {
         .exec();
   }
   async removeLikeDislikeFromComment(id: string, username: string) {
-    username = username.toLowerCase();
     return await commentModel
         .update({_id: id}, {$pull: {likes: username, dislikes: username}})
         .exec();
