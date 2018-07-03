@@ -12,7 +12,7 @@ import {passport} from './auth/passport';
 import {initDB} from './DB/data-generator';
 import {mongoConnection} from './DB/MongoDB';
 import * as products from './routers/products';
-import * as users from './users/users';
+import * as users from './routers/users';
 import * as comments from './routers/comments';
 import * as reviews from './routers/reviews';
 

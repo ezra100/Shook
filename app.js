@@ -11,7 +11,7 @@ const passport_1 = require("./auth/passport");
 const data_generator_1 = require("./DB/data-generator");
 const MongoDB_1 = require("./DB/MongoDB");
 const products = require("./routers/products");
-const users = require("./users/users");
+const users = require("./routers/users");
 const comments = require("./routers/comments");
 const reviews = require("./routers/reviews");
 // init the data base with fake data
