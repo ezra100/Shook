@@ -10,10 +10,10 @@ const auth = require("./auth/auth");
 const passport_1 = require("./auth/passport");
 const data_generator_1 = require("./DB/data-generator");
 const MongoDB_1 = require("./DB/MongoDB");
-const products = require("./products/products");
+const products = require("./routers/products");
 const users = require("./users/users");
-const comments = require("./comments/comments");
-const reviews = require("./reviews/reviews");
+const comments = require("./routers/comments");
+const reviews = require("./routers/reviews");
 // init the data base with fake data
 data_generator_1.initDB();
 let secret = 'atgasdv82aergfnsg';

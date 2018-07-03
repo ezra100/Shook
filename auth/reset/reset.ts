@@ -11,12 +11,12 @@ export var router = express.Router();
 // request a password reset - sends an email to the given address if a user with
 // such email exists
 router.post('/request', async function(req, res) {
-  let user: User;
+  let user:  User;
   // the user can send an email or a username to reset
   if (req.body.email) {
     user = await db.findUserByEmail(req.body.email);
   } else if (req.body.username) {
-    user = await db.getUser(req.body.username);
+    user = <User> await db.getUser(req.body.username);
   }
   if (!user) {
     res.status(400).end('user not found');

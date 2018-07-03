@@ -64,6 +64,7 @@ let userSchema: Schema = new Schema({
     }
   },
   follows: [{type: String, required: true, ref: 'User'}],
+  basket: [{type: Schema.Types.ObjectId, ref: 'Product', required: true}]
 });
 
 let userDataSchema: Schema = new Schema({
@@ -95,6 +96,7 @@ let productSchema: Schema = new Schema({
       return !this.link || helpers.isValidURL(this.link)
     }
   },
+  price: {type: Number, required: true}
 });
 
 
@@ -159,8 +161,6 @@ reviewSchema.postAnyFInd(function(doc, next: Function): void {
   }
   next();
 });
-
-
 
 
 

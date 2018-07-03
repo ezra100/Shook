@@ -18,7 +18,8 @@ export interface User {
   gender: Gender;
   address: string;
   imageURL: string;
-  follows: string[]
+  follows: string[];
+  basket : string[]
 }
 
 export interface UserAuthData {
@@ -37,7 +38,7 @@ export interface IProduct{
   link?: string;
   _id: string;
   creationDate : Date;
-
+  price : number;
   owner: string;  // publisher of the product - must exist in users collection
 }
 

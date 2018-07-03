@@ -1,3 +1,7 @@
 node_modules/
 *.log
 data.json
+**.js
+**.js.map
+*.js
+*.js.map

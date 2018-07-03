@@ -35,7 +35,7 @@ router.get('/getLatest', async function(req, res) {
   }
   if (req.query.productID) {
     filter.productID = req.query.productID;
-  }
+  } 
   let limit = Number(req.query.limit)  || LIMIT;
   let offset = Number(req.query.offset || 0);
   let products = await db.getLatestReviews(filter, offset, limit);
@@ -44,7 +44,7 @@ router.get('/getLatest', async function(req, res) {
 
 router.delete('/delete', async function(req, res) {
   let id = req.query._id || req.query.id;
-  let recursive = req.query.recursive;
+  let recursive = req.query.recursive !== "false";
   let oldReview = await db.getReviewByID(id);
   if (oldReview.owner.toLowerCase() === req.user._id.toLowerCase()) {
     db.deleteReview(id, recursive);

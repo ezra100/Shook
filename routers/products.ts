@@ -1,9 +1,9 @@
 import * as express from 'express';
 
+import {LIMIT} from '../constants';
 import {db} from '../DB/MongoDB';
 import {helpers} from '../helpers';
 import {IProduct} from '../types';
-import {LIMIT} from "../constants";
 
 export var router = express.Router();
 
@@ -24,7 +24,9 @@ router.put('/update', async function(req, res) {
 
 router.get('/getByID', async function(req, res) {
   let id: string = req.query.id;
-  res.json(await db.getProductByID(id));
+  let product =
+      await db.getProductByID(id).catch(err => res.status(404) && err.message);
+  res.json(product);
 });
 
 router.get('/getLatest', async function(req, res) {
@@ -33,6 +35,9 @@ router.get('/getLatest', async function(req, res) {
   if (req.query.username) {
     filter.owner = new RegExp(helpers.escapeRegExp(username), 'i');
   }
+  if (req.query.before) {
+    filter.creationDate = {$gte: new Date(req.query.before)};
+  }
   let limit = Number(req.query.limit) || LIMIT;
   let offset = Number(req.query.offset || 0);
   res.json(await db.getLatestProducts(filter, offset, limit));
@@ -40,7 +45,7 @@ router.get('/getLatest', async function(req, res) {
 
 router.delete('/delete', async function(req, res) {
   let id = req.query._id || req.query.id;
-  let recursive = req.query.recursive;
+  let recursive = req.query.recursive !== 'false';
   let oldReview = await db.getProductByID(id);
   if (oldReview.owner === req.user._id) {
     db.deleteProduct(id, recursive);
@@ -56,7 +61,9 @@ router.get('/getAvgRating', async function(req, res) {
   res.json(rating);
 });
 
-router.get(/\/myFeed/i, async function(req, res){
-  let dbRes = await db.getProductsFromFollowees(req.user._id);
+router.get(/\/myFeed/i, async function(req, res) {
+  let dbRes = await db.getProductsFromFollowees(req.user._id)
+                // in case of error set the status to 404 and return the error message
+                  .catch(err => res.status(404) && err.message);
   res.json(dbRes);
 });

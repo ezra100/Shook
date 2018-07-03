@@ -79,3 +79,7 @@ PUT for update, POST for create, GET for get (no changes on server side)
 * follow list and post list
 * categories (?)
 * products list
+* basket
+* price for product
+    * allow users to report prices for the product (?)
+* external entities / sellers

@@ -9,9 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
+const constants_1 = require("../constants");
 const MongoDB_1 = require("../DB/MongoDB");
 const helpers_1 = require("../helpers");
-const constants_1 = require("../constants");
 exports.router = express.Router();
 exports.router.post('/add', function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -31,7 +31,8 @@ exports.router.put('/update', function (req, res) {
 exports.router.get('/getByID', function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let id = req.query.id;
-        res.json(yield MongoDB_1.db.getProductByID(id));
+        let product = yield MongoDB_1.db.getProductByID(id).catch(err => res.status(404) && err.message);
+        res.json(product);
     });
 });
 exports.router.get('/getLatest', function (req, res) {
@@ -41,6 +42,9 @@ exports.router.get('/getLatest', function (req, res) {
         if (req.query.username) {
             filter.owner = new RegExp(helpers_1.helpers.escapeRegExp(username), 'i');
         }
+        if (req.query.before) {
+            filter.creationDate = { $gte: new Date(req.query.before) };
+        }
         let limit = Number(req.query.limit) || constants_1.LIMIT;
         let offset = Number(req.query.offset || 0);
         res.json(yield MongoDB_1.db.getLatestProducts(filter, offset, limit));
@@ -49,7 +53,7 @@ exports.router.get('/getLatest', function (req, res) {
 exports.router.delete('/delete', function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let id = req.query._id || req.query.id;
-        let recursive = req.query.recursive;
+        let recursive = req.query.recursive !== 'false';
         let oldReview = yield MongoDB_1.db.getProductByID(id);
         if (oldReview.owner === req.user._id) {
             MongoDB_1.db.deleteProduct(id, recursive);

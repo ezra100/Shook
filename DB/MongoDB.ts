@@ -24,7 +24,8 @@ mongoConnection.on(
 
 class MongoDB {
   async getUserAuthData(username: string): Promise<UserAuthData> {
-    return (await userAuthDataModel.findById(username)).toObject();
+    let doc = await userAuthDataModel.findById(username);
+    return doc && doc.toObject();
   }
 
   updateUserAuthData(username: string, data: Partial<UserAuthData>):
@@ -55,12 +56,15 @@ class MongoDB {
 
 
   async findUserByEmail(email: string): Promise<User> {
-    return (await userModel.findOne({email: email})).toObject();
+    let doc =  await userModel.findOne({email: email});
+    return doc && doc.toObject();
   }
 
   //#region users
   // todo: update this
-  getUsers(filter: any = {}): Promise<User[]> {
+  async getUsers(
+      filter: any = {}, offset: number = 0, limit?: number,
+      showPrivateData: boolean = false): Promise<Partial<User>[]> {
     for (const key of Object.keys(filter)) {
       if (filter[key] === '') {
         delete filter[key];
@@ -104,27 +108,36 @@ class MongoDB {
           }
       }
     }
-    return new Promise<User[]>((resolve, reject) => {
-      userModel.find(filter, (err: Error, users: User[]) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve(users);
-      });
+    let query = userModel.find(filter).sort('-_id').skip(offset);
+    if (limit) {
+      query.limit(limit);
+    }
+    let users: Partial<User>[] = await query;
+    return users.map(user => {
+      return {
+        _id: user._id, firstName: user.firstName, lastName: user.lastName,
+            gender: user.gender, userType: user.userType,
+            imageURL: user.imageURL
+      }
     });
   }
-  getUser(username: string): Promise<User|null> {
-    return new Promise<User|null>((resolve, reject) => {
-      userModel.findById(username.toLowerCase(), (err: Error, user: User) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve(user);
-      });
-    });
+  async getUser(username: string, showPrivateData: boolean = false):
+      Promise<Partial<User>> {
+    let user: Partial<User> = await userModel.findById(username.toLowerCase());
+    if (showPrivateData) {
+      user = {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        gender: user.gender,
+        userType: user.userType,
+        imageURL: user.imageURL
+      };
+    }
+    return user;
   }
+
+
 
   async addFollowee(follower: string, followee: string) {
     followee = followee.toLowerCase();
@@ -148,6 +161,24 @@ class MongoDB {
         await userModel
             .update({_id: follower.toLowerCase()}, {$pull: {follows: followee}})
             .exec());
+  }
+
+
+  async addToBasket(username: string, productID: string) {
+    let doc = await this.getProductByID(productID);
+    if (!doc) {
+      return 'product ID ' + productID + ' doesn\'t exist';
+    }
+    return (
+        await userModel
+            .update({_id: username}, {$addToSet: {basket: ObjectId(productID)}})
+            .exec());
+  }
+
+  async removeFromBasket(username: string, productID: string) {
+    return (await userModel
+                .update({_id: username}, {$pull: {basket: ObjectId(productID)}})
+                .exec());
   }
 
   updateUserById(username: string, user: Partial<User>): Promise<User> {
@@ -201,7 +232,8 @@ class MongoDB {
     if (secure) {
       product.creationDate = new Date();
     }
-    return (await productModel.create(product)).toObject();
+    let retProduct = await productModel.create(product);
+    return retProduct && retProduct.toObject();
   }
 
   async updateProduct(product: Partial<IProduct>, owner: string):
@@ -209,22 +241,24 @@ class MongoDB {
     product = {
       link: product.link,
       subtitle: product.subtitle,
-      title: product.title
+      title: product.title,
+      price: product.price
     };
-    return (await productModel.findOneAndUpdate(
-                {_id: product._id, owner: owner || 'block undefined'}, product,
-                {new /* return the new document*/: true}))
-        .toObject();
+    let doc = (await productModel.findOneAndUpdate(
+        {_id: product._id, owner: owner || 'block undefined'}, product,
+        {new /* return the new document*/: true}));
+    return doc && doc.toObject();
   }
   async deleteProduct(id: string, removeReviews: boolean = true) {
     if (removeReviews) {
       this.deleteReviewsByProductID(id);
     }
-    return (await productModel.findByIdAndRemove(id)).toObject();
-    ;
+    let doc = await productModel.findByIdAndRemove(id);
+    return doc && doc.toObject();
   }
   async getProductByID(id: string): Promise<IProduct> {
-    return (await productModel.findById(id)).toObject();
+    let doc = await productModel.findById(id);
+    return doc && doc.toObject();
   }
   async getLatestProducts(
       filter: Partial<IProduct> = {}, offset: number = 0,
@@ -238,7 +272,11 @@ class MongoDB {
   async getProductsFromFollowees(
       username: string, offset: number = 0,
       limit?: number): Promise<IProduct[]> {
-    let followees = (await userModel.findById(username)).toObject().follows;
+    let user = await userModel.findById(username);
+    if(!user){
+      throw "User " + username + " not found";
+    }
+    let followees = user.toObject().follows;
     let agg = productModel.aggregate()
                   .match({'owner': {$in: followees}})
                   .sort('-creationDate')
@@ -257,7 +295,8 @@ class MongoDB {
       review.likes = [];
       review.creationDate = new Date();
     }
-    return (await reviewModel.create(review)).toObject();
+    let doc = await reviewModel.create(review);
+    return doc && doc.toObject();
   }
 
   async updateReview(review: Partial<IReview>, owner: string):
@@ -267,16 +306,17 @@ class MongoDB {
       rating: review.rating,
       fullReview: review.fullReview
     };
-    return (await reviewModel.findOneAndUpdate(
+    let doc = await reviewModel.findOneAndUpdate(
                 {_id: review._id, owner: owner || 'block undefined'}, review,
-                {new /* return the new document*/: true}))
-        .toObject();
+                {new /* return the new document*/: true});
+      return doc && doc.toObject();
   }
   async deleteReview(id: string, removeComments: boolean = true) {
     if (removeComments) {
       this.deleteCommentsByReviewID(id);
     }
-    return (await reviewModel.findByIdAndRemove(id)).toObject();
+    let doc =await reviewModel.findByIdAndRemove(id);
+    return doc && doc.toObject();
   }
   async deleteReviewsByProductID(productID: string) {
     let reviews = await this.getLatestReviews({productID: productID});
@@ -288,7 +328,8 @@ class MongoDB {
     return results;
   }
   async getReviewByID(id: string): Promise<IReview> {
-    return (await reviewModel.findById(id)).toObject();
+    let doc = await reviewModel.findById(id);
+    return doc && doc.toObject();
   }
   async getLatestReviews(
       filter: Partial<IReview> = {}, offset: number = 0,
@@ -325,6 +366,24 @@ class MongoDB {
         .update({_id: id}, {$pull: {likes: username, dislikes: username}})
         .exec();
   }
+
+  async getReviewsFromFollowees(
+      username: string, offset: number = 0,
+      limit?: number): Promise<IProduct[]> {
+    let userDoc = (await userModel.findById(username));
+    if(!userDoc){
+      throw "User not found";
+    }
+    let followees = userDoc.toObject().follows;
+    let agg = reviewModel.aggregate()
+                  .match({'owner': {$in: followees}})
+                  .sort('-creationDate')
+                  .skip(offset);
+    if (limit) {
+      agg.limit(limit);
+    }
+    return await agg;
+  }
   //#endregion
 
   //#region comment
@@ -353,7 +412,8 @@ class MongoDB {
         .toObject();
   }
   async getCommentByID(id: string): Promise<IComment> {
-    return (await commentModel.findById(id)).toObject();
+    let doc = (await commentModel.findById(id));
+    return doc && doc.toObject();
   }
   async getLatestComments(
       filter: Partial<IComment> = {}, offset: number = 0,

@@ -27,7 +27,7 @@ function generateUser(): IInitPackage {
   let username = faker.internet.userName(firstName, lastName);
   let password: string = faker.internet.password();
   let user: User = {
-    userType: faker.random.number(20) > 19 ? UserType.Admin : UserType.Basic,
+    userType: 4 - Math.floor(Math.sqrt(faker.random.number(15))),
     firstName,
     lastName,
     _id: username,
@@ -36,7 +36,8 @@ function generateUser(): IInitPackage {
     email: faker.internet.email(),
     gender: faker.random.boolean ? Gender.Male : Gender.Female,
     imageURL: '/img/default.png',
-    follows : []
+    follows: [],
+    basket: []
   };
 
   return {user, password: password};
@@ -52,12 +53,12 @@ function getFakeUsers(num: number): IInitPackage[] {
 
 function getFakeProduct(): Partial<IProduct> {
   return {
-    title: faker.lorem.sentence(),
+    title: faker.commerce.productName(),
     subtitle: faker.lorem.paragraph(),
     link: faker.internet.url(),
     owner: users[faker.random.number(users.length - 1)]._id,
-    creationDate : faker.date.past(5),
-
+    creationDate: faker.date.past(5),
+    price: faker.random.number({min: 5, max: 100, precision: 0.05}),
   };
 }
 
@@ -88,9 +89,8 @@ function getFakeReview(): Partial<IReview> {
     owner: users[faker.random.number(users.length - 1)]._id,
         title: faker.lorem.sentence(), fullReview: faker.lorem.paragraphs(3),
         dislikes: likeDislike[1], likes: likeDislike[0],
-        rating: faker.random.number({min: 1, max: 5}),
-        productID: product._id,
-        creationDate : faker.date.between(product.creationDate, Date()),
+        rating: faker.random.number({min: 1, max: 5}), productID: product._id,
+        creationDate: faker.date.between(product.creationDate, Date()),
   }
 }
 
@@ -100,20 +100,16 @@ function getFakeComment(): Partial<IComment> {
   return {
     owner: users[faker.random.number(users.length - 1)]._id,
         comment: faker.lorem.paragraphs(3), dislikes: likeDislike[1],
-        likes: likeDislike[0],
-        reviewID: review._id,
-        creationDate : faker.date.between(review.creationDate, Date()),
+        likes: likeDislike[0], reviewID: review._id,
+        creationDate: faker.date.between(review.creationDate, Date()),
   }
 }
 
 
 
 async function initProducts(size: number = 1500) {
-  let users = await db.getUsers();
   for (let i = 0; i < size; i++) {
-    db.addProduct(
-        getFakeProduct(),false
-    );
+    db.addProduct(getFakeProduct(), false);
   }
 }
 
@@ -138,13 +134,13 @@ async function initUsers(size: number = 50, logPasswod: boolean = true) {
 export async function initDB(
     usersSize: number = 100, avgProductsPerUser = 5,
     reviewsPerProduct: number = 5, commentsPerReview = 8) {
-  users = await db.getUsers();
+  users = <User[]>await db.getUsers(undefined, undefined, undefined, true);
   products = await db.getLatestProducts();
   reviews = await db.getLatestReviews();
   comments = await db.getLatestComments();
   if (users.length < usersSize) {
     await initUsers(usersSize - users.length);
-    users = await db.getUsers();
+    users = <User[]>await db.getUsers(undefined, undefined, undefined, true);
   }
   if (products.length < usersSize * avgProductsPerUser) {
     await initProducts((usersSize * avgProductsPerUser) - products.length);
