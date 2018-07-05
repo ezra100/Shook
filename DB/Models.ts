@@ -147,8 +147,22 @@ let commentSchema = new Schema({
   }],  // array of username of dislikes
   dislikesCount: Number,
 
-})
+});
 
+
+let chatRoomSchema = new Schema({
+  _id: Number,
+  name: {type: String, required: true},
+  admins: [{type: String, required: true, ref: "User"}],
+  owner : {type: String, required: true},
+  last100Messages: [String]
+});
+
+let messageSchema = new Schema({
+  _id: Number,
+  roomID: {type: Number, ref:"ChatRoom"},
+  content:{type: String, required: true}
+});
 
 //#region hooks
 
@@ -210,3 +224,5 @@ export let userAuthDataModel: mongoose.Model<any> =
 export let productModel = mongoose.model('Product', productSchema);
 export let reviewModel = mongoose.model('Review', reviewSchema);
 export let commentModel = mongoose.model('Comment', commentSchema);
+export let chatRoomModel = mongoose.model("ChatRoom", chatRoomSchema);
+export let messageModel = mongoose.model("Message", messageSchema);

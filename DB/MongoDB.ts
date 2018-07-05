@@ -3,9 +3,10 @@ import {resolve} from 'dns';
 import * as mongoose from 'mongoose';
 
 import {helpers} from '../helpers';
-import {Gender, IComment, IProduct, IReview, User, UserAuthData, UserType} from '../types';
+import {ChatRoom, Gender, IComment, IProduct, IReview, User, UserAuthData, UserType} from '../types';
 
-import {commentModel, productModel, reviewModel, userAuthDataModel, userModel} from './Models';
+import {chatRoomModel, commentModel, messageModel, productModel, reviewModel, userAuthDataModel, userModel} from './Models';
+import { stripObject, userPermitedFields, productPermitedFields, reviewPermitedFields, commentPermitedFields, chatRoomPermitedFields } from './StripForUpdate';
 
 let ObjectId = mongoose.Types.ObjectId;
 
@@ -56,7 +57,7 @@ class MongoDB {
 
 
   async findUserByEmail(email: string): Promise<User> {
-    let doc =  await userModel.findOne({email: email});
+    let doc = await userModel.findOne({email: email});
     return doc && doc.toObject();
   }
 
@@ -182,14 +183,7 @@ class MongoDB {
   }
 
   updateUserById(username: string, user: Partial<User>): Promise<User> {
-    user = {
-      address: user.address,
-      email: user.email,
-      imageURL: user.imageURL,
-      gender: user.gender,
-      firstName: user.firstName,
-      lastName: user.lastName
-    };
+    user = stripObject(user, userPermitedFields);
     return new Promise((resolve, reject) => {
       userModel.findByIdAndUpdate(
           username, user, (err: Error, oldUser: User) => {
@@ -238,12 +232,7 @@ class MongoDB {
 
   async updateProduct(product: Partial<IProduct>, owner: string):
       Promise<IProduct|null> {
-    product = {
-      link: product.link,
-      subtitle: product.subtitle,
-      title: product.title,
-      price: product.price
-    };
+    product = stripObject(product, productPermitedFields);
     let doc = (await productModel.findOneAndUpdate(
         {_id: product._id, owner: owner || 'block undefined'}, product,
         {new /* return the new document*/: true}));
@@ -273,8 +262,8 @@ class MongoDB {
       username: string, offset: number = 0,
       limit?: number): Promise<IProduct[]> {
     let user = await userModel.findById(username);
-    if(!user){
-      throw "User " + username + " not found";
+    if (!user) {
+      throw 'User ' + username + ' not found';
     }
     let followees = user.toObject().follows;
     let agg = productModel.aggregate()
@@ -301,21 +290,17 @@ class MongoDB {
 
   async updateReview(review: Partial<IReview>, owner: string):
       Promise<IReview|null> {
-    review = {
-      title: review.title,
-      rating: review.rating,
-      fullReview: review.fullReview
-    };
+    review = stripObject(review, reviewPermitedFields);
     let doc = await reviewModel.findOneAndUpdate(
-                {_id: review._id, owner: owner || 'block undefined'}, review,
-                {new /* return the new document*/: true});
-      return doc && doc.toObject();
+        {_id: review._id, owner: owner || 'block undefined'}, review,
+        {new /* return the new document*/: true});
+    return doc && doc.toObject();
   }
   async deleteReview(id: string, removeComments: boolean = true) {
     if (removeComments) {
       this.deleteCommentsByReviewID(id);
     }
-    let doc =await reviewModel.findByIdAndRemove(id);
+    let doc = await reviewModel.findByIdAndRemove(id);
     return doc && doc.toObject();
   }
   async deleteReviewsByProductID(productID: string) {
@@ -371,8 +356,8 @@ class MongoDB {
       username: string, offset: number = 0,
       limit?: number): Promise<IProduct[]> {
     let userDoc = (await userModel.findById(username));
-    if(!userDoc){
-      throw "User not found";
+    if (!userDoc) {
+      throw 'User not found';
     }
     let followees = userDoc.toObject().follows;
     let agg = reviewModel.aggregate()
@@ -405,7 +390,7 @@ class MongoDB {
   }
   async updateComment(comment: Partial<IComment>, owner: string):
       Promise<IComment|null> {
-    comment = {comment: comment.comment};
+    comment = stripObject(comment, commentPermitedFields);
     return (await commentModel.findOneAndUpdate(
                 {_id: comment._id, owner: owner || 'block undefined'}, comment,
                 {new: /* return the new document*/ true}))
@@ -443,6 +428,27 @@ class MongoDB {
     return await commentModel
         .update({_id: id}, {$pull: {likes: username, dislikes: username}})
         .exec();
+  }
+
+  //#endregion
+
+  //#region chat
+  async addRoom(name: string, owner: string, admins: string[]) {
+    // remove duplicates
+    admins = [...new Set(admins)];
+    let room: Partial <ChatRoom>= {name, owner, admins};
+    let doc = await chatRoomModel.create(room);
+    return doc && doc.toObject();
+  }
+
+  async updateRoom(id: number, owner : string, chatRoom :ChatRoom){
+    chatRoom = stripObject(chatRoom, chatRoomPermitedFields);
+    let doc = await chatRoomModel.findOneAndUpdate({_id: id, owner: owner}, chatRoom);
+    return doc && doc.toObject();
+  }
+
+  async addMessage(content : string){
+    
   }
   //#endregion
 }

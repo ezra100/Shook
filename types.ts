@@ -71,3 +71,17 @@ export interface IComment {
   // likes and dislikes must not intersect, must not have duplicates, and
   // usernames must exist
 }
+
+export interface Message{
+  _id: number;
+  roomID: number;
+  content: string;
+}
+
+export interface ChatRoom{
+  _id: number;
+  name: string;
+  admins: string[];
+  owner : string;
+  last100Messages: string[];
+}
