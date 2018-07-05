@@ -3,10 +3,10 @@ import {resolve} from 'dns';
 import * as mongoose from 'mongoose';
 
 import {helpers} from '../helpers';
-import {ChatRoom, Gender, IComment, IProduct, IReview, User, UserAuthData, UserType} from '../types';
+import {ChatRoom, Gender, IComment, IProduct, IReview, Message, User, UserAuthData, UserType} from '../types';
 
 import {chatRoomModel, commentModel, messageModel, productModel, reviewModel, userAuthDataModel, userModel} from './Models';
-import { stripObject, userPermitedFields, productPermitedFields, reviewPermitedFields, commentPermitedFields, chatRoomPermitedFields } from './StripForUpdate';
+import {chatRoomPermitedFields, commentPermitedFields, productPermitedFields, reviewPermitedFields, stripObject, userPermitedFields} from './StripForUpdate';
 
 let ObjectId = mongoose.Types.ObjectId;
 
@@ -436,19 +436,22 @@ class MongoDB {
   async addRoom(name: string, owner: string, admins: string[]) {
     // remove duplicates
     admins = [...new Set(admins)];
-    let room: Partial <ChatRoom>= {name, owner, admins};
+    let room: Partial < ChatRoom >= {name, owner, admins};
     let doc = await chatRoomModel.create(room);
     return doc && doc.toObject();
   }
 
-  async updateRoom(id: number, owner : string, chatRoom :ChatRoom){
+  async updateRoom(id: number, owner: string, chatRoom: ChatRoom) {
     chatRoom = stripObject(chatRoom, chatRoomPermitedFields);
-    let doc = await chatRoomModel.findOneAndUpdate({_id: id, owner: owner}, chatRoom);
+    let doc =
+        await chatRoomModel.findOneAndUpdate({_id: id, owner: owner}, chatRoom);
     return doc && doc.toObject();
   }
 
-  async addMessage(content : string){
-    
+  async addMessage(message: Message): Promise<Message> {
+    delete message._id;
+    let doc = await messageModel.create(message);
+    return doc && doc.toObject();
   }
   //#endregion
 }

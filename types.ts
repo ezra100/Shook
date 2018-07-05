@@ -19,7 +19,7 @@ export interface User {
   address: string;
   imageURL: string;
   follows: string[];
-  basket : string[]
+  basket: string[]
 }
 
 export interface UserAuthData {
@@ -32,56 +32,57 @@ export interface UserAuthData {
 
 
 
-export interface IProduct{
+export interface IProduct {
   title: string;
   subtitle: string;
   link?: string;
   _id: string;
-  creationDate : Date;
-  price : number;
+  creationDate: Date;
+  price: number;
   owner: string;  // publisher of the product - must exist in users collection
 }
 
 export interface IReview {
   _id: string;
-  creationDate : Date;
-  owner: string;  // publisher of the review
+  creationDate: Date;
+  owner: string;      // publisher of the review
   productID: string;  // product.id
   title: string;
   fullReview: string;
   rating: number;  // 1-5 stars
   likes: string[];
-  likesCount? : number;
+  likesCount?: number;
   dislikes: string[];
   dislikesCount: number;
-
 }
 
 // a comment on a review
 export interface IComment {
   _id: string;
-  creationDate : Date;
-  owner: string;  // publisher of the comment
+  creationDate: Date;
+  owner: string;     // publisher of the comment
   reviewID: string;  // review.id
   comment: string;
-  likes: string[];    // array of usernames of those who liked the comment
-  likesCount? : number;
+  likes: string[];  // array of usernames of those who liked the comment
+  likesCount?: number;
   dislikes: string[];  // array of username of dislikes
-  dislikesCount? : number;
+  dislikesCount?: number;
   // likes and dislikes must not intersect, must not have duplicates, and
   // usernames must exist
 }
 
-export interface Message{
+export interface Message {
   _id: number;
+  owner: string;
   roomID: number;
   content: string;
+  creationDate: Date;
 }
 
-export interface ChatRoom{
+export interface ChatRoom {
   _id: number;
   name: string;
   admins: string[];
-  owner : string;
-  last100Messages: string[];
+  owner: string;
+  // todo - add members and validate
 }

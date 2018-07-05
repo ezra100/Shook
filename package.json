@@ -11,7 +11,7 @@
     "type": "git",
     "url": "git+https://github.com/ezra100/Shook-server.git"
   },
-  "author": "Ezra Steinmetz & Tomer Trabelsi",
+  "owner": "Ezra Steinmetz & Tomer Trabelsi",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/ezra100/Shook-server/issues"

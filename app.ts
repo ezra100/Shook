@@ -11,10 +11,10 @@ import * as auth from './auth/auth';
 import {passport} from './auth/passport';
 import {initDB} from './DB/data-generator';
 import {mongoConnection} from './DB/MongoDB';
-import * as products from './routers/products';
-import * as users from './routers/users';
 import * as comments from './routers/comments';
+import * as products from './routers/products';
 import * as reviews from './routers/reviews';
+import * as users from './routers/users';
 
 // init the data base with fake data
 initDB();
@@ -32,7 +32,8 @@ let mongoStore = connMongo(session);
 let options:
     connMongo.MogooseConnectionOptions = {mongooseConnection: mongoConnection};
 let store = new mongoStore(options);
-app.use(session({secret, store: store, resave: false, saveUninitialized: false}));
+app.use(
+    session({secret, store: store, resave: false, saveUninitialized: false}));
 
 // this must become before loginRouter
 app.use(passport.initialize());
@@ -43,6 +44,7 @@ app.use('/users', users.router);
 app.use('/products', products.router);
 app.use('/comments', comments.router);
 app.use('/reviews', reviews.router);
+app.use('/', express.static(path.join(__dirname, 'angular-app/dist')))
 app.use('/', express.static(path.join(__dirname, 'public')));
 
 

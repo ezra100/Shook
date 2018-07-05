@@ -153,15 +153,17 @@ let commentSchema = new Schema({
 let chatRoomSchema = new Schema({
   _id: Number,
   name: {type: String, required: true},
-  admins: [{type: String, required: true, ref: "User"}],
-  owner : {type: String, required: true},
-  last100Messages: [String]
+  admins: [{type: String, required: true, ref: 'User'}],
+  owner: {type: String, required: true},
+
 });
 
 let messageSchema = new Schema({
   _id: Number,
-  roomID: {type: Number, ref:"ChatRoom"},
-  content:{type: String, required: true}
+  creationDate: {type: Date, default: Date.now, index: true},
+  roomID: {type: Number, ref: 'ChatRoom'},
+  content: {type: String, required: true},
+  owner: {type: String, ref: 'User'}
 });
 
 //#region hooks
@@ -224,5 +226,5 @@ export let userAuthDataModel: mongoose.Model<any> =
 export let productModel = mongoose.model('Product', productSchema);
 export let reviewModel = mongoose.model('Review', reviewSchema);
 export let commentModel = mongoose.model('Comment', commentSchema);
-export let chatRoomModel = mongoose.model("ChatRoom", chatRoomSchema);
-export let messageModel = mongoose.model("Message", messageSchema);
+export let chatRoomModel = mongoose.model('ChatRoom', chatRoomSchema);
+export let messageModel = mongoose.model('Message', messageSchema);

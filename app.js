@@ -10,10 +10,10 @@ const auth = require("./auth/auth");
 const passport_1 = require("./auth/passport");
 const data_generator_1 = require("./DB/data-generator");
 const MongoDB_1 = require("./DB/MongoDB");
-const products = require("./routers/products");
-const users = require("./routers/users");
 const comments = require("./routers/comments");
+const products = require("./routers/products");
 const reviews = require("./routers/reviews");
+const users = require("./routers/users");
 // init the data base with fake data
 data_generator_1.initDB();
 let secret = 'atgasdv82aergfnsg';
@@ -36,6 +36,7 @@ app.use('/users', users.router);
 app.use('/products', products.router);
 app.use('/comments', comments.router);
 app.use('/reviews', reviews.router);
+app.use('/', express.static(path.join(__dirname, 'angular-app/dist')));
 app.use('/', express.static(path.join(__dirname, 'public')));
 // server favicon
 app.get('/favicon.ico', function (req, res) {
