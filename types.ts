@@ -18,12 +18,12 @@ export interface User {
   gender: Gender;
   address: string;
   imageURL: string;
-  follows: string[];
-  basket: string[]
+  follows?: string[];
+  basket?: string[]
 }
 
 export interface UserAuthData {
-  _id: string;
+  _id?: string;
   recoveryKey?: string;
   recoveryCreationDate?: Date;
   hashedPassword?: string;
@@ -36,51 +36,51 @@ export interface IProduct {
   title: string;
   subtitle: string;
   link?: string;
-  _id: string;
-  creationDate: Date;
+  _id?: string;
+  creationDate?: Date;
   price: number;
-  owner: string;  // publisher of the product - must exist in users collection
+  owner?: string;  // publisher of the product - must exist in users collection
 }
 
 export interface IReview {
-  _id: string;
-  creationDate: Date;
+  _id?: string;
+  creationDate?: Date;
   owner: string;      // publisher of the review
   productID: string;  // product.id
   title: string;
   fullReview: string;
   rating: number;  // 1-5 stars
-  likes: string[];
+  likes?: string[];
   likesCount?: number;
-  dislikes: string[];
-  dislikesCount: number;
+  dislikes?: string[];
+  dislikesCount?: number;
 }
 
 // a comment on a review
 export interface IComment {
-  _id: string;
-  creationDate: Date;
+  _id?: string;
+  creationDate?: Date;
   owner: string;     // publisher of the comment
   reviewID: string;  // review.id
   comment: string;
-  likes: string[];  // array of usernames of those who liked the comment
+  likes?: string[];  // array of usernames of those who liked the comment
   likesCount?: number;
-  dislikes: string[];  // array of username of dislikes
+  dislikes?: string[];  // array of username of dislikes
   dislikesCount?: number;
   // likes and dislikes must not intersect, must not have duplicates, and
   // usernames must exist
 }
 
 export interface Message {
-  _id: number;
+  _id?: number;
   owner: string;
   roomID: number;
   content: string;
-  creationDate: Date;
+  creationDate?: Date;
 }
 
 export interface ChatRoom {
-  _id: number;
+  _id?: number;
   name: string;
   admins: string[];
   owner: string;

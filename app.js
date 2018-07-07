@@ -36,11 +36,11 @@ app.use('/users', users.router);
 app.use('/products', products.router);
 app.use('/comments', comments.router);
 app.use('/reviews', reviews.router);
-app.use('/', express.static(path.join(__dirname, 'angular-app/dist')));
+app.use('/', express.static(path.join(__dirname, 'angular-app', 'dist', 'angular-app')));
 app.use('/', express.static(path.join(__dirname, 'public')));
 // server favicon
 app.get('/favicon.ico', function (req, res) {
-    res.sendFile(path.join(__dirname, 'public/img/favicon.jpg'));
+    res.sendFile(path.join(__dirname, 'public/img/robot.gif'));
 });
 exports.default = app;
 //# sourceMappingURL=app.js.map
