@@ -64,7 +64,7 @@ let userSchema: Schema = new Schema({
     }
   },
   follows: [{type: String, required: true, ref: 'User'}],
-  basket: [{type: Schema.Types.ObjectId, ref: 'Product', required: true}]
+  basket: {}
 });
 
 let userDataSchema: Schema = new Schema({
@@ -151,7 +151,7 @@ let commentSchema = new Schema({
 
 
 let chatRoomSchema = new Schema({
-  _id: Number,
+  _id: String,
   name: {type: String, required: true},
   admins: [{type: String, required: true, ref: 'User'}],
   owner: {type: String, required: true},
@@ -159,9 +159,9 @@ let chatRoomSchema = new Schema({
 });
 
 let messageSchema = new Schema({
-  _id: Number,
+  _id: String,
   creationDate: {type: Date, default: Date.now, index: true},
-  roomID: {type: Number, ref: 'ChatRoom'},
+  roomID: {type: String, ref: 'ChatRoom'},
   content: {type: String, required: true},
   owner: {type: String, ref: 'User'}
 });

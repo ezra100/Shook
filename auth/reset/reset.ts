@@ -10,7 +10,7 @@ export var router = express.Router();
 
 // request a password reset - sends an email to the given address if a user with
 // such email exists
-router.post('/request', async function(req, res) {
+router.post('/request', helpers.asyncWrapper(async function(req, res) {
   let user:  User;
   // the user can send an email or a username to reset
   if (req.body.email) {
@@ -39,12 +39,12 @@ router.post('/request', async function(req, res) {
               '&&username=' + user._id));
   // don't show the email unless the user sent it
   res.status(201).end('reset email sent to' + (req.body.email || 'your email'));
-});
+}));
 
 
 // the target of the reset form - here the  password is replaced with the new
 // one
-router.post('/complete', async function(req, res) {
+router.post('/complete', helpers.asyncWrapper(async function(req, res) {
   let key = req.body.key;
   let username = req.body.username;
   let newPassword = req.body.password;
@@ -73,4 +73,4 @@ router.post('/complete', async function(req, res) {
     res.status(400).end(
         'failed to reset password, key doesn\'t match or username not found');
   }
-});
+}));

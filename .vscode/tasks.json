@@ -10,7 +10,7 @@
                 "command": "time/T && tsc -p tsconfig.json",
             },
             "linux": {
-                "command": "date && tsc -p tsconfig.json",
+                "command": "export PATH=\"${PATH}:/home/es/.npm-global/bin\" &&date && tsc -p tsconfig.json",
             },
             "problemMatcher": [
                 "$tsc"
@@ -19,6 +19,11 @@
                 "kind": "build",
                 "isDefault": true
             },
+        },
+        {
+            "label": "test task",
+            "type": "shell",
+            "command": "echo $PATH; echo $VISUAL"
         }
     ]
 }

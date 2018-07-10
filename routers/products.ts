@@ -15,21 +15,21 @@ router.post(
       res.status(201).json(product);
     });
 
-router.put('/update', async function(req, res) {
+router.put('/update', helpers.asyncWrapper(async function(req, res) {
   let product: IProduct = req.body;
 
   product = await db.updateProduct(product, req.user._id);
   res.status(201).json(product);
-});
+}));
 
-router.get('/getByID', async function(req, res) {
+router.get('/getByID', helpers.asyncWrapper(async function(req, res) {
   let id: string = req.query.id;
   let product =
       await db.getProductByID(id).catch(err => res.status(404) && err.message);
   res.json(product);
-});
+}));
 
-router.get('/getLatest', async function(req, res) {
+router.get('/getLatest', helpers.asyncWrapper(async function(req, res) {
   let filter: any = {};
   let username = req.query.username;
   if (req.query.username) {
@@ -41,9 +41,9 @@ router.get('/getLatest', async function(req, res) {
   let limit = Number(req.query.limit) || LIMIT;
   let offset = Number(req.query.offset || 0);
   res.json(await db.getLatestProducts(filter, offset, limit));
-});
+}));
 
-router.delete('/delete', async function(req, res) {
+router.delete('/delete', helpers.asyncWrapper(async function(req, res) {
   let id = req.query._id || req.query.id;
   let recursive = req.query.recursive !== 'false';
   let oldReview = await db.getProductByID(id);
@@ -53,17 +53,17 @@ router.delete('/delete', async function(req, res) {
   } else {
     res.status(401).end('You\'re not the owner of ' + id);
   }
-});
+}));
 
-router.get('/getAvgRating', async function(req, res) {
+router.get('/getAvgRating', helpers.asyncWrapper(async function(req, res) {
   let id = req.query.id;
   let rating = await db.getProductRating(id);
   res.json(rating);
-});
+}));
 
-router.get(/\/myFeed/i, async function(req, res) {
+router.get(/\/myFeed/i, helpers.asyncWrapper(async function(req, res) {
   let dbRes = await db.getProductsFromFollowees(req.user._id)
                 // in case of error set the status to 404 and return the error message
                   .catch(err => res.status(404) && err.message);
   res.json(dbRes);
-});
+}));

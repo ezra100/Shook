@@ -12,7 +12,13 @@ import {db} from './MongoDB';
 let users: User[];
 let products: IProduct[];
 let reviews: IReview[];
-let comments: IComment[];
+
+let usersLength: number;
+let productsLength: number;
+let reviewsLength: number;
+let commentsLength: number;
+let roomsLenght: number;
+let messageLength: number;
 
 const logFile: string = path.join(__dirname, 'password.log');
 interface IInitPackage {
@@ -56,7 +62,7 @@ function getFakeProduct(): Partial<IProduct> {
     title: faker.commerce.productName(),
     subtitle: faker.lorem.paragraph(),
     link: faker.internet.url(),
-    owner: users[faker.random.number(users.length - 1)]._id,
+    owner: users[faker.random.number(usersLength - 1)]._id,
     creationDate: faker.date.past(5),
     price: faker.random.number({min: 5, max: 100, precision: 0.05}),
   };
@@ -64,7 +70,7 @@ function getFakeProduct(): Partial<IProduct> {
 
 function getRandomUsernames(
     min: number = 5, max: number = 30): [string[], string[]] {
-  max = Math.max(max, users.length / 8);
+  max = Math.max(max, usersLength / 8);
   let likesSize = faker.random.number({min, max});
   let dislikesSize = faker.random.number({min, max});
   let likes: string[] = [];
@@ -84,9 +90,9 @@ function getRandomUsernames(
 
 function getFakeReview(): Partial<IReview> {
   let likeDislike = getRandomUsernames();
-  let product = products[faker.random.number(products.length - 1)];
+  let product = products[faker.random.number(productsLength - 1)];
   return {
-    owner: users[faker.random.number(users.length - 1)]._id,
+    owner: users[faker.random.number(usersLength - 1)]._id,
         title: faker.lorem.sentence(), fullReview: faker.lorem.paragraphs(3),
         dislikes: likeDislike[1], likes: likeDislike[0],
         rating: faker.random.number({min: 1, max: 5}), productID: product._id,
@@ -96,9 +102,9 @@ function getFakeReview(): Partial<IReview> {
 
 function getFakeComment(): Partial<IComment> {
   let likeDislike = getRandomUsernames();
-  let review = reviews[faker.random.number(reviews.length - 1)];
+  let review = reviews[faker.random.number(reviewsLength - 1)];
   return {
-    owner: users[faker.random.number(users.length - 1)]._id,
+    owner: users[faker.random.number(usersLength - 1)]._id,
         comment: faker.lorem.paragraphs(3), dislikes: likeDislike[1],
         likes: likeDislike[0], reviewID: review._id,
         creationDate: faker.date.between(review.creationDate, Date()),
@@ -132,30 +138,33 @@ async function initUsers(size: number = 50, logPasswod: boolean = true) {
 
 
 export async function initDB(
-    usersSize: number = 100, avgProductsPerUser = 5,
+    usersSizeGoal: number = 100, avgProductsPerUser = 5,
     reviewsPerProduct: number = 5, commentsPerReview = 8) {
-  users = <User[]>await db.getUsers(undefined, undefined, undefined, true);
-  products = await db.getLatestProducts();
-  reviews = await db.getLatestReviews();
-  comments = await db.getLatestComments();
-  if (users.length < usersSize) {
-    await initUsers(usersSize - users.length);
-    users = <User[]>await db.getUsers(undefined, undefined, undefined, true);
+  usersLength = await db.getUsersSize();
+  productsLength = await db.getProductsSize();
+  reviewsLength = await db.getProductsSize();
+  commentsLength = await db.getCommentsSize();
+  users = await db.getUsers();
+  if (usersLength < usersSizeGoal) {
+    await initUsers(usersSizeGoal - usersLength);
+    usersLength = await db.getUsersSize();
   }
-  if (products.length < usersSize * avgProductsPerUser) {
-    await initProducts((usersSize * avgProductsPerUser) - products.length);
+  if (productsLength < usersSizeGoal * avgProductsPerUser) {
+    await initProducts((usersSizeGoal * avgProductsPerUser) - productsLength);
+    productsLength = await db.getProductsSize();
+  }
+  if (reviewsLength < productsLength * reviewsPerProduct) {
     products = await db.getLatestProducts();
-  }
-  if (reviews.length < products.length * reviewsPerProduct) {
-    for (let i = reviews.length; i < products.length * reviewsPerProduct; i++) {
+    for (let i = reviewsLength; i < productsLength * reviewsPerProduct; i++) {
       await db.addReview(<IReview>getFakeReview(), false);
     }
-    reviews = await db.getLatestReviews();
+    reviewsLength = await db.getReviewsSize();
   }
-  if (comments.length < reviews.length * commentsPerReview) {
-    for (let i = comments.length; i < reviews.length * commentsPerReview; i++) {
+  if (commentsLength < reviewsLength * commentsPerReview) {
+    reviews = await db.getLatestReviews();
+    for (let i = commentsLength; i < reviewsLength * commentsPerReview; i++) {
       await db.addComment(<IComment>getFakeComment(), false);
     }
-    comments = await db.getLatestComments();
+    commentsLength = await db.getCommentsSize();
   }
 }

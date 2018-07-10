@@ -19,7 +19,7 @@ export interface User {
   address: string;
   imageURL: string;
   follows?: string[];
-  basket?: string[]
+  basket?: {(productID: string):  number}
 }
 
 export interface UserAuthData {
@@ -72,15 +72,15 @@ export interface IComment {
 }
 
 export interface Message {
-  _id?: number;
+  _id?: string;
   owner: string;
-  roomID: number;
+  roomID: string;
   content: string;
   creationDate?: Date;
 }
 
 export interface ChatRoom {
-  _id?: number;
+  _id?: string;
   name: string;
   admins: string[];
   owner: string;

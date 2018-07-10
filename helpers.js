@@ -42,5 +42,11 @@ var helpers;
             .test(url);
     }
     helpers.isValidURL = isValidURL;
+    function asyncWrapper(fn) {
+        return function (req, res) {
+            fn(req, res).catch((err) => res.status(500).end(err.message));
+        };
+    }
+    helpers.asyncWrapper = asyncWrapper;
 })(helpers = exports.helpers || (exports.helpers = {}));
 //# sourceMappingURL=helpers.js.map

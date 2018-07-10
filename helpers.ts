@@ -2,7 +2,7 @@ import * as nodemailer from 'nodemailer';
 
 import * as data from './data.json';
 import {User} from './types';
-
+import {Request, Response} from 'express-serve-static-core'
 
 export namespace helpers {
   let reallySendEmail = true;
@@ -45,5 +45,14 @@ export namespace helpers {
   export function isValidURL(url: string) {
     return /^((http[s]?):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?$/i
         .test(url);
+  }
+
+  export function asyncWrapper(fn : (req: Request, res: Response) => Promise<any>){
+    return function(req: Request, res: Response){
+      fn(req, res).catch(
+        (err : Error) =>
+        res.status(500).end(err.message)
+      )
+    }
   }
 }

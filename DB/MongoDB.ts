@@ -65,7 +65,7 @@ class MongoDB {
   // todo: update this
   async getUsers(
       filter: any = {}, offset: number = 0, limit?: number,
-      showPrivateData: boolean = false): Promise<Partial<User>[]> {
+      showPrivateData: boolean = false): Promise<User[]> {
     for (const key of Object.keys(filter)) {
       if (filter[key] === '') {
         delete filter[key];
@@ -113,14 +113,11 @@ class MongoDB {
     if (limit) {
       query.limit(limit);
     }
-    let users: Partial<User>[] = await query;
-    return users.map(user => {
-      return {
-        _id: user._id, firstName: user.firstName, lastName: user.lastName,
-            gender: user.gender, userType: user.userType,
-            imageURL: user.imageURL
-      }
-    });
+    if (!showPrivateData) {
+      query.select('_id firstName lastName gender userType imageUrl');
+    }
+    let users: User[] = await query;
+    return users;
   }
   async getUser(username: string, showPrivateData: boolean = false):
       Promise<Partial<User>> {
@@ -164,22 +161,54 @@ class MongoDB {
             .exec());
   }
 
-
-  async addToBasket(username: string, productID: string) {
+  // todo
+  async addToBasket(username: string, productID: string, quantity: number = 1) {
+    if (quantity < 1) {
+      return await db.removeFromBasket(username, productID);
+    }
     let doc = await this.getProductByID(productID);
     if (!doc) {
       return 'product ID ' + productID + ' doesn\'t exist';
     }
-    return (
-        await userModel
-            .update({_id: username}, {$addToSet: {basket: ObjectId(productID)}})
-            .exec());
+    let set: any = {};
+    set['basket.' + productID] = quantity;
+    return (await userModel
+                .updateOne(
+                    {
+                      _id: username,
+                    },
+                    {
+                      $set: set,
+                    })
+                .exec());
   }
 
   async removeFromBasket(username: string, productID: string) {
+    let doc = await this.getProductByID(productID);
+    if (!doc) {
+      return 'product ID ' + productID + ' doesn\'t exist';
+    }
+    let unset: any = {};
+    unset['basket.' + productID] = '';
     return (await userModel
-                .update({_id: username}, {$pull: {basket: ObjectId(productID)}})
+                .updateOne(
+                    {
+                      _id: username,
+                    },
+                    {
+                      $unset: unset,
+                    })
                 .exec());
+  }
+
+  async getBasketSum(username: string) {
+    let user = await this.getUser(username, true);
+
+    let agg = await productModel.aggregate(
+        [{$match: {'_id': {$in: Object.keys(user.basket)}}},
+        {$project: {"finalPrice" : {$multiply : ["price", basket[]]}}}
+      {$group {_id:null, "sum" : {$sum : }}}]);
+    return agg && agg[0].sum;
   }
 
   updateUserById(username: string, user: Partial<User>): Promise<User> {
@@ -452,6 +481,37 @@ class MongoDB {
     delete message._id;
     let doc = await messageModel.create(message);
     return doc && doc.toObject();
+  }
+  async deleteMessage(id: string, requesting: string) {
+    let doc = await messageModel.findOneAndRemove({
+      _id: id,
+      '$or': [
+        {owner: requesting},
+        {owner: {$in: 'admins'}},
+      ]
+    });
+    return doc && doc.toObject();
+  }
+  //#endregion
+
+  //#region stats
+  async getUsersSize() {
+    return await userModel.count({}).exec();
+  }
+  async getProductsSize() {
+    return await productModel.count({}).exec();
+  }
+  async getReviewsSize() {
+    return await reviewModel.count({}).exec();
+  }
+  async getCommentsSize() {
+    return await commentModel.count({}).exec();
+  }
+  async getRoomsSize() {
+    return await chatRoomModel.count({}).exec();
+  }
+  async getMessagesSize() {
+    return await messageModel.count({}).exec();
   }
   //#endregion
 }

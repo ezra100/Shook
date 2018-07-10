@@ -2,15 +2,15 @@ import * as express from 'express';
 
 import {createUserData} from '../auth/auth';
 import {db} from '../DB/MongoDB';
+import {helpers} from '../helpers';
 import {User} from '../types';
 
 export var router = express.Router();
 
-let userProperties: string[] = [
- '_id', 'address', 'firstName', 'lastName', 'email', 'gender', 'className'
-];
+let userProperties: string[] =
+    ['_id', 'address', 'firstName', 'lastName', 'email', 'gender', 'className'];
 // create a new user
-router.post('/signup', async function(req: express.Request, res) {
+router.post('/signup', helpers.asyncWrapper( async function(req: express.Request, res) {
   let user: any = {};
   for (let key of userProperties) {
     user[key] = req.body[key];
@@ -25,7 +25,7 @@ router.post('/signup', async function(req: express.Request, res) {
   let password = req.body.password;
   createUserData(user._id, password);
   res.status(201).end();
-});
+}));
 
 // update details about the current user
 router.put('/updateDetails', function(req, res) {
@@ -48,16 +48,34 @@ router.get('/getDetails', function(req, res) {
   res.status(404).end('You\'re not logged in');
 });
 
-router.put("/follow", async function(req, res){
+router.put('/follow', helpers.asyncWrapper(async function(req, res) {
   let followee = req.query.followee;
   let follower = req.user._id;
   let dbRes = await db.addFollowee(follower, followee);
   res.json(dbRes);
-});
+}));
 
-router.put("/unfollow", async function(req, res){
+router.put('/unfollow', helpers.asyncWrapper(async function(req, res) {
   let followee = req.query.followee;
   let follower = req.user._id;
   let dbRes = await db.removeFollowee(follower, followee);
   res.json(dbRes);
-});
+}));
+
+router.post('/addToBasket', helpers.asyncWrapper(async function(req, res) {
+  let productID = req.body.productID;
+  let qunatity = Number(req.body.qunatity || 1);
+  return res.json(await db.addToBasket(req.user._id, productID, qunatity)
+                      .catch((err: Error) => res.status(500) && err.message));
+}));
+
+
+router.delete('/removeFromBasket', helpers.asyncWrapper(async function(req, res) {
+  let productID = req.body.productID;
+  return res.json(await db.removeFromBasket(req.user._id, productID)
+                      .catch((err: Error) => res.status(500) && err.message));
+}));
+
+router.get('/basketSum', helpers.asyncWrapper(async function(req, res) {
+  return res.json(await db.getBasketSum(req.user._id));
+}));

@@ -75,11 +75,14 @@ PUT for update, POST for create, GET for get (no changes on server side)
 ### todo
 
 * chats
+    * personal chat
 * filter by creation date range
 * follow list and post list
 * categories (?)
 * products list
-* basket
 * price for product
     * allow users to report prices for the product (?)
 * external entities / sellers
+
+* add like/dislike to product
+* change all put/post request to body rather than query
