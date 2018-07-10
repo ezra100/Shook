@@ -49,14 +49,14 @@ router.get('/getDetails', function(req, res) {
 });
 
 router.put('/follow', helpers.asyncWrapper(async function(req, res) {
-  let followee = req.query.followee;
+  let followee = req.body.followee;
   let follower = req.user._id;
   let dbRes = await db.addFollowee(follower, followee);
   res.json(dbRes);
 }));
 
 router.put('/unfollow', helpers.asyncWrapper(async function(req, res) {
-  let followee = req.query.followee;
+  let followee = req.body.followee;
   let follower = req.user._id;
   let dbRes = await db.removeFollowee(follower, followee);
   res.json(dbRes);
@@ -64,14 +64,14 @@ router.put('/unfollow', helpers.asyncWrapper(async function(req, res) {
 
 router.post('/addToBasket', helpers.asyncWrapper(async function(req, res) {
   let productID = req.body.productID;
-  let qunatity = Number(req.body.qunatity || 1);
+  let qunatity = Number(req.body.quantity || 1);
   return res.json(await db.addToBasket(req.user._id, productID, qunatity)
                       .catch((err: Error) => res.status(500) && err.message));
 }));
 
 
 router.delete('/removeFromBasket', helpers.asyncWrapper(async function(req, res) {
-  let productID = req.body.productID;
+  let productID = req.query.productID;
   return res.json(await db.removeFromBasket(req.user._id, productID)
                       .catch((err: Error) => res.status(500) && err.message));
 }));

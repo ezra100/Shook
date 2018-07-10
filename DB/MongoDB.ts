@@ -170,17 +170,24 @@ class MongoDB {
     if (!doc) {
       return 'product ID ' + productID + ' doesn\'t exist';
     }
-    let set: any = {};
-    set['basket.' + productID] = quantity;
-    return (await userModel
-                .updateOne(
-                    {
-                      _id: username,
-                    },
-                    {
-                      $set: set,
-                    })
-                .exec());
+    await userModel
+        .updateOne(
+            {
+              _id: username,
+            },
+            {$pull: {basket: {'productID': productID}}})
+        .exec();
+
+    return (
+        await userModel
+            .updateOne(
+                {
+                  _id: username,
+                },
+                {
+                  $push: {basket: {productID: productID, quantity: quantity}},
+                })
+            .exec());
   }
 
   async removeFromBasket(username: string, productID: string) {
@@ -188,26 +195,47 @@ class MongoDB {
     if (!doc) {
       return 'product ID ' + productID + ' doesn\'t exist';
     }
-    let unset: any = {};
-    unset['basket.' + productID] = '';
     return (await userModel
                 .updateOne(
                     {
                       _id: username,
                     },
-                    {
-                      $unset: unset,
-                    })
+                    {$pull: {basket: {'productID': productID}}})
                 .exec());
   }
 
   async getBasketSum(username: string) {
     let user = await this.getUser(username, true);
 
-    let agg = await productModel.aggregate(
-        [{$match: {'_id': {$in: Object.keys(user.basket)}}},
-        {$project: {"finalPrice" : {$multiply : ["price", basket[]]}}}
-      {$group {_id:null, "sum" : {$sum : }}}]);
+
+    let agg = await userModel.aggregate(
+
+      [{$match: {_id:username}},
+        {$unwind : {path: '$basket', preserveNullAndEmptyArrays: true}},
+        {
+          $lookup:{
+          from: 'products',
+          localField: 'basket.productID',
+          foreignField : '_id',
+          as: 'products'
+        }
+      },
+      {
+        $project: {product:{$arrayElemAt : ['$products', 0]}, quantity :'$basket.quantity'}
+      },
+      {
+        $project: {
+          'finalPrice' : {
+          $multiply : ['$product.price', '$quantity']
+        }}
+      }
+      ,{
+        $group :{
+          _id: null,
+          sum:{$sum: '$finalPrice'}
+        }
+      }
+    ]);
     return agg && agg[0].sum;
   }
 

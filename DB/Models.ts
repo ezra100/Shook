@@ -64,7 +64,11 @@ let userSchema: Schema = new Schema({
     }
   },
   follows: [{type: String, required: true, ref: 'User'}],
-  basket: {}
+  basket: [{
+    productID: {type: Schema.Types.ObjectId, required: true, ref:"Product"},
+    quantity: {type: Number, required: {min: 1}},
+    _id: false
+  }]
 });
 
 let userDataSchema: Schema = new Schema({

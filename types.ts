@@ -19,7 +19,7 @@ export interface User {
   address: string;
   imageURL: string;
   follows?: string[];
-  basket?: {(productID: string):  number}
+  basket?: {productID: string, quantity: number}[]
 }
 
 export interface UserAuthData {
@@ -85,4 +85,11 @@ export interface ChatRoom {
   admins: string[];
   owner: string;
   // todo - add members and validate
+}
+
+interface Order {
+  _id?: string,
+  owner: string,
+  products: {productID: string, quantity: number}[],
+  orderDate: Date
 }

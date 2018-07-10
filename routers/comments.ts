@@ -55,7 +55,7 @@ router.delete('/delete', helpers.asyncWrapper(async function(req, res) {
 }));
 
 router.put("/like", helpers.asyncWrapper(async function(req, res){
-  let id= req.query._id || req.query.id;
+  let id= req.body._id || req.body.id;
   if(!req.user){
     res.status(401).end("you're not logged in");
     return;
@@ -64,7 +64,7 @@ router.put("/like", helpers.asyncWrapper(async function(req, res){
 }));
 
 router.put("/dislike", helpers.asyncWrapper(async function(req, res){
-  let id= req.query._id || req.query.id;
+  let id= req.body._id || req.body.id;
   if(!req.user){
     res.status(401).end("you're not logged in");
     return;
@@ -74,7 +74,7 @@ router.put("/dislike", helpers.asyncWrapper(async function(req, res){
 
 // removes both likes and dislikes
 router.put(/\/removeLike/i, helpers.asyncWrapper(async function(req, res){
-  let id= req.query._id || req.query.id;
+  let id= req.body._id || req.body.id;
   if(!req.user){
     res.status(401).end("you're not logged in");
     return;

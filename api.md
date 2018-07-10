@@ -85,4 +85,4 @@ PUT for update, POST for create, GET for get (no changes on server side)
 * external entities / sellers
 
 * add like/dislike to product
-* change all put/post request to body rather than query
+* ~~change all put/post request to body rather than query~~
