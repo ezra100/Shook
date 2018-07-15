@@ -3,9 +3,9 @@ import {resolve} from 'dns';
 import * as mongoose from 'mongoose';
 
 import {helpers} from '../helpers';
-import {ChatRoom, Gender, IComment, IProduct, IReview, Message, User, UserAuthData, UserType} from '../types';
+import {ChatRoom, DMessage, Gender, IComment, IProduct, IReview, Message, User, UserAuthData, UserType} from '../types';
 
-import {chatRoomModel, commentModel, messageModel, productModel, reviewModel, userAuthDataModel, userModel} from './Models';
+import {chatRoomModel, commentModel, DMessageModel, messageModel, productModel, reviewModel, userAuthDataModel, userModel} from './Models';
 import {chatRoomPermitedFields, commentPermitedFields, productPermitedFields, reviewPermitedFields, stripObject, userPermitedFields} from './StripForUpdate';
 
 let ObjectId = mongoose.Types.ObjectId;
@@ -23,13 +23,13 @@ export var mongoConnection: mongoose.Connection = mongoose.connection;
 mongoConnection.on(
     'error', console.error.bind(console, 'MongoDB connection error:'));
 
-class MongoDB {
-  async getUserAuthData(username: string): Promise<UserAuthData> {
+export namespace db {
+  async  function getUserAuthData(username: string): Promise<UserAuthData> {
     let doc = await userAuthDataModel.findById(username);
     return doc && doc.toObject();
   }
 
-  updateUserAuthData(username: string, data: Partial<UserAuthData>):
+  function updateUserAuthData(username: string, data: Partial<UserAuthData>):
       Promise<void> {
     return new Promise((resolve, reject) => {
       userAuthDataModel.findByIdAndUpdate(
@@ -42,7 +42,7 @@ class MongoDB {
           });
     });
   }
-  createUserAuthData(data: UserAuthData): Promise<void> {
+  function createUserAuthData(data: UserAuthData): Promise<void> {
     return new Promise((resolve, reject) => {
       userAuthDataModel.create(data, (err: Error, rData: UserAuthData) => {
         if (err) {
@@ -56,14 +56,14 @@ class MongoDB {
 
 
 
-  async findUserByEmail(email: string): Promise<User> {
+  async function findUserByEmail(email: string): Promise<User> {
     let doc = await userModel.findOne({email: email});
     return doc && doc.toObject();
   }
 
   //#region users
   // todo: update this
-  async getUsers(
+  async function getUsers(
       filter: any = {}, offset: number = 0, limit?: number,
       showPrivateData: boolean = false): Promise<User[]> {
     for (const key of Object.keys(filter)) {
@@ -119,7 +119,7 @@ class MongoDB {
     let users: User[] = await query;
     return users;
   }
-  async getUser(username: string, showPrivateData: boolean = false):
+  async function getUser(username: string, showPrivateData: boolean = false):
       Promise<Partial<User>> {
     let user: Partial<User> = await userModel.findById(username.toLowerCase());
     if (showPrivateData) {
@@ -137,7 +137,7 @@ class MongoDB {
 
 
 
-  async addFollowee(follower: string, followee: string) {
+  async function addFollowee(follower: string, followee: string) {
     followee = followee.toLowerCase();
     follower = follower.toLowerCase();
     // validate the followee, we assume the follower is validated by the calling
@@ -152,7 +152,7 @@ class MongoDB {
                 {_id: follower.toLowerCase()}, {$addToSet: {follows: followee}})
             .exec());
   }
-  async removeFollowee(follower: string, followee: string) {
+  async function removeFollowee(follower: string, followee: string) {
     followee = followee.toLowerCase();
     follower = follower.toLowerCase();
     return (
@@ -162,7 +162,7 @@ class MongoDB {
   }
 
   // todo
-  async addToBasket(username: string, productID: string, quantity: number = 1) {
+  async function addToBasket(username: string, productID: string, quantity: number = 1) {
     if (quantity < 1) {
       return await db.removeFromBasket(username, productID);
     }
@@ -190,7 +190,7 @@ class MongoDB {
             .exec());
   }
 
-  async removeFromBasket(username: string, productID: string) {
+  async function removeFromBasket(username: string, productID: string) {
     let doc = await this.getProductByID(productID);
     if (!doc) {
       return 'product ID ' + productID + ' doesn\'t exist';
@@ -204,7 +204,7 @@ class MongoDB {
                 .exec());
   }
 
-  async getBasketSum(username: string) {
+  async function getBasketSum(username: string) {
     let user = await this.getUser(username, true);
 
 
@@ -239,7 +239,7 @@ class MongoDB {
     return agg && agg[0].sum;
   }
 
-  updateUserById(username: string, user: Partial<User>): Promise<User> {
+  function updateUserById(username: string, user: Partial<User>): Promise<User> {
     user = stripObject(user, userPermitedFields);
     return new Promise((resolve, reject) => {
       userModel.findByIdAndUpdate(
@@ -253,7 +253,7 @@ class MongoDB {
           });
     });
   }
-  addUser(user: User): Promise<User|null> {
+  function addUser(user: User): Promise<User|null> {
     return new Promise((resolve, reject) => {
       let userDoc: any = new userModel(user);
       userDoc.save((err: Error, user: User) => {
@@ -265,7 +265,7 @@ class MongoDB {
       });
     });
   }
-  deleteUser(user: User): Promise<User|null> {
+  function deleteUser(user: User): Promise<User|null> {
     return new Promise((resolve, reject) => {
       userModel.findByIdAndRemove(user._id, (err: Error, user: User) => {
         if (err) {
@@ -278,7 +278,7 @@ class MongoDB {
   }
   //#endregion
   //#region  product
-  async addProduct(product: Partial<IProduct>, secure: boolean = true):
+  async function addProduct(product: Partial<IProduct>, secure: boolean = true):
       Promise<IProduct> {
     if (secure) {
       product.creationDate = new Date();
@@ -287,7 +287,7 @@ class MongoDB {
     return retProduct && retProduct.toObject();
   }
 
-  async updateProduct(product: Partial<IProduct>, owner: string):
+  async function updateProduct(product: Partial<IProduct>, owner: string):
       Promise<IProduct|null> {
     product = stripObject(product, productPermitedFields);
     let doc = (await productModel.findOneAndUpdate(
@@ -295,18 +295,18 @@ class MongoDB {
         {new /* return the new document*/: true}));
     return doc && doc.toObject();
   }
-  async deleteProduct(id: string, removeReviews: boolean = true) {
+  async function deleteProduct(id: string, removeReviews: boolean = true) {
     if (removeReviews) {
       this.deleteReviewsByProductID(id);
     }
     let doc = await productModel.findByIdAndRemove(id);
     return doc && doc.toObject();
   }
-  async getProductByID(id: string): Promise<IProduct> {
+  async function getProductByID(id: string): Promise<IProduct> {
     let doc = await productModel.findById(id);
     return doc && doc.toObject();
   }
-  async getLatestProducts(
+  async function getLatestProducts(
       filter: Partial<IProduct> = {}, offset: number = 0,
       limit?: number): Promise<IProduct[]> {
     let res = productModel.find(filter).sort('-creationDate').skip(offset);
@@ -315,7 +315,7 @@ class MongoDB {
     }
     return (await res.exec()).map(doc => doc.toObject());
   }
-  async getProductsFromFollowees(
+  async function getProductsFromFollowees(
       username: string, offset: number = 0,
       limit?: number): Promise<IProduct[]> {
     let user = await userModel.findById(username);
@@ -335,7 +335,7 @@ class MongoDB {
   //#endregion
 
   //#region review
-  async addReview(review: IReview, secure: boolean = true): Promise<IReview> {
+  async function addReview(review: IReview, secure: boolean = true): Promise<IReview> {
     if (secure) {
       review.dislikes = [];
       review.likes = [];
@@ -345,7 +345,7 @@ class MongoDB {
     return doc && doc.toObject();
   }
 
-  async updateReview(review: Partial<IReview>, owner: string):
+  async function updateReview(review: Partial<IReview>, owner: string):
       Promise<IReview|null> {
     review = stripObject(review, reviewPermitedFields);
     let doc = await reviewModel.findOneAndUpdate(
@@ -353,14 +353,14 @@ class MongoDB {
         {new /* return the new document*/: true});
     return doc && doc.toObject();
   }
-  async deleteReview(id: string, removeComments: boolean = true) {
+  async function deleteReview(id: string, removeComments: boolean = true) {
     if (removeComments) {
       this.deleteCommentsByReviewID(id);
     }
     let doc = await reviewModel.findByIdAndRemove(id);
     return doc && doc.toObject();
   }
-  async deleteReviewsByProductID(productID: string) {
+  async function deleteReviewsByProductID(productID: string) {
     let reviews = await this.getLatestReviews({productID: productID});
     reviews.forEach((review) => {
       this.deleteCommentsByReviewID(review._id);
@@ -369,11 +369,11 @@ class MongoDB {
         (await reviewModel.remove({productID: new ObjectId(productID)}));
     return results;
   }
-  async getReviewByID(id: string): Promise<IReview> {
+  async function getReviewByID(id: string): Promise<IReview> {
     let doc = await reviewModel.findById(id);
     return doc && doc.toObject();
   }
-  async getLatestReviews(
+  async function getLatestReviews(
       filter: Partial<IReview> = {}, offset: number = 0,
       limit?: number): Promise<IReview[]> {
     let res = reviewModel.find(filter).sort('-creationDate').skip(offset);
@@ -383,33 +383,33 @@ class MongoDB {
     return (await res.exec()).map(doc => doc.toObject());
   }
 
-  async getProductRating(productID: string): Promise<number> {
+  async function getProductRating(productID: string): Promise<number> {
     return (await reviewModel.aggregate()
                 .match({productID: mongoose.Types.ObjectId(productID)})
                 .group({_id: '$productID', avg: {$avg: '$rating'}}))[0]
         .avg;
   }
-  async likeReview(id: string, username: string) {
+  async function likeReview(id: string, username: string) {
     return (await reviewModel
                 .update(
                     {_id: id},
                     {$addToSet: {likes: username}, $pull: {dislikes: username}})
                 .exec());
   }
-  async dislikeReview(id: string, username: string) {
+  async function dislikeReview(id: string, username: string) {
     return await reviewModel
         .update(
             {_id: id},
             {$pull: {likes: username}, $addToSet: {dislikes: username}})
         .exec();
   }
-  async removeLikeDislikeFromReview(id: string, username: string) {
+  async function removeLikeDislikeFromReview(id: string, username: string) {
     return await reviewModel
         .update({_id: id}, {$pull: {likes: username, dislikes: username}})
         .exec();
   }
 
-  async getReviewsFromFollowees(
+  async function getReviewsFromFollowees(
       username: string, offset: number = 0,
       limit?: number): Promise<IProduct[]> {
     let userDoc = (await userModel.findById(username));
@@ -429,7 +429,7 @@ class MongoDB {
   //#endregion
 
   //#region comment
-  async addComment(comment: IComment, secure: boolean = true):
+  async function addComment(comment: IComment, secure: boolean = true):
       Promise<IComment> {
     if (secure) {
       comment.creationDate = new Date();
@@ -438,14 +438,14 @@ class MongoDB {
     }
     return (await commentModel.create(comment)).toObject();
   }
-  async deleteComment(id: string) {
+  async function deleteComment(id: string) {
     commentModel.findByIdAndRemove(id);
   }
-  async deleteCommentsByReviewID(reviewID: string) {
+  async function deleteCommentsByReviewID(reviewID: string) {
     let results = await commentModel.remove({reviewID: new ObjectId(reviewID)});
     return results;
   }
-  async updateComment(comment: Partial<IComment>, owner: string):
+  async function updateComment(comment: Partial<IComment>, owner: string):
       Promise<IComment|null> {
     comment = stripObject(comment, commentPermitedFields);
     return (await commentModel.findOneAndUpdate(
@@ -453,11 +453,11 @@ class MongoDB {
                 {new: /* return the new document*/ true}))
         .toObject();
   }
-  async getCommentByID(id: string): Promise<IComment> {
+  async function getCommentByID(id: string): Promise<IComment> {
     let doc = (await commentModel.findById(id));
     return doc && doc.toObject();
   }
-  async getLatestComments(
+  async function getLatestComments(
       filter: Partial<IComment> = {}, offset: number = 0,
       limit?: number): Promise<IComment[]> {
     let res = commentModel.find(filter).sort('-creationDate').skip(offset);
@@ -467,21 +467,21 @@ class MongoDB {
     return (await res.exec()).map(doc => doc.toObject());
   }
 
-  async likeComment(id: string, username: string) {
+  async function likeComment(id: string, username: string) {
     return (await commentModel
                 .update(
                     {_id: id},
                     {$addToSet: {likes: username}, $pull: {dislikes: username}})
                 .exec());
   }
-  async dislikeComment(id: string, username: string) {
+  async function dislikeComment(id: string, username: string) {
     return await commentModel
         .update(
             {_id: id},
             {$pull: {likes: username}, $addToSet: {dislikes: username}})
         .exec();
   }
-  async removeLikeDislikeFromComment(id: string, username: string) {
+  async function removeLikeDislikeFromComment(id: string, username: string) {
     return await commentModel
         .update({_id: id}, {$pull: {likes: username, dislikes: username}})
         .exec();
@@ -490,27 +490,94 @@ class MongoDB {
   //#endregion
 
   //#region chat
-  async addRoom(name: string, owner: string, admins: string[]) {
+  async function addChatRoom(
+      name: string, owner: string, admins: string[],
+      verifyAdmins: boolean = true) {
+    admins.push(owner);
     // remove duplicates
     admins = [...new Set(admins)];
-    let room: Partial < ChatRoom >= {name, owner, admins};
+
+    if (verifyAdmins) {
+      let adminsUsers = await userModel.find({_id: {$in: admins}}).exec();
+      if (adminsUsers.length !== admins.length) {
+        let verifiedAdmins: string[] = adminsUsers.map(user => user._id);
+        let missingAdmins =
+            admins.filter(name => verifiedAdmins.indexOf(name) === -1);
+        throw 'the following admins don\'t exist: ' +
+            JSON.stringify(missingAdmins);
+      }
+    }
+    let room: Partial < ChatRoom >= {name, owner, admins, members: admins};
     let doc = await chatRoomModel.create(room);
     return doc && doc.toObject();
   }
 
-  async updateRoom(id: number, owner: string, chatRoom: ChatRoom) {
+  async function updateRoom(id: number, owner: string, chatRoom: Partial<ChatRoom>) {
     chatRoom = stripObject(chatRoom, chatRoomPermitedFields);
-    let doc =
-        await chatRoomModel.findOneAndUpdate({_id: id, owner: owner}, chatRoom);
+    let doc = await chatRoomModel.findOneAndUpdate(
+        {_id: id, owner: owner}, chatRoom, {new: true});
     return doc && doc.toObject();
   }
 
-  async addMessage(message: Message): Promise<Message> {
+  async function addMember(member: string, adminName: string, roomID: string) {
+    if(!await this.getUser(member)){
+      throw member + " doesn't exist";
+    }
+    return await chatRoomModel.updateOne(
+        {_id: roomID, admins: /* maek sure the given admin is actually an admin of that room*/ {$elemMatch: adminName}},
+        {$addToSet: {members: member}});
+  }
+  async function removeMember(member: string, adminName: string, roomID: string) {
+    return await chatRoomModel.updateOne(
+        {_id: roomID, admins: {$elemMatch: adminName}},
+        {$pull: {members: member}});
+  }
+
+
+
+  async function addAdmin(admin: string, roomOwnerName: string, roomID: string) {
+    if(!await this.getUser(admin)){
+      throw admin + " doesn't exist";
+    }
+    await this.addMember(admin, roomOwnerName, roomID);
+    return await chatRoomModel.updateOne(
+        {_id: roomID, owner: /* maek sure the given owner name is actually the owner of that room*/ roomOwnerName},
+        {$addToSet: {admins: admin}});
+  }
+  async function removeAdmin(admin: string, roomOwnerName: string, roomID: string) {
+    if(admin === roomOwnerName){
+      throw "the owner cannot remove itself from the admin list";
+    }
+    return await chatRoomModel.updateOne(
+        {_id: roomID, owner: roomOwnerName},
+        {$pull: {admins: admin}});
+  }
+
+  async function getGroupsWhereUserMemberOf(username:string){
+    return await chatRoomModel.find({members:{$elemMatch: username}});
+  }
+  async function getGroupsWhereUserIsAdmin(username:string){
+    return await chatRoomModel.find({admins:{$elemMatch: username}});
+  }
+  async function getGroupsUserOwns(username:string){
+    return await chatRoomModel.find({owner:username});
+  }
+
+
+  async function addMessage(message: Message, verifyMember: boolean = true):
+      Promise<Message> {
     delete message._id;
+    if (verifyMember) {
+      let chat = await chatRoomModel.find(
+          {_id: message.roomID, members: {$elemMatch: message.owner}});
+      if (!chat) {
+        throw message.owner + ' is not a member of this room';
+      }
+    }
     let doc = await messageModel.create(message);
     return doc && doc.toObject();
   }
-  async deleteMessage(id: string, requesting: string) {
+  async function deleteMessage(id: string, requesting: string) {
     let doc = await messageModel.findOneAndRemove({
       _id: id,
       '$or': [
@@ -520,25 +587,57 @@ class MongoDB {
     });
     return doc && doc.toObject();
   }
+
+  async function addDMessage(
+      message: DMessage,
+      verifyTo /* whether to verify the 'to' field or not*/: boolean = true) {
+    if (verifyTo) {
+      if (!message.to) {
+        throw '"to" field not specified';
+      }
+      let toUser = await this.getUser(message.to);
+      if (!toUser) {
+        throw message.to + ' isn\'t a username';
+      }
+    }
+    let doc = await DMessageModel.create(message);
+    return doc && doc.toObject();
+  }
+
+  // get all messages between 2 users
+  async function getDirectMessages(
+      user1: string, user2: string, offset: number = 0, limit?: number) {
+    let query =
+        DMessageModel
+            .find({$or: [{from: user1, to: user2}, {from: user2, to: user1}]})
+            .sort('-date')
+            .skip(offset);
+    if (limit) {
+      query.limit(limit);
+    }
+    return await query;
+  }
   //#endregion
 
+
+
   //#region stats
-  async getUsersSize() {
+  async function getUsersSize() {
     return await userModel.count({}).exec();
   }
-  async getProductsSize() {
+  async function getProductsSize() {
     return await productModel.count({}).exec();
   }
-  async getReviewsSize() {
+  async function getReviewsSize() {
     return await reviewModel.count({}).exec();
   }
-  async getCommentsSize() {
+  async function getCommentsSize() {
     return await commentModel.count({}).exec();
   }
-  async getRoomsSize() {
+  async function getRoomsSize() {
     return await chatRoomModel.count({}).exec();
   }
-  async getMessagesSize() {
+  async function getMessagesSize() {
     return await messageModel.count({}).exec();
   }
   //#endregion
@@ -547,6 +646,3 @@ class MongoDB {
 function getUserKeyType(key: string): string {
   return (<string>(<any>userModel.schema).paths[key].instance).toLowerCase();
 }
-
-
-export var db: MongoDB = new MongoDB();

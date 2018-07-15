@@ -79,10 +79,20 @@ export interface Message {
   creationDate?: Date;
 }
 
+// direct message, user-2-user
+export interface DMessage{
+  from: string;
+  to: string;
+  content: string;
+  date?: Date;
+}
+
 export interface ChatRoom {
   _id?: string;
   name: string;
   admins: string[];
+  members: string[];
+  memberRequests: string[];
   owner: string;
   // todo - add members and validate
 }

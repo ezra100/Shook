@@ -67,3 +67,4 @@ router.get(/\/myFeed/i, helpers.asyncWrapper(async function(req, res) {
                   .catch(err => res.status(404) && err.message);
   res.json(dbRes);
 }));
+

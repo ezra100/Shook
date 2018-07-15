@@ -65,7 +65,7 @@ let userSchema: Schema = new Schema({
   },
   follows: [{type: String, required: true, ref: 'User'}],
   basket: [{
-    productID: {type: Schema.Types.ObjectId, required: true, ref:"Product"},
+    productID: {type: Schema.Types.ObjectId, required: true, ref: 'Product'},
     quantity: {type: Number, required: {min: 1}},
     _id: false
   }]
@@ -93,7 +93,7 @@ let productSchema: Schema = new Schema({
   creationDate: {type: Date, default: Date.now, index: true},
   title: {type: String, required: true, minlength: 6, maxlength: 140},
   subtitle: {type: String, required: true},
-  owner: {type: String, required: true, ref: 'User'},
+  owner: {type: String, required: true, ref: 'User', index: true},
   link: {
     type: String,
     required: function() {
@@ -110,7 +110,8 @@ let reviewSchema = new Schema({
   productID: {
     type: Schema.Types.ObjectId,
     ref: 'Product',
-    required: true
+    required: true,
+    index: true
   },  // product._id
   title: {type: String, required: true, minlength: 5, maxlength: 140},
   fullReview: {type: String, required: true},
@@ -134,7 +135,8 @@ let commentSchema = new Schema({
   reviewID: {
     type: Schema.Types.ObjectId,
     ref: 'Review',
-    required: true
+    required: true,
+    index: true
   },  // review._id
   comment: {type: String, minlength: 1, required: true},
   likes: [{
@@ -156,9 +158,10 @@ let commentSchema = new Schema({
 
 let chatRoomSchema = new Schema({
   _id: String,
-  name: {type: String, required: true},
-  admins: [{type: String, required: true, ref: 'User'}],
+  name: {type: String, required: true, index: true},
+  admins: [{type: String, required: true, ref: 'User', index: true}],
   owner: {type: String, required: true},
+  members: [{type: String, required: true, ref: 'User', index: true}],
 
 });
 
@@ -167,7 +170,14 @@ let messageSchema = new Schema({
   creationDate: {type: Date, default: Date.now, index: true},
   roomID: {type: String, ref: 'ChatRoom'},
   content: {type: String, required: true},
-  owner: {type: String, ref: 'User'}
+  owner: {type: String, ref: 'User', index: true}
+});
+
+let DMessageSchema = new Schema({
+  from: {type: String, ref: 'User', index: true, required: true},
+  to: {type: String, ref: 'User', index: true, required: true},
+  content: String,
+  date: {type:Date, default: Date.now }
 });
 
 //#region hooks
@@ -232,3 +242,4 @@ export let reviewModel = mongoose.model('Review', reviewSchema);
 export let commentModel = mongoose.model('Comment', commentSchema);
 export let chatRoomModel = mongoose.model('ChatRoom', chatRoomSchema);
 export let messageModel = mongoose.model('Message', messageSchema);
+export let DMessageModel = mongoose.model('DMessage', DMessageSchema);
