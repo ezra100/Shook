@@ -23,13 +23,13 @@ export var mongoConnection: mongoose.Connection = mongoose.connection;
 mongoConnection.on(
     'error', console.error.bind(console, 'MongoDB connection error:'));
 
-export namespace db {
-  async  function getUserAuthData(username: string): Promise<UserAuthData> {
+class MongoDB {
+  async getUserAuthData(username: string): Promise<UserAuthData> {
     let doc = await userAuthDataModel.findById(username);
     return doc && doc.toObject();
   }
 
-  function updateUserAuthData(username: string, data: Partial<UserAuthData>):
+  updateUserAuthData(username: string, data: Partial<UserAuthData>):
       Promise<void> {
     return new Promise((resolve, reject) => {
       userAuthDataModel.findByIdAndUpdate(
@@ -42,7 +42,7 @@ export namespace db {
           });
     });
   }
-  function createUserAuthData(data: UserAuthData): Promise<void> {
+  createUserAuthData(data: UserAuthData): Promise<void> {
     return new Promise((resolve, reject) => {
       userAuthDataModel.create(data, (err: Error, rData: UserAuthData) => {
         if (err) {
@@ -56,14 +56,14 @@ export namespace db {
 
 
 
-  async function findUserByEmail(email: string): Promise<User> {
+  async findUserByEmail(email: string): Promise<User> {
     let doc = await userModel.findOne({email: email});
     return doc && doc.toObject();
   }
 
   //#region users
   // todo: update this
-  async function getUsers(
+  async getUsers(
       filter: any = {}, offset: number = 0, limit?: number,
       showPrivateData: boolean = false): Promise<User[]> {
     for (const key of Object.keys(filter)) {
@@ -119,7 +119,7 @@ export namespace db {
     let users: User[] = await query;
     return users;
   }
-  async function getUser(username: string, showPrivateData: boolean = false):
+  async getUser(username: string, showPrivateData: boolean = false):
       Promise<Partial<User>> {
     let user: Partial<User> = await userModel.findById(username.toLowerCase());
     if (showPrivateData) {
@@ -137,7 +137,7 @@ export namespace db {
 
 
 
-  async function addFollowee(follower: string, followee: string) {
+  async addFollowee(follower: string, followee: string) {
     followee = followee.toLowerCase();
     follower = follower.toLowerCase();
     // validate the followee, we assume the follower is validated by the calling
@@ -152,7 +152,7 @@ export namespace db {
                 {_id: follower.toLowerCase()}, {$addToSet: {follows: followee}})
             .exec());
   }
-  async function removeFollowee(follower: string, followee: string) {
+  async removeFollowee(follower: string, followee: string) {
     followee = followee.toLowerCase();
     follower = follower.toLowerCase();
     return (
@@ -162,7 +162,7 @@ export namespace db {
   }
 
   // todo
-  async function addToBasket(username: string, productID: string, quantity: number = 1) {
+  async addToBasket(username: string, productID: string, quantity: number = 1) {
     if (quantity < 1) {
       return await db.removeFromBasket(username, productID);
     }
@@ -190,7 +190,7 @@ export namespace db {
             .exec());
   }
 
-  async function removeFromBasket(username: string, productID: string) {
+  async removeFromBasket(username: string, productID: string) {
     let doc = await this.getProductByID(productID);
     if (!doc) {
       return 'product ID ' + productID + ' doesn\'t exist';
@@ -204,7 +204,7 @@ export namespace db {
                 .exec());
   }
 
-  async function getBasketSum(username: string) {
+  async getBasketSum(username: string) {
     let user = await this.getUser(username, true);
 
 
@@ -239,7 +239,7 @@ export namespace db {
     return agg && agg[0].sum;
   }
 
-  function updateUserById(username: string, user: Partial<User>): Promise<User> {
+  updateUserById(username: string, user: Partial<User>): Promise<User> {
     user = stripObject(user, userPermitedFields);
     return new Promise((resolve, reject) => {
       userModel.findByIdAndUpdate(
@@ -253,7 +253,7 @@ export namespace db {
           });
     });
   }
-  function addUser(user: User): Promise<User|null> {
+  addUser(user: User): Promise<User|null> {
     return new Promise((resolve, reject) => {
       let userDoc: any = new userModel(user);
       userDoc.save((err: Error, user: User) => {
@@ -265,7 +265,7 @@ export namespace db {
       });
     });
   }
-  function deleteUser(user: User): Promise<User|null> {
+  deleteUser(user: User): Promise<User|null> {
     return new Promise((resolve, reject) => {
       userModel.findByIdAndRemove(user._id, (err: Error, user: User) => {
         if (err) {
@@ -278,7 +278,7 @@ export namespace db {
   }
   //#endregion
   //#region  product
-  async function addProduct(product: Partial<IProduct>, secure: boolean = true):
+  async addProduct(product: Partial<IProduct>, secure: boolean = true):
       Promise<IProduct> {
     if (secure) {
       product.creationDate = new Date();
@@ -287,7 +287,7 @@ export namespace db {
     return retProduct && retProduct.toObject();
   }
 
-  async function updateProduct(product: Partial<IProduct>, owner: string):
+  async updateProduct(product: Partial<IProduct>, owner: string):
       Promise<IProduct|null> {
     product = stripObject(product, productPermitedFields);
     let doc = (await productModel.findOneAndUpdate(
@@ -295,18 +295,18 @@ export namespace db {
         {new /* return the new document*/: true}));
     return doc && doc.toObject();
   }
-  async function deleteProduct(id: string, removeReviews: boolean = true) {
+  async deleteProduct(id: string, removeReviews: boolean = true) {
     if (removeReviews) {
       this.deleteReviewsByProductID(id);
     }
     let doc = await productModel.findByIdAndRemove(id);
     return doc && doc.toObject();
   }
-  async function getProductByID(id: string): Promise<IProduct> {
+  async getProductByID(id: string): Promise<IProduct> {
     let doc = await productModel.findById(id);
     return doc && doc.toObject();
   }
-  async function getLatestProducts(
+  async getLatestProducts(
       filter: Partial<IProduct> = {}, offset: number = 0,
       limit?: number): Promise<IProduct[]> {
     let res = productModel.find(filter).sort('-creationDate').skip(offset);
@@ -315,7 +315,7 @@ export namespace db {
     }
     return (await res.exec()).map(doc => doc.toObject());
   }
-  async function getProductsFromFollowees(
+  async getProductsFromFollowees(
       username: string, offset: number = 0,
       limit?: number): Promise<IProduct[]> {
     let user = await userModel.findById(username);
@@ -335,7 +335,7 @@ export namespace db {
   //#endregion
 
   //#region review
-  async function addReview(review: IReview, secure: boolean = true): Promise<IReview> {
+  async addReview(review: IReview, secure: boolean = true): Promise<IReview> {
     if (secure) {
       review.dislikes = [];
       review.likes = [];
@@ -345,7 +345,7 @@ export namespace db {
     return doc && doc.toObject();
   }
 
-  async function updateReview(review: Partial<IReview>, owner: string):
+  async updateReview(review: Partial<IReview>, owner: string):
       Promise<IReview|null> {
     review = stripObject(review, reviewPermitedFields);
     let doc = await reviewModel.findOneAndUpdate(
@@ -353,14 +353,14 @@ export namespace db {
         {new /* return the new document*/: true});
     return doc && doc.toObject();
   }
-  async function deleteReview(id: string, removeComments: boolean = true) {
+  async deleteReview(id: string, removeComments: boolean = true) {
     if (removeComments) {
       this.deleteCommentsByReviewID(id);
     }
     let doc = await reviewModel.findByIdAndRemove(id);
     return doc && doc.toObject();
   }
-  async function deleteReviewsByProductID(productID: string) {
+  async deleteReviewsByProductID(productID: string) {
     let reviews = await this.getLatestReviews({productID: productID});
     reviews.forEach((review) => {
       this.deleteCommentsByReviewID(review._id);
@@ -369,11 +369,11 @@ export namespace db {
         (await reviewModel.remove({productID: new ObjectId(productID)}));
     return results;
   }
-  async function getReviewByID(id: string): Promise<IReview> {
+  async getReviewByID(id: string): Promise<IReview> {
     let doc = await reviewModel.findById(id);
     return doc && doc.toObject();
   }
-  async function getLatestReviews(
+  async getLatestReviews(
       filter: Partial<IReview> = {}, offset: number = 0,
       limit?: number): Promise<IReview[]> {
     let res = reviewModel.find(filter).sort('-creationDate').skip(offset);
@@ -383,33 +383,33 @@ export namespace db {
     return (await res.exec()).map(doc => doc.toObject());
   }
 
-  async function getProductRating(productID: string): Promise<number> {
+  async getProductRating(productID: string): Promise<number> {
     return (await reviewModel.aggregate()
                 .match({productID: mongoose.Types.ObjectId(productID)})
                 .group({_id: '$productID', avg: {$avg: '$rating'}}))[0]
         .avg;
   }
-  async function likeReview(id: string, username: string) {
+  async likeReview(id: string, username: string) {
     return (await reviewModel
                 .update(
                     {_id: id},
                     {$addToSet: {likes: username}, $pull: {dislikes: username}})
                 .exec());
   }
-  async function dislikeReview(id: string, username: string) {
+  async dislikeReview(id: string, username: string) {
     return await reviewModel
         .update(
             {_id: id},
             {$pull: {likes: username}, $addToSet: {dislikes: username}})
         .exec();
   }
-  async function removeLikeDislikeFromReview(id: string, username: string) {
+  async removeLikeDislikeFromReview(id: string, username: string) {
     return await reviewModel
         .update({_id: id}, {$pull: {likes: username, dislikes: username}})
         .exec();
   }
 
-  async function getReviewsFromFollowees(
+  async getReviewsFromFollowees(
       username: string, offset: number = 0,
       limit?: number): Promise<IProduct[]> {
     let userDoc = (await userModel.findById(username));
@@ -429,7 +429,7 @@ export namespace db {
   //#endregion
 
   //#region comment
-  async function addComment(comment: IComment, secure: boolean = true):
+  async addComment(comment: IComment, secure: boolean = true):
       Promise<IComment> {
     if (secure) {
       comment.creationDate = new Date();
@@ -438,14 +438,14 @@ export namespace db {
     }
     return (await commentModel.create(comment)).toObject();
   }
-  async function deleteComment(id: string) {
+  async deleteComment(id: string) {
     commentModel.findByIdAndRemove(id);
   }
-  async function deleteCommentsByReviewID(reviewID: string) {
+  async deleteCommentsByReviewID(reviewID: string) {
     let results = await commentModel.remove({reviewID: new ObjectId(reviewID)});
     return results;
   }
-  async function updateComment(comment: Partial<IComment>, owner: string):
+  async updateComment(comment: Partial<IComment>, owner: string):
       Promise<IComment|null> {
     comment = stripObject(comment, commentPermitedFields);
     return (await commentModel.findOneAndUpdate(
@@ -453,11 +453,11 @@ export namespace db {
                 {new: /* return the new document*/ true}))
         .toObject();
   }
-  async function getCommentByID(id: string): Promise<IComment> {
+  async getCommentByID(id: string): Promise<IComment> {
     let doc = (await commentModel.findById(id));
     return doc && doc.toObject();
   }
-  async function getLatestComments(
+  async getLatestComments(
       filter: Partial<IComment> = {}, offset: number = 0,
       limit?: number): Promise<IComment[]> {
     let res = commentModel.find(filter).sort('-creationDate').skip(offset);
@@ -467,21 +467,21 @@ export namespace db {
     return (await res.exec()).map(doc => doc.toObject());
   }
 
-  async function likeComment(id: string, username: string) {
+  async likeComment(id: string, username: string) {
     return (await commentModel
                 .update(
                     {_id: id},
                     {$addToSet: {likes: username}, $pull: {dislikes: username}})
                 .exec());
   }
-  async function dislikeComment(id: string, username: string) {
+  async dislikeComment(id: string, username: string) {
     return await commentModel
         .update(
             {_id: id},
             {$pull: {likes: username}, $addToSet: {dislikes: username}})
         .exec();
   }
-  async function removeLikeDislikeFromComment(id: string, username: string) {
+  async removeLikeDislikeFromComment(id: string, username: string) {
     return await commentModel
         .update({_id: id}, {$pull: {likes: username, dislikes: username}})
         .exec();
@@ -490,7 +490,7 @@ export namespace db {
   //#endregion
 
   //#region chat
-  async function addChatRoom(
+  async addChatRoom(
       name: string, owner: string, admins: string[],
       verifyAdmins: boolean = true) {
     admins.push(owner);
@@ -512,14 +512,14 @@ export namespace db {
     return doc && doc.toObject();
   }
 
-  async function updateRoom(id: number, owner: string, chatRoom: Partial<ChatRoom>) {
+  async updateRoom(id: number, owner: string, chatRoom: Partial<ChatRoom>) {
     chatRoom = stripObject(chatRoom, chatRoomPermitedFields);
     let doc = await chatRoomModel.findOneAndUpdate(
         {_id: id, owner: owner}, chatRoom, {new: true});
     return doc && doc.toObject();
   }
 
-  async function addMember(member: string, adminName: string, roomID: string) {
+  async addMember(member: string, adminName: string, roomID: string) {
     if(!await this.getUser(member)){
       throw member + " doesn't exist";
     }
@@ -527,7 +527,7 @@ export namespace db {
         {_id: roomID, admins: /* maek sure the given admin is actually an admin of that room*/ {$elemMatch: adminName}},
         {$addToSet: {members: member}});
   }
-  async function removeMember(member: string, adminName: string, roomID: string) {
+  async removeMember(member: string, adminName: string, roomID: string) {
     return await chatRoomModel.updateOne(
         {_id: roomID, admins: {$elemMatch: adminName}},
         {$pull: {members: member}});
@@ -535,7 +535,7 @@ export namespace db {
 
 
 
-  async function addAdmin(admin: string, roomOwnerName: string, roomID: string) {
+  async addAdmin(admin: string, roomOwnerName: string, roomID: string) {
     if(!await this.getUser(admin)){
       throw admin + " doesn't exist";
     }
@@ -544,7 +544,7 @@ export namespace db {
         {_id: roomID, owner: /* maek sure the given owner name is actually the owner of that room*/ roomOwnerName},
         {$addToSet: {admins: admin}});
   }
-  async function removeAdmin(admin: string, roomOwnerName: string, roomID: string) {
+  async removeAdmin(admin: string, roomOwnerName: string, roomID: string) {
     if(admin === roomOwnerName){
       throw "the owner cannot remove itself from the admin list";
     }
@@ -552,19 +552,19 @@ export namespace db {
         {_id: roomID, owner: roomOwnerName},
         {$pull: {admins: admin}});
   }
-
-  async function getGroupsWhereUserMemberOf(username:string){
+  
+  async getGroupsWhereUserMemberOf(username:string){
     return await chatRoomModel.find({members:{$elemMatch: username}});
   }
-  async function getGroupsWhereUserIsAdmin(username:string){
+  async getGroupsWhereUserIsAdmin(username:string){
     return await chatRoomModel.find({admins:{$elemMatch: username}});
   }
-  async function getGroupsUserOwns(username:string){
+  async getGroupsUserOwns(username:string){
     return await chatRoomModel.find({owner:username});
   }
 
 
-  async function addMessage(message: Message, verifyMember: boolean = true):
+  async addMessage(message: Message, verifyMember: boolean = true):
       Promise<Message> {
     delete message._id;
     if (verifyMember) {
@@ -577,7 +577,7 @@ export namespace db {
     let doc = await messageModel.create(message);
     return doc && doc.toObject();
   }
-  async function deleteMessage(id: string, requesting: string) {
+  async deleteMessage(id: string, requesting: string) {
     let doc = await messageModel.findOneAndRemove({
       _id: id,
       '$or': [
@@ -588,7 +588,7 @@ export namespace db {
     return doc && doc.toObject();
   }
 
-  async function addDMessage(
+  async addDMessage(
       message: DMessage,
       verifyTo /* whether to verify the 'to' field or not*/: boolean = true) {
     if (verifyTo) {
@@ -605,7 +605,7 @@ export namespace db {
   }
 
   // get all messages between 2 users
-  async function getDirectMessages(
+  async getDirectMessages(
       user1: string, user2: string, offset: number = 0, limit?: number) {
     let query =
         DMessageModel
@@ -622,22 +622,22 @@ export namespace db {
 
 
   //#region stats
-  async function getUsersSize() {
+  async getUsersSize() {
     return await userModel.count({}).exec();
   }
-  async function getProductsSize() {
+  async getProductsSize() {
     return await productModel.count({}).exec();
   }
-  async function getReviewsSize() {
+  async getReviewsSize() {
     return await reviewModel.count({}).exec();
   }
-  async function getCommentsSize() {
+  async getCommentsSize() {
     return await commentModel.count({}).exec();
   }
-  async function getRoomsSize() {
+  async getRoomsSize() {
     return await chatRoomModel.count({}).exec();
   }
-  async function getMessagesSize() {
+  async getMessagesSize() {
     return await messageModel.count({}).exec();
   }
   //#endregion
@@ -646,3 +646,6 @@ export namespace db {
 function getUserKeyType(key: string): string {
   return (<string>(<any>userModel.schema).paths[key].instance).toLowerCase();
 }
+
+
+export var db: MongoDB = new MongoDB();
