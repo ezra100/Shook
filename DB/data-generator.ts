@@ -135,7 +135,7 @@ function getFakeDMessage() {
     to = users[faker.random.number(users.length - 1)]._id;
   }
   let dMessage: DMessage = {
-    content: faker.lorem.sentences(faker.random.number(7)),
+    content: faker.lorem.sentences(faker.random.number({min:1, max:7})),
     date: faker.date.past(3),
     from,
     to
@@ -145,7 +145,7 @@ function getFakeDMessage() {
 
 function getFakeMessage() {
   return <Message>{
-    content: faker.lorem.sentences(faker.random.number(7)),
+    content: faker.lorem.sentences(faker.random.number({min:1, max:7})),
     date: faker.date.past(3),
     owner: users[faker.random.number(users.length - 1)]._id,
     roomID: chatRooms[faker.random.number(chatRooms.length - 1)]._id
@@ -197,6 +197,9 @@ export async function initDB(
   reviewsLength = await db.getProductsSize();
   commentsLength = await db.getCommentsSize();
   users = await db.getUsers();
+  roomsLenght = await db.ChatRooms.getRoomsSize();
+  DMessageLength = await db.DirectMessages.getDMessageSize();
+  messageLength = await db.ChatRooms.getMessagesSize();
   if (usersLength < usersSizeGoal) {
     await initUsers(usersSizeGoal - usersLength);
     usersLength = await db.getUsersSize();
@@ -226,6 +229,8 @@ export async function initDB(
     }
   }
   if (messageLength < MessagesPerChat * roomsLenght) {
+    // for the fake message generator
+    chatRooms = await db.ChatRooms.getRooms();
     for (; messageLength < MessagesPerChat; messageLength++) {
       await db.ChatRooms.addMessage(getFakeMessage(), false);
     }

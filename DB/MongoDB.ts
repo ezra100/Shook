@@ -469,6 +469,15 @@ export namespace db {
   //#region chat
 
   export namespace ChatRooms {
+
+    export async function getRoomsSize() {
+      return await chatRoomModel.count({}).exec();
+    }
+
+    export async function getMessagesSize() {
+      return await messageModel.count({}).exec();
+    }
+    
     export async function addChatRoom(
         name: string, owner: string, admins: string[],
         verifyAdmins: boolean = true) {
@@ -497,6 +506,9 @@ export namespace db {
       let doc = await chatRoomModel.findOneAndUpdate(
           {_id: id, owner: owner}, chatRoom, {new: true});
       return doc && doc.toObject();
+    }
+    export async function getRooms(filter : any ={}) : Promise<ChatRoom[]>{
+      return (await chatRoomModel.find(filter)).map(d => d.toObject());
     }
 
     export async function
@@ -590,6 +602,10 @@ export namespace db {
   }
 
   export namespace DirectMessages {
+
+    export async function getDMessageSize() {
+      return await DMessageModel.count({}).exec();
+    }
     export async function addDMessage(
         message: DMessage,
         verifyTo /* whether to verify the 'to' field or not*/: boolean = true) {
@@ -692,12 +708,8 @@ export namespace db {
   export async function getCommentsSize() {
     return await commentModel.count({}).exec();
   }
-  export async function getRoomsSize() {
-    return await chatRoomModel.count({}).exec();
-  }
-  export async function getMessagesSize() {
-    return await messageModel.count({}).exec();
-  }
+
+
   //#endregion
 }
 

@@ -15,6 +15,8 @@ import * as comments from './routers/comments';
 import * as products from './routers/products';
 import * as reviews from './routers/reviews';
 import * as users from './routers/users';
+import * as chatRooms from './routers/ChatRooms';
+import * as DMessages from './routers/DMessages';
 
 // init the data base with fake data
 initDB();
@@ -44,6 +46,8 @@ app.use('/users', users.router);
 app.use('/products', products.router);
 app.use('/comments', comments.router);
 app.use('/reviews', reviews.router);
+app.use('/chatRooms', chatRooms.router);
+app.use('/DMessages', DMessages.router);
 app.use('/', express.static(path.join(__dirname, 'angular-app','dist', 'angular-app')))
 app.use('/', express.static(path.join(__dirname, 'public')));
 
