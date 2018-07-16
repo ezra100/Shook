@@ -76,7 +76,7 @@ export interface Message {
   owner: string;
   roomID: string;
   content: string;
-  creationDate?: Date;
+  date?: Date;
 }
 
 // direct message, user-2-user
@@ -92,14 +92,14 @@ export interface ChatRoom {
   name: string;
   admins: string[];
   members: string[];
-  memberRequests: string[];
+  //memberRequests: string[];
   owner: string;
-  // todo - add members and validate
 }
 
-interface Order {
+export interface Order {
   _id?: string,
   owner: string,
-  products: {productID: string, quantity: number}[],
-  orderDate: Date
+  products: {productID: string, quantity: number, currentPrice: number}[],
+  orderDate: Date,
+  paid: boolean
 }

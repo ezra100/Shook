@@ -16,14 +16,25 @@ router.post('/send', helpers.asyncWrapper(async function(req, res) {
   let content = req.body.content;
   let message:
       DMessage = {from: req.user._id, to, content, date: new Date()};
-  res.json(db.addDMessage(message));
+  res.json(await db.DirectMessages.addDMessage(message));
 }));
 
-router.get("/messages", helpers.asyncWrapper(async function(req, res){
+router.get("/getMessages", helpers.asyncWrapper(async function(req, res){
   if(!req.user){
     res.status(401).end("You're not logged in");
     return;
   }
   let otherUser = req.query.otherUser;
-  res.json(db.getDirectMessages(req.user._id, otherUser));
+  res.json(await db.DirectMessages.getDirectMessages(req.user._id, otherUser));
+}));
+
+router.get("/getRecent", helpers.asyncWrapper(async function(req, res){
+  if(!req.user){
+    res.status(401).end("You're not logged in");
+    return;
+  }
+  let otherUser = req.query.otherUser;
+  let limit = req.query.limit;
+  let offset = req.query.offset;
+  res.json(await db.DirectMessages.getLastChats(req.user._id, offset, limit));
 }));

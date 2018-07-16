@@ -66,7 +66,7 @@ let userSchema: Schema = new Schema({
   follows: [{type: String, required: true, ref: 'User'}],
   basket: [{
     productID: {type: Schema.Types.ObjectId, required: true, ref: 'Product'},
-    quantity: {type: Number, required: {min: 1}},
+    quantity: {type: Number, required:true, min: 1},
     _id: false
   }]
 });
@@ -167,7 +167,7 @@ let chatRoomSchema = new Schema({
 
 let messageSchema = new Schema({
   _id: String,
-  creationDate: {type: Date, default: Date.now, index: true},
+  date: {type: Date, default: Date.now, index: true},
   roomID: {type: String, ref: 'ChatRoom'},
   content: {type: String, required: true},
   owner: {type: String, ref: 'User', index: true}
@@ -177,7 +177,19 @@ let DMessageSchema = new Schema({
   from: {type: String, ref: 'User', index: true, required: true},
   to: {type: String, ref: 'User', index: true, required: true},
   content: String,
-  date: {type:Date, default: Date.now }
+  date: {type: Date, default: Date.now}
+});
+
+let orderSchema = new Schema({
+  _id: String,
+  owner: String,
+  products: [{
+    productID: {type: String, ref: 'Product', required: true},
+    quantity: {type: Number, required: true, min: 1},
+    currentPrice: Number
+  }],
+  orderDate: {type: Date, default: Date.now()},
+  paid: {type: Boolean, default: false}
 });
 
 //#region hooks
@@ -243,3 +255,4 @@ export let commentModel = mongoose.model('Comment', commentSchema);
 export let chatRoomModel = mongoose.model('ChatRoom', chatRoomSchema);
 export let messageModel = mongoose.model('Message', messageSchema);
 export let DMessageModel = mongoose.model('DMessage', DMessageSchema);
+export let orderModel = mongoose.model('Order', orderSchema);

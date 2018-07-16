@@ -3,9 +3,9 @@ import {resolve} from 'dns';
 import * as mongoose from 'mongoose';
 
 import {helpers} from '../helpers';
-import {ChatRoom, DMessage, Gender, IComment, IProduct, IReview, Message, User, UserAuthData, UserType} from '../types';
+import {ChatRoom, DMessage, Gender, IComment, IProduct, IReview, Message, Order, User, UserAuthData, UserType} from '../types';
 
-import {chatRoomModel, commentModel, DMessageModel, messageModel, productModel, reviewModel, userAuthDataModel, userModel} from './Models';
+import {chatRoomModel, commentModel, DMessageModel, messageModel, orderModel, productModel, reviewModel, userAuthDataModel, userModel} from './Models';
 import {chatRoomPermitedFields, commentPermitedFields, productPermitedFields, reviewPermitedFields, stripObject, userPermitedFields} from './StripForUpdate';
 
 let ObjectId = mongoose.Types.ObjectId;
@@ -467,150 +467,216 @@ export namespace db {
   //#endregion
 
   //#region chat
-  export async function addChatRoom(
-      name: string, owner: string, admins: string[],
-      verifyAdmins: boolean = true) {
-    admins.push(owner);
-    // remove duplicates
-    admins = [...new Set(admins)];
 
-    if (verifyAdmins) {
-      let adminsUsers = await userModel.find({_id: {$in: admins}}).exec();
-      if (adminsUsers.length !== admins.length) {
-        let verifiedAdmins: string[] = adminsUsers.map(user => user._id);
-        let missingAdmins =
-            admins.filter(name => verifiedAdmins.indexOf(name) === -1);
-        throw 'the following admins don\'t exist: ' +
-            JSON.stringify(missingAdmins);
+  export namespace ChatRooms {
+    export async function addChatRoom(
+        name: string, owner: string, admins: string[],
+        verifyAdmins: boolean = true) {
+      admins.push(owner);
+      // remove duplicates
+      admins = [...new Set(admins)];
+
+      if (verifyAdmins) {
+        let adminsUsers = await userModel.find({_id: {$in: admins}}).exec();
+        if (adminsUsers.length !== admins.length) {
+          let verifiedAdmins: string[] = adminsUsers.map(user => user._id);
+          let missingAdmins =
+              admins.filter(name => verifiedAdmins.indexOf(name) === -1);
+          throw 'the following admins don\'t exist: ' +
+              JSON.stringify(missingAdmins);
+        }
       }
+      let room: Partial < ChatRoom >= {name, owner, admins, members: admins};
+      let doc = await chatRoomModel.create(room);
+      return doc && doc.toObject();
     }
-    let room: Partial < ChatRoom >= {name, owner, admins, members: admins};
-    let doc = await chatRoomModel.create(room);
-    return doc && doc.toObject();
-  }
 
-  export async function
-  updateRoom(id: number, owner: string, chatRoom: Partial<ChatRoom>) {
-    chatRoom = stripObject(chatRoom, chatRoomPermitedFields);
-    let doc = await chatRoomModel.findOneAndUpdate(
-        {_id: id, owner: owner}, chatRoom, {new: true});
-    return doc && doc.toObject();
-  }
-
-  export async function
-  addMember(member: string, adminName: string, roomID: string) {
-    if (!await getUser(member)) {
-      throw member + ' doesn\'t exist';
+    export async function
+    updateRoom(id: number, owner: string, chatRoom: Partial<ChatRoom>) {
+      chatRoom = stripObject(chatRoom, chatRoomPermitedFields);
+      let doc = await chatRoomModel.findOneAndUpdate(
+          {_id: id, owner: owner}, chatRoom, {new: true});
+      return doc && doc.toObject();
     }
-    return await chatRoomModel.updateOne(
-        {
-          _id: roomID,
-          admins:
-              /* maek sure the given admin is actually an admin of that room*/ {
-                $elemMatch: adminName
-              }
-        },
-        {$addToSet: {members: member}});
-  }
-  export async function
-  removeMember(member: string, adminName: string, roomID: string) {
-    return await chatRoomModel.updateOne(
-        {_id: roomID, admins: {$elemMatch: adminName}},
-        {$pull: {members: member}});
-  }
 
-
-
-  export async function
-  addAdmin(admin: string, roomOwnerName: string, roomID: string) {
-    if (!await getUser(admin)) {
-      throw admin + ' doesn\'t exist';
-    }
-    await addMember(admin, roomOwnerName, roomID);
-    return await chatRoomModel.updateOne(
-        {
-          _id: roomID,
-          owner: /* maek sure the given owner name is actually the owner of that
-                    room*/
-                     roomOwnerName
-        },
-        {$addToSet: {admins: admin}});
-  }
-  export async function
-  removeAdmin(admin: string, roomOwnerName: string, roomID: string) {
-    if (admin === roomOwnerName) {
-      throw 'the owner cannot remove itself from the admin list';
-    }
-    return await chatRoomModel.updateOne(
-        {_id: roomID, owner: roomOwnerName}, {$pull: {admins: admin}});
-  }
-
-  export async function getGroupsWhereUserMemberOf(username: string) {
-    return await chatRoomModel.find({members: {$elemMatch: username}});
-  }
-  export async function getGroupsWhereUserIsAdmin(username: string) {
-    return await chatRoomModel.find({admins: {$elemMatch: username}});
-  }
-  export async function getGroupsUserOwns(username: string) {
-    return await chatRoomModel.find({owner: username});
-  }
-
-
-  export async function
-  addMessage(message: Message, verifyMember: boolean = true): Promise<Message> {
-    delete message._id;
-    if (verifyMember) {
-      let chat = await chatRoomModel.find(
-          {_id: message.roomID, members: {$elemMatch: message.owner}});
-      if (!chat) {
-        throw message.owner + ' is not a member of this room';
+    export async function
+    addMember(member: string, adminName: string, roomID: string) {
+      if (!await getUser(member)) {
+        throw member + ' doesn\'t exist';
       }
+      return await chatRoomModel.updateOne(
+          {
+            _id: roomID,
+            admins:
+                /* maek sure the given admin is actually an admin of that room*/
+                {$elemMatch: adminName}
+          },
+          {$addToSet: {members: member}});
     }
-    let doc = await messageModel.create(message);
-    return doc && doc.toObject();
+    export async function
+    removeMember(member: string, adminName: string, roomID: string) {
+      return await chatRoomModel.updateOne(
+          {_id: roomID, admins: {$elemMatch: adminName}},
+          {$pull: {members: member}});
+    }
+
+
+
+    export async function
+    addAdmin(admin: string, roomOwnerName: string, roomID: string) {
+      if (!await getUser(admin)) {
+        throw admin + ' doesn\'t exist';
+      }
+      await addMember(admin, roomOwnerName, roomID);
+      return await chatRoomModel.updateOne(
+          {
+            _id: roomID,
+            owner: /* maek sure the given owner name is actually the owner of
+                      that room*/
+                roomOwnerName
+          },
+          {$addToSet: {admins: admin}});
+    }
+    export async function
+    removeAdmin(admin: string, roomOwnerName: string, roomID: string) {
+      if (admin === roomOwnerName) {
+        throw 'the owner cannot remove itself from the admin list';
+      }
+      return await chatRoomModel.updateOne(
+          {_id: roomID, owner: roomOwnerName}, {$pull: {admins: admin}});
+    }
+
+    export async function getGroupsWhereUserMemberOf(username: string) {
+      return await chatRoomModel.find({members: {$elemMatch: username}});
+    }
+    export async function getGroupsWhereUserIsAdmin(username: string) {
+      return await chatRoomModel.find({admins: {$elemMatch: username}});
+    }
+    export async function getGroupsUserOwns(username: string) {
+      return await chatRoomModel.find({owner: username});
+    }
+
+    export async function addMessage(
+        message: Message, verifyMember: boolean = true): Promise<Message> {
+      delete message._id;
+      if (verifyMember) {
+        let chat = await chatRoomModel.find(
+            {_id: message.roomID, members: {$elemMatch: message.owner}});
+        if (!chat) {
+          throw message.owner + ' is not a member of this room';
+        }
+      }
+      let doc = await messageModel.create(message);
+      return doc && doc.toObject();
+    }
+    export async function deleteMessage(id: string, requesting: string) {
+      let doc = await messageModel.findOneAndRemove({
+        _id: id,
+        '$or': [
+          {owner: requesting},
+          {owner: {$in: 'admins'}},
+        ]
+      });
+      return doc && doc.toObject();
+    }
+    export async function
+    getMessagesFromRoom(roomID: string, offset: number = 0, limit?: number) {
+      let query = chatRoomModel.find({_id: roomID}).sort('-date').skip(offset);
+      if (limit) {
+        query.limit(limit);
+      }
+      return await query;
+    }
   }
-  export async function deleteMessage(id: string, requesting: string) {
-    let doc = await messageModel.findOneAndRemove({
-      _id: id,
-      '$or': [
-        {owner: requesting},
-        {owner: {$in: 'admins'}},
+
+  export namespace DirectMessages {
+    export async function addDMessage(
+        message: DMessage,
+        verifyTo /* whether to verify the 'to' field or not*/: boolean = true) {
+      if (verifyTo) {
+        if (!message.to) {
+          throw '"to" field not specified';
+        }
+        let toUser = await getUser(message.to);
+        if (!toUser) {
+          throw message.to + ' isn\'t a username';
+        }
+      }
+      let doc = await DMessageModel.create(message);
+      return doc && doc.toObject();
+    }
+
+    // get all messages between 2 users
+    export async function getDirectMessages(
+        user1: string, user2: string, offset: number = 0, limit?: number) {
+      let query =
+          DMessageModel
+              .find({$or: [{from: user1, to: user2}, {from: user2, to: user1}]})
+              .sort('-date')
+              .skip(offset);
+      if (limit) {
+        query.limit(limit);
+      }
+      return await query;
+    }
+
+    export async function
+    getLastChats(user: string, offset: number = 0, limit: number = 100) {
+      let query = DMessageModel.aggregate([
+        {$match: {$or: [{from: user}, {to: user}]}}, {
+          $addFields: {
+            id: {
+              $cond:
+                  {if: {$eq: ['$from', user]}, then: '$to', else: '$form'}
+            }
+          }
+        },
+        {
+          $group: {
+            _id: '$id',
+            messages: {$push: '$$ROOT'},
+            lastMessageDate: {$max: '$date'}
+          }
+        },
+        {$sort: {lastMessageDate: -1}}, {$limit: limit}
       ]
-    });
-    return doc && doc.toObject();
-  }
-
-  export async function addDMessage(
-      message: DMessage,
-      verifyTo /* whether to verify the 'to' field or not*/: boolean = true) {
-    if (verifyTo) {
-      if (!message.to) {
-        throw '"to" field not specified';
-      }
-      let toUser = await getUser(message.to);
-      if (!toUser) {
-        throw message.to + ' isn\'t a username';
-      }
+      );
+      return await query;
     }
-    let doc = await DMessageModel.create(message);
-    return doc && doc.toObject();
-  }
-
-  // get all messages between 2 users
-  export async function getDirectMessages(
-      user1: string, user2: string, offset: number = 0, limit?: number) {
-    let query =
-        DMessageModel
-            .find({$or: [{from: user1, to: user2}, {from: user2, to: user1}]})
-            .sort('-date')
-            .skip(offset);
-    if (limit) {
-      query.limit(limit);
-    }
-    return await query;
   }
   //#endregion
+  export namespace orders {
+    export async function addOrder(order: Order) {
+      order.paid = false;
+      let productIDList = order.products.map(p => p.productID);
+      let productDocs =
+          <any[]>await productModel.find({_id: {$in: productIDList}}).exec();
+      order.products.forEach(p => {
+        let tempProduct = productDocs.find(pr => pr.productID === p.productID);
+        if (!tempProduct) {
+          throw 'Product with product id ' + p.productID + ' doesn\'t exist';
+        }
+        p.currentPrice = tempProduct.price;
+      });
+      return await orderModel.create(order);
+    }
 
+    export async function getOrder(
+        orderID: string,
+        owner: /*only the owner can access the order*/ string) {
+      let doc = await orderModel.findOne({_id: orderID, owner});
+      return doc && doc.toObject();
+    }
+
+    export async function getOrderByUser(owner: string) {
+      let docs = await orderModel.find({owner}).sort('-orderDate').exec();
+      return docs.map(doc => doc.toObject());
+    }
+
+    export async function markOrderAsPaid(orderID: string) {
+      return await orderModel.updateOne({_id: orderID}, {paid: true});
+    }
+  }
 
 
   //#region stats
