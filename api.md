@@ -84,4 +84,40 @@ PUT for update, POST for create, GET for get (no changes on server side)
     * allow users to report prices for the product (?)
 * external entities / sellers
 
-* ~~change all put/post request to body rather than query~~
+* search
+* routing
+    * products
+        * id
+        * seller
+        * category - todo in server too
+        * my feed
+        * latests - from all
+    * reviews
+        * id
+        * by user
+        * my feed
+        * latests - from all
+    * comments
+        * my comments
+    * direct messages
+        * all
+        * user
+    * chat rooms
+        * chat id
+        * all
+        * my chats
+        * chats I'm admin
+        * chats I own
+    * login
+    * profile
+* shell - header, navbar, footer
+* services
+    * products
+    * reviews
+    * 
+* 2 special features
+    * recaptcha
+    * login with FB/Google
+
+
+products, reviews, DMessage, Chat Rooms     login/logout
