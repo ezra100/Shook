@@ -7,24 +7,24 @@ import {mergeMap} from 'rxjs/operators';
 
 import {IProduct} from '../../../types';
 
-const base = 'https://localhost:3000';
 
 @Injectable({providedIn: 'root'})
 export class ProductsService {
   constructor(private http: HttpClient) {}
 
   getProductsObserver(): Observable<IProduct[]> {
-    return this.http.get<IProduct[]>(base + '/products/getLatest');
+    return this.http.get<IProduct[]>( '/products/getLatest');
   }
   addProduct(title: string, subtitle: string, link: URL, price: number):
-      Observable<{success: boolean, body: string|IProduct}> {
+      Observable<{success: boolean, err?: string, body?:IProduct}> {
     let product: IProduct = {title, subtitle, link: link.toString(), price};
-    let params = new HttpParams({fromObject: <any>product});
-    return this.http.post('/products/add', {params})
+    //let params = new HttpParams({fromObject: <any>product});
+    return this.http.post('/products/add', product)
         .pipe(mergeMap(async function(res: Response) {
           return {
             success: res.ok,
-            body: (res.ok ? await res.json() : await res.text())
+            body: (res.ok ? await res.json() : undefined),
+            err: (res.ok? undefined : await res.text())
           };
         }));
   }

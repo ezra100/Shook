@@ -47,7 +47,7 @@ router.post('/request', helpers.asyncWrapper(async function(req, res) {
 router.post('/complete', helpers.asyncWrapper(async function(req, res) {
   let key = req.body.key;
   let username = req.body.username;
-  let newPassword = req.body.password;
+  let newPassword = req.body.newPassword;
   let userData = await db.getUserAuthData(username);
   if (newPassword && userData && userData.recoveryKey === key) {
     // if more than 24 hours past since the creation

@@ -1,12 +1,12 @@
 import * as express from 'express';
 
 import {db} from '../DB/MongoDB';
+import {helpers} from '../helpers';
 import {UserAuthData} from '../types';
 
 import {getRandomString, hashLength, sha512} from './crypto';
 import {passport, tempSalts} from './passport';
 import * as reset from './reset/reset';
-import { helpers } from '../helpers';
 
 export var router = express.Router();
 
@@ -14,20 +14,20 @@ router.use('/reset', reset.router);
 
 
 
-router.post(
+router.put(
     '/login',
     passport.authenticate(
         'local', {failureMessage: 'wrong username or password'}),
     function(req, res) {
       if (req.user) {
-        res.status(201).end("login successful");
+        res.status(201).json(req.user);
         return;
       }
       res.status(400).end('Wrong username or password');
     });
-router.post('/logout', function(req: express.Request, res) {
+router.put('/logout', function(req: express.Request, res) {
   req.logout();
-  res.end("You've logged successfully");
+  res.end('You\'ve logged out successfully');
 });
 
 // requests the salts for the challengs

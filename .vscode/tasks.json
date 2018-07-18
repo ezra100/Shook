@@ -21,9 +21,9 @@
             },
         },
         {
-            "label": "test task",
+            "label": "build angular",
             "type": "shell",
-            "command": "echo $PATH; echo $VISUAL"
+            "command": "cd angular-app && ng build --watch"
         }
     ]
 }

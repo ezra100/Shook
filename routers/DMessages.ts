@@ -33,7 +33,6 @@ router.get("/getRecent", helpers.asyncWrapper(async function(req, res){
     res.status(401).end("You're not logged in");
     return;
   }
-  let otherUser = req.query.otherUser;
   let limit = req.query.limit;
   let offset = req.query.offset;
   res.json(await db.DirectMessages.getLastChats(req.user._id, offset, limit));

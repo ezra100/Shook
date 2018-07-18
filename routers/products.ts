@@ -24,8 +24,7 @@ router.put('/update', helpers.asyncWrapper(async function(req, res) {
 
 router.get('/getByID', helpers.asyncWrapper(async function(req, res) {
   let id: string = req.query.id;
-  let product =
-      await db.getProductByID(id).catch(err => res.status(404) && err.message);
+  let product = await db.getProductByID(id);
   res.json(product);
 }));
 
@@ -62,9 +61,6 @@ router.get('/getAvgRating', helpers.asyncWrapper(async function(req, res) {
 }));
 
 router.get(/\/myFeed/i, helpers.asyncWrapper(async function(req, res) {
-  let dbRes = await db.getProductsFromFollowees(req.user._id)
-                // in case of error set the status to 404 and return the error message
-                  .catch(err => res.status(404) && err.message);
+  let dbRes = await db.getProductsFromFollowees(req.user._id);
   res.json(dbRes);
 }));
-

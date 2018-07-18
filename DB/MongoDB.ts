@@ -107,18 +107,12 @@ export namespace db {
   export async function
   getUser(username: string, showPrivateData: boolean = false):
       Promise<Partial<User>> {
-    let user: Partial<User> = await userModel.findById(username.toLowerCase());
-    if (showPrivateData) {
-      user = {
-        _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        gender: user.gender,
-        userType: user.userType,
-        imageURL: user.imageURL
-      };
+    let query =  userModel.findById(username.toLowerCase());
+    if (!showPrivateData) {
+      query.select('_id firstName lastName gender userType imageUrl');
     }
-    return user;
+    let doc = await query;
+    return doc && doc.toObject();
   }
 
 
@@ -469,7 +463,6 @@ export namespace db {
   //#region chat
 
   export namespace ChatRooms {
-
     export async function getRoomsSize() {
       return await chatRoomModel.count({}).exec();
     }
@@ -477,7 +470,7 @@ export namespace db {
     export async function getMessagesSize() {
       return await messageModel.count({}).exec();
     }
-    
+
     export async function addChatRoom(
         name: string, owner: string, admins: string[],
         verifyAdmins: boolean = true) {
@@ -507,7 +500,7 @@ export namespace db {
           {_id: id, owner: owner}, chatRoom, {new: true});
       return doc && doc.toObject();
     }
-    export async function getRooms(filter : any ={}) : Promise<ChatRoom[]>{
+    export async function getRooms(filter: any = {}): Promise<ChatRoom[]> {
       return (await chatRoomModel.find(filter)).map(d => d.toObject());
     }
 
@@ -582,14 +575,19 @@ export namespace db {
       return doc && doc.toObject();
     }
     export async function deleteMessage(id: string, requesting: string) {
-      let doc = await messageModel.findOneAndRemove({
-        _id: id,
-        '$or': [
-          {owner: requesting},
-          {owner: {$in: 'admins'}},
-        ]
-      });
-      return doc && doc.toObject();
+      let doc =
+          <mongoose.Document&Message>await messageModel.findOne({_id: id});
+      if (!doc) {
+        throw id + ' id doesn\'t exist';
+      }
+      if (doc.owner === requesting) {
+        return await messageModel.deleteOne({_id: id, owner: requesting});
+      }
+      let chatRoom = <mongoose.Document&ChatRoom>await chatRoomModel.findOne(
+          {_id: doc.roomID});
+      if (chatRoom.admins.indexOf(requesting) >= 0) {
+        return await messageModel.deleteOne({_id: id});
+      }
     }
     export async function
     getMessagesFromRoom(roomID: string, offset: number = 0, limit?: number) {
@@ -602,7 +600,6 @@ export namespace db {
   }
 
   export namespace DirectMessages {
-
     export async function getDMessageSize() {
       return await DMessageModel.count({}).exec();
     }
@@ -655,8 +652,7 @@ export namespace db {
           }
         },
         {$sort: {lastMessageDate: -1}}, {$limit: limit}
-      ]
-      );
+      ]);
       return await query;
     }
   }
