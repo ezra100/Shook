@@ -7,12 +7,13 @@ import {AddProductComponent} from './add-product/add-product.component';
 import {AppComponent} from './app.component';
 import {ProductComponent} from './product/product.component';
 import {ProductsFeedComponent} from './products-feed/products-feed.component';
+import { AppRoutingModule } from './/app-routing.module';
 
 @NgModule({
   declarations: [
     AppComponent, ProductsFeedComponent, AddProductComponent, ProductComponent
   ],
-  imports: [BrowserModule, MatCardModule, HttpClientModule],
+  imports: [BrowserModule, MatCardModule, HttpClientModule, AppRoutingModule],
   providers: [],
   bootstrap: [AppComponent]
 })

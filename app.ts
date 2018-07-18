@@ -48,8 +48,10 @@ app.use('/comments', comments.router);
 app.use('/reviews', reviews.router);
 app.use('/chatRooms', chatRooms.router);
 app.use('/DMessages', DMessages.router);
-app.use('/', express.static(path.join(__dirname, 'angular-app','dist', 'angular-app')))
+app.use('/', express.static(path.join(__dirname, 'angular-app','dist', 'angular-app')));
+//app.get('/', (req, res) => res.redirect('/a/'));
 app.use('/', express.static(path.join(__dirname, 'public')));
+app.use('/*', express.static(path.join(__dirname, 'angular-app','dist', 'angular-app')));
 
 
 
