@@ -118,6 +118,6 @@ PUT for update, POST for create, GET for get (no changes on server side)
 * 2 special features
     * recaptcha
     * login with FB/Google
-
-
+ 
+ 
 products, reviews, DMessage, Chat Rooms     login/logout
