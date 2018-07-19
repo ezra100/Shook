@@ -1,7 +1,6 @@
 import * as nodemailer from 'nodemailer';
 
 import * as data from './data.json';
-import {User} from './types';
 import {Request, Response} from 'express-serve-static-core'
 
 export namespace helpers {
@@ -54,5 +53,9 @@ export namespace helpers {
         res.status(500).end(err.message)
       )
     }
+  }
+
+  export function regexToMongoRegex(regex: RegExp){
+    return {$regex: regex.source, $options: regex.flags};
   }
 }

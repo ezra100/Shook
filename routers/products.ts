@@ -29,14 +29,7 @@ router.get('/getByID', helpers.asyncWrapper(async function(req, res) {
 }));
 
 router.get('/getLatest', helpers.asyncWrapper(async function(req, res) {
-  let filter: any = {};
-  let username = req.query.username;
-  if (req.query.username) {
-    filter.owner = new RegExp(helpers.escapeRegExp(username), 'i');
-  }
-  if (req.query.before) {
-    filter.creationDate = {$gte: new Date(req.query.before)};
-  }
+  let filter: any = req.query.filter || {};
   let limit = Number(req.query.limit) || LIMIT;
   let offset = Number(req.query.offset || 0);
   res.json(await db.getLatestProducts(filter, offset, limit));

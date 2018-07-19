@@ -19,7 +19,7 @@ type Salts = {
 };
   @Injectable({providedIn: 'root'})
   export class AuthService {
-    currentUser: User;
+    static currentUser: User;
     constructor(private http: HttpClient) {}
 
     login(username: string, password: string): Observable<User> {
@@ -30,12 +30,13 @@ type Salts = {
                       return this.http.put<User>(
                           '/auth/login', {username, password: hashedPassword});
                     }));
-      obs.subscribe(user => this.currentUser = user);
+      obs.subscribe(user => AuthService.currentUser = user);
       return obs;
     }
 
     logout() {
-      return this.http.put('/auth/logout', {});
+      let obs =  this.http.put('/auth/logout', {});
+      obs.subscribe(res => AuthService.currentUser = null)
     }
 
     requestPasswordReset(email?: string, username?: string) {

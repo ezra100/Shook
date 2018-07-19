@@ -1,3 +1,5 @@
+import {isRegExp} from 'util';
+
 export enum Gender {
   Male = 1,
   Female = 2
@@ -80,7 +82,7 @@ export interface Message {
 }
 
 // direct message, user-2-user
-export interface DMessage{
+export interface DMessage {
   from: string;
   to: string;
   content: string;
@@ -92,14 +94,27 @@ export interface ChatRoom {
   name: string;
   admins: string[];
   members: string[];
-  //memberRequests: string[];
+  // memberRequests: string[];
   owner: string;
 }
 
 export interface Order {
-  _id?: string,
-  owner: string,
-  products: {productID: string, quantity: number, currentPrice: number}[],
-  orderDate: Date,
-  paid: boolean
+  _id?: string, owner: string,
+      products: {productID: string, quantity: number, currentPrice: number}[],
+      orderDate: Date, paid: boolean
+}
+
+export interface MongoRegExp{
+  $regex: string,
+  $options?: string
+}
+export namespace filters {
+
+  export interface ProductFilter {
+    owner?: string,
+    before?: Date,
+    after?: Date,
+    title?: MongoRegExp|string,
+    link?: MongoRegExp| string,
+  }
 }
