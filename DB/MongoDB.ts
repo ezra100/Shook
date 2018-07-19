@@ -247,7 +247,7 @@ export namespace db {
   export async function addProduct(
       product: Partial<IProduct>, secure: boolean = true): Promise<IProduct> {
     if (secure) {
-      product.creationDate = new Date();
+      product.date = new Date();
     }
     let retProduct = await productModel.create(product);
     return retProduct && retProduct.toObject();
@@ -276,7 +276,7 @@ export namespace db {
   export async function getLatestProducts(
       filter: Partial<IProduct> = {}, offset: number = 0,
       limit?: number): Promise<IProduct[]> {
-    let res = productModel.find(filter).sort('-creationDate').skip(offset);
+    let res = productModel.find(filter).sort('-date').skip(offset);
     if (limit) {
       res.limit(limit);
     }
@@ -292,7 +292,7 @@ export namespace db {
     let followees = user.toObject().follows;
     let agg = productModel.aggregate()
                   .match({'owner': {$in: followees}})
-                  .sort('-creationDate')
+                  .sort('-date')
                   .skip(offset);
     if (limit) {
       agg.limit(limit);
@@ -307,7 +307,7 @@ export namespace db {
     if (secure) {
       review.dislikes = [];
       review.likes = [];
-      review.creationDate = new Date();
+      review.date = new Date();
     }
     let doc = await reviewModel.create(review);
     return doc && doc.toObject();
@@ -345,7 +345,7 @@ export namespace db {
   export async function getLatestReviews(
       filter: Partial<IReview> = {}, offset: number = 0,
       limit?: number): Promise<IReview[]> {
-    let res = reviewModel.find(filter).sort('-creationDate').skip(offset);
+    let res = reviewModel.find(filter).sort('-date').skip(offset);
     if (limit) {
       res.limit(limit);
     }
@@ -389,7 +389,7 @@ export namespace db {
     let followees = userDoc.toObject().follows;
     let agg = reviewModel.aggregate()
                   .match({'owner': {$in: followees}})
-                  .sort('-creationDate')
+                  .sort('-date')
                   .skip(offset);
     if (limit) {
       agg.limit(limit);
@@ -402,7 +402,7 @@ export namespace db {
   export async function addComment(comment: IComment, secure: boolean = true):
       Promise<IComment> {
     if (secure) {
-      comment.creationDate = new Date();
+      comment.date = new Date();
       comment.dislikes = [];
       comment.likes = [];
     }
@@ -430,7 +430,7 @@ export namespace db {
   export async function getLatestComments(
       filter: Partial<IComment> = {}, offset: number = 0,
       limit?: number): Promise<IComment[]> {
-    let res = commentModel.find(filter).sort('-creationDate').skip(offset);
+    let res = commentModel.find(filter).sort('-date').skip(offset);
     if (limit) {
       res.limit(limit);
     }

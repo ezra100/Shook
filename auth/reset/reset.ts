@@ -29,7 +29,7 @@ router.post('/request', helpers.asyncWrapper(async function(req, res) {
     console.error(user._id + ' not found');
   }
   db.updateUserAuthData(
-      user._id, {recoveryKey: key, recoveryCreationDate: new Date()});
+      user._id, {recoveryKey: key, recoverydate: new Date()});
   helpers.sendEmail(
       user.email, user.firstName + ' ' + user.lastName,
       'Password reset for your account at flowers++',
@@ -51,7 +51,7 @@ router.post('/complete', helpers.asyncWrapper(async function(req, res) {
   let userData = await db.getUserAuthData(username);
   if (newPassword && userData && userData.recoveryKey === key) {
     // if more than 24 hours past since the creation
-    if ((new Date()).getTime() - userData.recoveryCreationDate.getTime() >=
+    if ((new Date()).getTime() - userData.recoverydate.getTime() >=
         (1000 * 3600 * 24)) {
       res.status(400).end('Can\'t reset after more than 24 hours');
       return;

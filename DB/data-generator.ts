@@ -67,7 +67,7 @@ function getFakeProduct(): Partial<IProduct> {
     subtitle: faker.lorem.paragraph(),
     link: faker.internet.url(),
     owner: users[faker.random.number(usersLength - 1)]._id,
-    creationDate: faker.date.past(5),
+    date: faker.date.past(5),
     price: faker.random.number({min: 5, max: 100, precision: 0.05}),
   };
 }
@@ -113,7 +113,7 @@ function getFakeReview(): Partial<IReview> {
         title: faker.lorem.sentence(), fullReview: faker.lorem.paragraphs(3),
         dislikes: likeDislike[1], likes: likeDislike[0],
         rating: faker.random.number({min: 1, max: 5}), productID: product._id,
-        creationDate: faker.date.between(product.creationDate, Date()),
+        date: faker.date.between(product.date, Date()),
   }
 }
 
@@ -124,7 +124,7 @@ function getFakeComment(): Partial<IComment> {
     owner: users[faker.random.number(usersLength - 1)]._id,
         comment: faker.lorem.paragraphs(3), dislikes: likeDislike[1],
         likes: likeDislike[0], reviewID: review._id,
-        creationDate: faker.date.between(review.creationDate, Date()),
+        date: faker.date.between(review.date, Date()),
   }
 }
 

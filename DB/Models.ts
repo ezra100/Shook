@@ -74,7 +74,7 @@ let userSchema: Schema = new Schema({
 let userDataSchema: Schema = new Schema({
   _id: String,
   recoveryKey: String,
-  recoveryCreationDate: Date,
+  recoverydate: Date,
   salt: {type: String, required: true},
   hashedPassword: {type: String, required: true},
 });
@@ -90,7 +90,7 @@ userSchema.pre('save', function(next: Function): void {
 
 
 let productSchema: Schema = new Schema({
-  creationDate: {type: Date, default: Date.now, index: true},
+  date: {type: Date, default: Date.now, index: true},
   title: {type: String, required: true, minlength: 6, maxlength: 140},
   subtitle: {type: String, required: true},
   owner: {type: String, required: true, ref: 'User', index: true},
@@ -105,7 +105,7 @@ let productSchema: Schema = new Schema({
 
 
 let reviewSchema = new Schema({
-  creationDate: {type: Date, default: Date.now, index: true},
+  date: {type: Date, default: Date.now, index: true},
   owner: {type: String, required: true, ref: 'User'},
   productID: {
     type: Schema.Types.ObjectId,
@@ -131,7 +131,7 @@ let reviewSchema = new Schema({
 
 let commentSchema = new Schema({
   owner: {type: String, required: true, ref: 'User'},
-  creationDate: {type: Date, default: Date.now, index: true},
+  date: {type: Date, default: Date.now, index: true},
   reviewID: {
     type: Schema.Types.ObjectId,
     ref: 'Review',
@@ -215,14 +215,14 @@ commentSchema.postAnyFInd(function(doc, next: Function): void {
 productSchema.preAnyUpdate(function(next: Function): void {
   let update: any = this.getUpdate();
   delete update.owner;
-  delete update.creationDate;
+  delete update.date;
 
   next();
 });
 reviewSchema.preAnyUpdate(function(next: Function): void {
   let update: any = this.getUpdate();
   delete update.owner;
-  delete update.creationDate;
+  delete update.date;
   delete update.productID;
 
   next();
@@ -230,7 +230,7 @@ reviewSchema.preAnyUpdate(function(next: Function): void {
 commentSchema.preAnyUpdate(function(next: Function): void {
   let update: any = this.getUpdate();
   delete update.owner;
-  delete update.creationDate;
+  delete update.date;
   delete update.reviewID;
 
   next();

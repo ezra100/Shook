@@ -25,7 +25,7 @@ export interface User {
 export interface UserAuthData {
   _id?: string;
   recoveryKey?: string;
-  recoveryCreationDate?: Date;
+  recoverydate?: Date;
   hashedPassword?: string;
   salt?: string;
 }
@@ -37,14 +37,14 @@ export interface IProduct {
   subtitle: string;
   link?: string;
   _id?: string;
-  creationDate?: Date;
+  date?: Date;
   price: number;
   owner?: string;  // publisher of the product - must exist in users collection
 }
 
 export interface IReview {
   _id?: string;
-  creationDate?: Date;
+  date?: Date;
   owner: string;      // publisher of the review
   productID: string;  // product.id
   title: string;
@@ -59,7 +59,7 @@ export interface IReview {
 // a comment on a review
 export interface IComment {
   _id?: string;
-  creationDate?: Date;
+  date?: Date;
   owner: string;     // publisher of the comment
   reviewID: string;  // review.id
   comment: string;
