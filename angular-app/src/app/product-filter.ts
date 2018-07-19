@@ -28,7 +28,7 @@ class StringQuery {
   }
 }
 
-interface MongoProductFilter {
+export interface MongoProductFilter {
   owner?: string, date?: {$lt?: Date, $gte?: Date}, title?: MongoRegExp|string,
       link?: MongoRegExp|string,
 }
@@ -58,4 +58,5 @@ export class ProductFilter {
     }
     return filter;
   }
+
 }

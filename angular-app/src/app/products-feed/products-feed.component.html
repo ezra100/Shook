@@ -1,26 +1,29 @@
 <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = false">
     <mat-expansion-panel-header>
         <mat-panel-title>
-            Self aware panel
+            Filter Products
         </mat-panel-title>
         <mat-panel-description>
-            Currently I am {{panelOpenState ? 'open' : 'closed'}}
+            {{panelOpenState ? 'Click to expand' : 'Filter'}}
         </mat-panel-description>
+
     </mat-expansion-panel-header>
+    <button mat-button (click)="filterProducts()" >Filter</button>
+
     Date:
     <mat-form-field>
-        <input matInput [matDatepicker]="picker" placeholder="Before">
+        <input matInput [formControl]="beforeControl" [matDatepicker]="picker" placeholder="Before">
         <mat-datepicker-toggle matSuffix [for]="beforePicker"></mat-datepicker-toggle>
         <mat-datepicker #beforePicker></mat-datepicker>
     </mat-form-field>
     <mat-form-field>
-        <input matInput [ngModel]="filter.creatrionDate.$lt" [matDatepicker]="picker" placeholder="After">
+        <input matInput [formControl]="afterControl" [matDatepicker]="picker" placeholder="After">
         <mat-datepicker-toggle matSuffix [for]="afterPicker"></mat-datepicker-toggle>
         <mat-datepicker #afterPicker></mat-datepicker>
     </mat-form-field>
     <br>
-    <label [for]=>
-        <input 
+    <label [for]="title">Title: 
+        <input [(ngModel)]="filter.title.query" #title >
     </label>
 </mat-expansion-panel>
 <app-product *ngFor="let product of products" [product]="product">

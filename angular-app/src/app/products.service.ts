@@ -3,10 +3,10 @@
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {from, Observable, Operator} from 'rxjs';
+import {MongoProductFilter} from "./product-filter"
 import {mergeMap} from 'rxjs/operators';
 
-import {helpers} from '../../../helpers';
-import {filters, IProduct} from '../../../types';
+import {IProduct} from '../../../types';
 
 
 @Injectable({providedIn: 'root'})
@@ -15,10 +15,9 @@ export class ProductsService {
 
   getProductsObserver(
       offset: number = 0, limit: number = 100,
-      filter: filters.ProductFilter = {}): Observable<IProduct[]> {
-    let body: any = {offset, limit, filter};
-
-    body.filter = filter;
+      filter: MongoProductFilter = {} ): Observable<IProduct[]> 
+  {
+    let body: any = {offset, limit,filter: JSON.stringify(filter)};
     let params = new HttpParams({fromObject: body});
     return this.http.get<IProduct[]>('/products/getLatest', {params});
   }

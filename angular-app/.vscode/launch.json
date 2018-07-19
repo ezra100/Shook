@@ -8,7 +8,7 @@
             "type": "chrome",
             "request": "launch",
             "name": "Chrome debugging",
-            "url": "http://localhost:4200",
+            "url": "http://localhost:3000",
             "webRoot": "${workspaceFolder}",
             "runtimeExecutable": "/usr/bin/chromium",
             "userDataDir": true

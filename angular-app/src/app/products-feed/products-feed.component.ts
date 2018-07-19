@@ -1,8 +1,11 @@
 import {Component, ElementRef, Input, OnInit, Renderer, Renderer2} from '@angular/core';
+import * as $ from 'jquery';
 import {Subscription} from 'rxjs';
 
 import {filters, IProduct} from '../../../../types';
+import {ProductFilter} from '../product-filter';
 import {ProductsService} from '../products.service';
+import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-products-feed',
@@ -13,7 +16,10 @@ export class ProductsFeedComponent implements OnInit {
   products: IProduct[] = [];
   sub: Subscription;
   loadingMore: boolean = false;
-  @Input() filter: filters.ProductFilter;
+  filter: ProductFilter = new ProductFilter();
+  beforeControlle = new FormControl(this.filter.date.before);
+  afterControlle = new FormControl(this.filter.date.after);
+
   constructor(
       private service: ProductsService, elementRef: ElementRef,
       renderer: Renderer2) {
@@ -32,8 +38,9 @@ export class ProductsFeedComponent implements OnInit {
   }
   filterProducts() {
     this.sub.unsubscribe();
-    this.sub = this.service.getProductsObserver(0, null, this.filter)
-                   .subscribe(products => this.products = products);
+    this.sub =
+        this.service.getProductsObserver(0, null, this.filter.toMongoFilter())
+            .subscribe(products => this.products = products);
   }
   loadMore() {
     if (this.loadingMore) {
@@ -41,7 +48,8 @@ export class ProductsFeedComponent implements OnInit {
     }
     this.loadingMore = true;
     this.sub = this.service
-                   .getProductsObserver(this.products.length, null, this.filter)
+                   .getProductsObserver(
+                       this.products.length, null, this.filter.toMongoFilter())
                    .subscribe(products => this.products.concat(products));
   }
 }

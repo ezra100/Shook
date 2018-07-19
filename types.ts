@@ -1,4 +1,3 @@
-import {isRegExp} from 'util';
 
 export enum Gender {
   Male = 1,

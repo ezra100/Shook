@@ -29,7 +29,7 @@ router.get('/getByID', helpers.asyncWrapper(async function(req, res) {
 }));
 
 router.get('/getLatest', helpers.asyncWrapper(async function(req, res) {
-  let filter: any = req.query.filter || {};
+  let filter: any = JSON.parse(req.query.filter) || {};
   let limit = Number(req.query.limit) || LIMIT;
   let offset = Number(req.query.offset || 0);
   res.json(await db.getLatestProducts(filter, offset, limit));
