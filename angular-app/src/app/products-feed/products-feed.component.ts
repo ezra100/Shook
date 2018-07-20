@@ -1,11 +1,11 @@
 import {Component, ElementRef, Input, OnInit, Renderer, Renderer2} from '@angular/core';
+import {FormControl} from '@angular/forms';
 import * as $ from 'jquery';
 import {Subscription} from 'rxjs';
 
 import {filters, IProduct} from '../../../../types';
 import {ProductFilter} from '../product-filter';
 import {ProductsService} from '../products.service';
-import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-products-feed',
@@ -24,17 +24,18 @@ export class ProductsFeedComponent implements OnInit {
       private service: ProductsService, elementRef: ElementRef,
       renderer: Renderer2) {
     let thisPF = this;
-    renderer.listen(elementRef.nativeElement, 'scroll', function() {
-      if ($(elementRef.nativeElement).scrollTop() +
-              $(elementRef.nativeElement).height() >
-          0.8 * $(elementRef.nativeElement).height()) {
+    let elem = $('#products');
+    renderer.listen(document, 'scroll', function() {
+      if ($(document).scrollTop() > 0.8 * $(document).height()) {
         thisPF.loadMore();
       }
     });
   }
   ngOnInit() {
-    this.sub = this.service.getProductsObserver().subscribe(
-        products => this.products = products);
+    let thisPF = this;
+    this.sub = this.service.getProductsObserver().subscribe(products => {
+      thisPF.products = products;
+    });
   }
   filterProducts() {
     this.sub.unsubscribe();
@@ -46,10 +47,15 @@ export class ProductsFeedComponent implements OnInit {
     if (this.loadingMore) {
       return;
     }
+    let thisPF = this;
     this.loadingMore = true;
+
     this.sub = this.service
                    .getProductsObserver(
                        this.products.length, null, this.filter.toMongoFilter())
-                   .subscribe(products => this.products.concat(products));
+                   .subscribe(products => {
+                     thisPF.products.push(...products);
+                     thisPF.loadingMore = false;
+                   });
   }
 }

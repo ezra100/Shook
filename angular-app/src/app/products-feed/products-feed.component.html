@@ -8,23 +8,25 @@
         </mat-panel-description>
 
     </mat-expansion-panel-header>
-    <button mat-button (click)="filterProducts()" >Filter</button>
+    <button mat-button (click)="filterProducts()">Filter</button>
 
     Date:
     <mat-form-field>
-        <input matInput [formControl]="beforeControl" [matDatepicker]="picker" placeholder="Before">
+        <input matInput [(value)]="filter.date.before" [matDatepicker]="picker" placeholder="Before">
         <mat-datepicker-toggle matSuffix [for]="beforePicker"></mat-datepicker-toggle>
         <mat-datepicker #beforePicker></mat-datepicker>
     </mat-form-field>
     <mat-form-field>
-        <input matInput [formControl]="afterControl" [matDatepicker]="picker" placeholder="After">
+        <input matInput [(value)]="filter.date.after" [matDatepicker]="picker" placeholder="After">
         <mat-datepicker-toggle matSuffix [for]="afterPicker"></mat-datepicker-toggle>
         <mat-datepicker #afterPicker></mat-datepicker>
     </mat-form-field>
     <br>
-    <label [for]="title">Title: 
-        <input [(ngModel)]="filter.title.query" #title >
+    <label [for]="title">Title:
+        <input [(ngModel)]="filter.title.query"  #title>
     </label>
 </mat-expansion-panel>
-<app-product *ngFor="let product of products" [product]="product">
-</app-product>
+<div #products>
+    <app-product *ngFor="let product of products" [product]="product">
+    </app-product>
+</div>

@@ -1,7 +1,7 @@
 import {MongoRegExp} from '../../../types';
 
 class StringQuery {
-  query?: string;
+  query?: string = "";
   isRegexp: boolean = false;
   caseSensitive = false;
   toMongoRegexp(stringToRegexpArray: boolean = true): MongoRegExp|string|undefined {
@@ -34,7 +34,7 @@ export interface MongoProductFilter {
 }
 
 export class ProductFilter {
-  owner?: string;
+  owner?: string = "";
   date: {before?: Date, after?: Date} = {};
   title?: StringQuery = new StringQuery();
   link?: StringQuery = new StringQuery();
