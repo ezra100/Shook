@@ -79,10 +79,11 @@ export class ProductFilter {
     }
     let obj: ProductFilter = JSON.parse(parseString);
     if (obj.date) {
-      this.date.after = this.date.after && moment(<any>this.date.after);
-      this.date.before = this.date.before && moment(<any>this.date.before);
+      this.date.after = obj.date.after && moment(<any>obj.date.after);
+      this.date.before = obj.date.before && moment(<any>obj.date.before);
     }
     this.link = obj.link;
     this.owner = obj.owner;
+    this.category = obj.category;
   }
 }

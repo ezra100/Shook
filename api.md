@@ -76,9 +76,8 @@ PUT for update, POST for create, GET for get (no changes on server side)
 
 * chats
     * personal chat
+    * socket.io
 * filter by creation date range
-* follow list and post list
-* categories (?)
 * products list
 * price for product
     * allow users to report prices for the product (?)

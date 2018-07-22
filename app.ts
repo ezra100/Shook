@@ -41,6 +41,11 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+// server favicon
+app.get('/favicon.ico', function(req: Request, res: Response) {
+  res.sendFile(path.join(__dirname, 'public/img/robot.gif'));
+});
+
 app.use('/auth', auth.router);
 app.use('/users', users.router);
 app.use('/products', products.router);
@@ -48,18 +53,8 @@ app.use('/comments', comments.router);
 app.use('/reviews', reviews.router);
 app.use('/chatRooms', chatRooms.router);
 app.use('/DMessages', DMessages.router);
-app.use('/', express.static(path.join(__dirname, 'angular-app','dist', 'angular-app')));
-//app.get('/', (req, res) => res.redirect('/a/'));
-app.use('/', express.static(path.join(__dirname, 'public')));
+//app.use('/', express.static(path.join(__dirname, 'public')));
 app.use('/*', express.static(path.join(__dirname, 'angular-app','dist', 'angular-app')));
-
-
-
-// server favicon
-app.get('/favicon.ico', function(req: Request, res: Response) {
-  res.sendFile(path.join(__dirname, 'public/img/robot.gif'));
-});
-
 
 
 export default app;

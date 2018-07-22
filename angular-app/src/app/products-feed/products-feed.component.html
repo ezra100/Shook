@@ -1,4 +1,4 @@
-<mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = false">
+<mat-expansion-panel class="m-2" (opened)="panelOpenState = true" (closed)="panelOpenState = false">
     <mat-expansion-panel-header>
         <mat-panel-title>
             Filter Products
@@ -48,14 +48,17 @@
         </label>
     </mat-form-field>
     <mat-form-field>
-        <mat-select placeholder="Category" [(ngModel)]="filter.category" >
+        <mat-select placeholder="Category" [(ngModel)]="filter.category">
             <mat-option *ngFor="let category of fullCategoryName; let i = index" [value]="i">
                 {{category}}
             </mat-option>
         </mat-select>
     </mat-form-field>
 </mat-expansion-panel>
-<div class="force-scroll">
-    <app-product *ngFor="let product of products" [product]="product">
-    </app-product>
-</div>
+<mat-divider></mat-divider>
+<mat-grid-list class="m-2"  [cols]="cols" gutterSize="2rem">
+    <mat-grid-tile *ngFor="let product of products">
+        <app-product [product]="product">
+        </app-product>
+    </mat-grid-tile>
+</mat-grid-list>
