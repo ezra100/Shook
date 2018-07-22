@@ -4,7 +4,7 @@
             Filter Products
         </mat-panel-title>
         <mat-panel-description>
-            {{panelOpenState ? 'Click to expand' : 'Filter'}}
+            {{panelOpenState ? 'Filter': 'Click to expand' }}
         </mat-panel-description>
 
     </mat-expansion-panel-header>
@@ -12,21 +12,50 @@
 
     Date:
     <mat-form-field>
-        <input matInput [(value)]="filter.date.before" [matDatepicker]="picker" placeholder="Before">
+        <input matInput [min]="filter.date.after" #beforeInput [(ngModel)]="filter.date.before" [formControl]="beforeControl" [matDatepicker]="beforePicker"
+            placeholder="Before">
         <mat-datepicker-toggle matSuffix [for]="beforePicker"></mat-datepicker-toggle>
         <mat-datepicker #beforePicker></mat-datepicker>
     </mat-form-field>
     <mat-form-field>
-        <input matInput [(value)]="filter.date.after" [matDatepicker]="picker" placeholder="After">
+        <input matInput #afterInput [max]="filter.date.before" [(ngModel)]="filter.date.after" [formControl]="afterControl" [matDatepicker]="afterPicker"
+            placeholder="After">
         <mat-datepicker-toggle matSuffix [for]="afterPicker"></mat-datepicker-toggle>
         <mat-datepicker #afterPicker></mat-datepicker>
     </mat-form-field>
-    <br>
-    <label [for]="title">Title:
-        <input [(ngModel)]="filter.title.query"  #title>
-    </label>
+    <mat-form-field>
+        <label [for]="title">Title:
+            <input matInput [(ngModel)]="filter.title.query" #title>
+        </label>
+        <mat-checkbox [(ngModel)]="filter.title.isRegexp">Regular Expression</mat-checkbox>
+        <mat-checkbox *ngIf="filter.title.isRegexp" [(ngModel)]="filter.title.caseSensitive">Case Sensitive</mat-checkbox>
+    </mat-form-field>
+    <mat-form-field>
+        <label [for]="link">Link:
+            <input matInput [(ngModel)]="filter.link.query" #link>
+        </label>
+        <mat-checkbox [(ngModel)]="filter.link.isRegexp">Regular Expression</mat-checkbox>
+        <mat-checkbox *ngIf="filter.link.isRegexp" [(ngModel)]="filter.link.caseSensitive">Case Sensitive</mat-checkbox>
+    </mat-form-field>
+    <mat-form-field>
+        <label [for]="ownerInput">Owner (Publisher):
+            <input matInput [(ngModel)]="filter.owner" #ownerInput>
+        </label>
+    </mat-form-field>
+    <mat-form-field>
+        <label [for]="categoryInput">Category:
+            <input matInput [(ngModel)]="filter.owner" #categoryInput>
+        </label>
+    </mat-form-field>
+    <mat-form-field>
+        <mat-select placeholder="Category" [(ngModel)]="filter.category" >
+            <mat-option *ngFor="let category of fullCategoryName; let i = index" [value]="i">
+                {{category}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
 </mat-expansion-panel>
-<div #products>
+<div class="force-scroll">
     <app-product *ngFor="let product of products" [product]="product">
     </app-product>
 </div>

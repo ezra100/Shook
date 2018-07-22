@@ -1,9 +1,10 @@
 import {resolve} from 'dns';
+import * as faker from 'faker';
 // import the mongoose module
 import * as mongoose from 'mongoose';
 
 import {helpers} from '../helpers';
-import {ChatRoom, DMessage, Gender, IComment, IProduct, IReview, Message, Order, User, UserAuthData, UserType} from '../types';
+import {Category, ChatRoom, DMessage, Gender, IComment, IReview, Message, Order, Product, User, UserAuthData, UserType} from '../types';
 
 import {chatRoomModel, commentModel, DMessageModel, messageModel, orderModel, productModel, reviewModel, userAuthDataModel, userModel} from './Models';
 import {chatRoomPermitedFields, commentPermitedFields, productPermitedFields, reviewPermitedFields, stripObject, userPermitedFields} from './StripForUpdate';
@@ -107,7 +108,7 @@ export namespace db {
   export async function
   getUser(username: string, showPrivateData: boolean = false):
       Promise<Partial<User>> {
-    let query =  userModel.findById(username.toLowerCase());
+    let query = userModel.findById(username.toLowerCase());
     if (!showPrivateData) {
       query.select('_id firstName lastName gender userType imageUrl');
     }
@@ -245,7 +246,7 @@ export namespace db {
   //#endregion
   //#region  product
   export async function addProduct(
-      product: Partial<IProduct>, secure: boolean = true): Promise<IProduct> {
+      product: Partial<Product>, secure: boolean = true): Promise<Product> {
     if (secure) {
       product.date = new Date();
     }
@@ -253,8 +254,8 @@ export namespace db {
     return retProduct && retProduct.toObject();
   }
 
-  export async function updateProduct(
-      product: Partial<IProduct>, owner: string): Promise<IProduct|null> {
+  export async function updateProduct(product: Partial<Product>, owner: string):
+      Promise<Product|null> {
     product = stripObject(product, productPermitedFields);
     let doc = (await productModel.findOneAndUpdate(
         {_id: product._id, owner: owner || 'block undefined'}, product,
@@ -269,22 +270,34 @@ export namespace db {
     let doc = await productModel.findByIdAndRemove(id);
     return doc && doc.toObject();
   }
-  export async function getProductByID(id: string): Promise<IProduct> {
+  export async function getProductByID(id: string): Promise<Product> {
     let doc = await productModel.findById(id);
     return doc && doc.toObject();
   }
   export async function getLatestProducts(
-      filter: Partial<IProduct> = {}, offset: number = 0,
-      limit?: number): Promise<IProduct[]> {
+      filter: Partial<Product> = {}, offset: number = 0,
+      limit?: number): Promise<Product[]> {
     let res = productModel.find(filter).sort('-date').skip(offset);
     if (limit) {
       res.limit(limit);
     }
     return (await res.exec()).map(doc => doc.toObject());
   }
+
+  // export async function addCategory() {
+  //   let products =
+  //       await productModel.find({category: {$exists: false}}).select('_id');
+  //   products.forEach((async product => {
+  //     let update = await productModel.updateOne(
+  //         {_id: product._id},
+  //         {$set: {category: faker.random.number(Category.Max - 1)}});
+  //     console.log(update);
+  //   }));
+  // }
+
   export async function getProductsFromFollowees(
       username: string, offset: number = 0,
-      limit?: number): Promise<IProduct[]> {
+      limit?: number): Promise<Product[]> {
     let user = await userModel.findById(username);
     if (!user) {
       throw 'User ' + username + ' not found';
@@ -381,7 +394,7 @@ export namespace db {
 
   export async function
   getReviewsFromFollowees(username: string, offset: number = 0, limit?: number):
-      Promise<IProduct[]> {
+      Promise<Product[]> {
     let userDoc = (await userModel.findById(username));
     if (!userDoc) {
       throw 'User not found';
@@ -464,11 +477,11 @@ export namespace db {
 
   export namespace ChatRooms {
     export async function getRoomsSize() {
-      return await chatRoomModel.count({}).exec();
+      return await chatRoomModel.estimatedDocumentCount().exec();
     }
 
     export async function getMessagesSize() {
-      return await messageModel.count({}).exec();
+      return await messageModel.estimatedDocumentCount().exec();
     }
 
     export async function addChatRoom(
@@ -601,7 +614,7 @@ export namespace db {
 
   export namespace DirectMessages {
     export async function getDMessageSize() {
-      return await DMessageModel.count({}).exec();
+      return await DMessageModel.estimatedDocumentCount().exec();
     }
     export async function addDMessage(
         message: DMessage,
@@ -693,16 +706,16 @@ export namespace db {
 
   //#region stats
   export async function getUsersSize() {
-    return await userModel.count({}).exec();
+    return await userModel.estimatedDocumentCount().exec();
   }
   export async function getProductsSize() {
-    return await productModel.count({}).exec();
+    return await productModel.estimatedDocumentCount().exec();
   }
   export async function getReviewsSize() {
-    return await reviewModel.count({}).exec();
+    return await reviewModel.estimatedDocumentCount().exec();
   }
   export async function getCommentsSize() {
-    return await commentModel.count({}).exec();
+    return await commentModel.estimatedDocumentCount().exec();
   }
 
 

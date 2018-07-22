@@ -2,7 +2,7 @@ import * as mongoose from 'mongoose';
 import {Aggregate, Model, NativeError} from 'mongoose';
 
 import {helpers} from '../helpers';
-import {Gender, IComment, IReview, User, UserAuthData, UserType} from '../types';
+import {Category, Gender, IComment, IReview, User, UserAuthData, UserType} from '../types';
 
 
 // define a schema
@@ -66,7 +66,7 @@ let userSchema: Schema = new Schema({
   follows: [{type: String, required: true, ref: 'User'}],
   basket: [{
     productID: {type: Schema.Types.ObjectId, required: true, ref: 'Product'},
-    quantity: {type: Number, required:true, min: 1},
+    quantity: {type: Number, required: true, min: 1},
     _id: false
   }]
 });
@@ -100,7 +100,8 @@ let productSchema: Schema = new Schema({
       return !this.link || helpers.isValidURL(this.link)
     }
   },
-  price: {type: Number, required: true}
+  price: {type: Number, required: true},
+  category: {type: Number, required: true, max: Category.Vehicles, index: true}
 });
 
 

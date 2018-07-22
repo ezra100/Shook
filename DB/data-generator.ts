@@ -5,12 +5,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import {createUserData} from '../auth/auth';
-import {ChatRoom, DMessage, Gender, IComment, IProduct, IReview, Message, User, UserAuthData, UserType} from '../types';
+import {ChatRoom, DMessage, Gender, IComment, Product, IReview, Message, User, UserAuthData, UserType, Category} from '../types';
 
 import {db} from './MongoDB';
 
 let users: User[];
-let products: IProduct[];
+let products: Product[];
 let reviews: IReview[];
 let chatRooms: ChatRoom[];
 
@@ -61,7 +61,7 @@ function getFakeUsers(num: number): IInitPackage[] {
   return arr;
 }
 
-function getFakeProduct(): Partial<IProduct> {
+function getFakeProduct(): Partial<Product> {
   return {
     title: faker.commerce.productName(),
     subtitle: faker.lorem.paragraph(),
@@ -69,6 +69,7 @@ function getFakeProduct(): Partial<IProduct> {
     owner: users[faker.random.number(usersLength - 1)]._id,
     date: faker.date.past(5),
     price: faker.random.number({min: 5, max: 100, precision: 0.05}),
+    category : faker.random.number(Category.Vehicles),
   };
 }
 
@@ -231,7 +232,7 @@ export async function initDB(
   if (messageLength < MessagesPerChat * roomsLenght) {
     // for the fake message generator
     chatRooms = await db.ChatRooms.getRooms();
-    for (; messageLength < MessagesPerChat; messageLength++) {
+    for (; messageLength < MessagesPerChat * roomsLenght; messageLength++) {
       await db.ChatRooms.addMessage(getFakeMessage(), false);
     }
   }

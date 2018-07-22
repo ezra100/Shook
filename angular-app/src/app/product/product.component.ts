@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {IProduct} from '../../../../types';
+import {Product, categoryNames} from '../../../../types';
 
 @Component({
 
@@ -8,7 +8,8 @@ import {IProduct} from '../../../../types';
   styleUrls: ['./product.component.scss']
 })
 export class ProductComponent implements OnInit {
-  @Input() product: IProduct;
+  @Input() product: Product;
+  categoryNames = categoryNames;
   constructor() {}
 
   ngOnInit() {}

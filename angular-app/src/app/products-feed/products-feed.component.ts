@@ -3,7 +3,7 @@ import {FormControl} from '@angular/forms';
 import * as $ from 'jquery';
 import {Subscription} from 'rxjs';
 
-import {filters, IProduct} from '../../../../types';
+import {filters, categoryNames, Product} from '../../../../types';
 import {ProductFilter} from '../product-filter';
 import {ProductsService} from '../products.service';
 
@@ -13,28 +13,30 @@ import {ProductsService} from '../products.service';
   styleUrls: ['./products-feed.component.scss']
 })
 export class ProductsFeedComponent implements OnInit {
-  products: IProduct[] = [];
+  products: Product[] = [];
   sub: Subscription;
   loadingMore: boolean = false;
+  endOfFeed: boolean = false;
   filter: ProductFilter = new ProductFilter();
-  beforeControlle = new FormControl(this.filter.date.before);
-  afterControlle = new FormControl(this.filter.date.after);
+  beforeControl = new FormControl(this.filter.date.before);
+  afterControl = new FormControl(this.filter.date.after);
+  fullCategoryName = categoryNames;
 
   constructor(
-      private service: ProductsService, elementRef: ElementRef,
-      renderer: Renderer2) {
-    let thisPF = this;
-    let elem = $('#products');
-    renderer.listen(document, 'scroll', function() {
-      if ($(document).scrollTop() > 0.8 * $(document).height()) {
-        thisPF.loadMore();
-      }
-    });
-  }
+      private service: ProductsService,private elementRef: ElementRef,
+      private renderer: Renderer2) {
+    }
   ngOnInit() {
     let thisPF = this;
     this.sub = this.service.getProductsObserver().subscribe(products => {
       thisPF.products = products;
+    });
+    let elem = this.elementRef.nativeElement;
+    elem.height = screen.height * 2.5;
+    this.renderer.listen(elem, 'scroll', function() {
+      if ($(elem).scrollTop() > 0.8 * $(elem).height()) {
+        thisPF.loadMore();
+      }
     });
   }
   filterProducts() {
@@ -44,7 +46,7 @@ export class ProductsFeedComponent implements OnInit {
             .subscribe(products => this.products = products);
   }
   loadMore() {
-    if (this.loadingMore) {
+    if (this.loadingMore || this.endOfFeed) {
       return;
     }
     let thisPF = this;
@@ -54,6 +56,9 @@ export class ProductsFeedComponent implements OnInit {
                    .getProductsObserver(
                        this.products.length, null, this.filter.toMongoFilter())
                    .subscribe(products => {
+                     if (products.length === 0) {
+                       thisPF.endOfFeed = true;
+                     }
                      thisPF.products.push(...products);
                      thisPF.loadingMore = false;
                    });

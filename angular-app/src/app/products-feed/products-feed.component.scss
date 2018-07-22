@@ -1,3 +1,8 @@
-#products{
-    overflow-y: scroll
+:host{
+    overflow-y: scroll;
+    height: 150vh;
+}
+
+mat-form-field *{
+    display: block;
 }

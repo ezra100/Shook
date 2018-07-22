@@ -1,10 +1,14 @@
-import {MongoRegExp} from '../../../types';
+import * as moment from 'moment';
+import {Moment} from 'moment';
+
+import {Category, MongoRegExp} from '../../../types';
 
 class StringQuery {
-  query?: string = "";
+  query?: string = '';
   isRegexp: boolean = false;
   caseSensitive = false;
-  toMongoRegexp(stringToRegexpArray: boolean = true): MongoRegExp|string|undefined {
+  toMongoRegexp(stringToRegexpArray: boolean = true): MongoRegExp|string
+      |undefined {
     if (!this.query) {
       return undefined;
     }
@@ -13,50 +17,72 @@ class StringQuery {
         $regex: this.query, $options: this.caseSensitive ? '' : 'i'
       }
     }
-    if(stringToRegexpArray){
-        return  {$regex:
-            this.query
-                .split(/\s+/)
-                // escape regex characters
-                .map(
-                    (v: any) =>
-                        v.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'))
-                .join('|'),
-            $options: 'gi'}
+    if (stringToRegexpArray) {
+      return {
+        $regex: this.query
+            .split(/\s+/)
+            // escape regex characters
+            .map((v: any) => v.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'))
+            .join('|'),
+            $options: 'gi'
+      }
     }
     return this.query;
   }
 }
 
 export interface MongoProductFilter {
-  owner?: string, date?: {$lt?: Date, $gte?: Date}, title?: MongoRegExp|string,
-      link?: MongoRegExp|string,
+  owner?: string;
+  date?: {$lt?: Date; $gte?: Date};
+  title?: MongoRegExp|string;
+  link?: MongoRegExp|string;
+  category?: Category
 }
 
 export class ProductFilter {
-  owner?: string = "";
-  date: {before?: Date, after?: Date} = {};
+  owner?: string = '';
+  date: {before?: Moment, after?: Moment} = {};
   title?: StringQuery = new StringQuery();
   link?: StringQuery = new StringQuery();
+  category?: Category;
   toMongoFilter(): MongoProductFilter {
     let filter: MongoProductFilter = {};
     if (this.owner) {
       filter.owner = this.owner;
     }
     if (this.date.before) {
-      filter.date = { $lt: this.date.before }
+      filter.date = { $lt: this.date.before.toDate() }
     }
     if (this.date.after) {
       filter.date = filter.date || {};
-      filter.date.$gte = this.date.after;
+      filter.date.$gte = this.date.after.toDate();
     }
     if (this.title.query) {
       filter.title = this.title.toMongoRegexp();
     }
-    if(this.link.query){
-        filter.link = this.link.toMongoRegexp();
+    if (this.link.query) {
+      filter.link = this.link.toMongoRegexp();
+    }
+    if (this.category) {
+      filter.category = this.category;
     }
     return filter;
   }
 
+  stringify() {
+    return JSON.stringify(this);
+  }
+
+  constructor(parseString?: string) {
+    if (!parseString) {
+      return;
+    }
+    let obj: ProductFilter = JSON.parse(parseString);
+    if (obj.date) {
+      this.date.after = this.date.after && moment(<any>this.date.after);
+      this.date.before = this.date.before && moment(<any>this.date.before);
+    }
+    this.link = obj.link;
+    this.owner = obj.owner;
+  }
 }

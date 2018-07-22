@@ -1,12 +1,9 @@
-
-
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {from, Observable, Operator} from 'rxjs';
-import {MongoProductFilter} from "./product-filter"
-import {mergeMap} from 'rxjs/operators';
 
-import {IProduct} from '../../../types';
+import {Category, Product} from '../../../types';
+import {MongoProductFilter} from './product-filter';
 
 
 @Injectable({providedIn: 'root'})
@@ -15,32 +12,33 @@ export class ProductsService {
 
   getProductsObserver(
       offset: number = 0, limit: number = 100,
-      filter: MongoProductFilter = {} ): Observable<IProduct[]> 
-  {
-    let body: any = {offset, limit,filter: JSON.stringify(filter)};
+      filter: MongoProductFilter = {}): Observable<Product[]> {
+    let body: any = {offset, limit, filter: JSON.stringify(filter)};
     let params = new HttpParams({fromObject: body});
-    return this.http.get<IProduct[]>('/products/getLatest', {params});
+    return this.http.get<Product[]>('/products/getLatest', {params});
   }
-  addProduct(title: string, subtitle: string, link: URL, price: number):
-      Observable<IProduct> {
-    let product: IProduct = {title, subtitle, link: link.toString(), price};
-    return this.http.post<IProduct>('/products/add', product);
+  addProduct(
+      title: string, subtitle: string, link: URL, price: number,
+      category: Category): Observable<Product> {
+    let product:
+        Product = {title, subtitle, link: link.toString(), price, category};
+    return this.http.post<Product>('/products/add', product);
   }
   updateProduct(
-      id: string, title?: string, subtitle?: string, link?: URL,
-      price?: number) {
-    let product:
-        IProduct = {_id: id, title, subtitle, link: link.toString(), price};
-    return this.http.put<IProduct>('/products/update', product);
+      id: string, title?: string, subtitle?: string, link?: URL, price?: number,
+      category?: Category) {
+    let product: Product =
+        {_id: id, title, category, subtitle, link: link.toString(), price};
+    return this.http.put<Product>('/products/update', product);
   }
 
   getProductByID(id: string) {
-    return this.http.get<IProduct>(
+    return this.http.get<Product>(
         '/products/getByID', {params: new HttpParams({fromObject: {id}})});
   }
 
   deleteProduct(id: string) {
-    return this.http.delete<IProduct>(
+    return this.http.delete<Product>(
         '/products/getByID', {params: new HttpParams({fromObject: {id}})});
   }
 
@@ -50,6 +48,6 @@ export class ProductsService {
   }
 
   getMyFeed() {
-    return this.http.get<IProduct[]>('/products/myFeed');
+    return this.http.get<Product[]>('/products/myFeed');
   }
 }

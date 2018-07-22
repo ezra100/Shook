@@ -3,20 +3,20 @@ import * as express from 'express';
 import {LIMIT} from '../constants';
 import {db} from '../DB/MongoDB';
 import {helpers} from '../helpers';
-import {IProduct} from '../types';
+import {Product} from '../types';
 
 export var router = express.Router();
 
 router.post(
     '/add', async function(req: express.Request, res: express.Response) {
-      let product: IProduct = req.body;
+      let product: Product = req.body;
       product.owner = req.user._id;
       product = await db.addProduct(product);
       res.status(201).json(product);
     });
 
 router.put('/update', helpers.asyncWrapper(async function(req, res) {
-  let product: IProduct = req.body;
+  let product: Product = req.body;
 
   product = await db.updateProduct(product, req.user._id);
   res.status(201).json(product);
@@ -30,6 +30,14 @@ router.get('/getByID', helpers.asyncWrapper(async function(req, res) {
 
 router.get('/getLatest', helpers.asyncWrapper(async function(req, res) {
   let filter: any = JSON.parse(req.query.filter) || {};
+  if (filter.date) {
+    if (filter.date.$lt) {
+      filter.date.$lt = new Date(filter.date.$lt);
+    }
+    if (filter.date.$gte) {
+      filter.date.$gte = new Date(filter.date.$gte);
+    }
+  }
   let limit = Number(req.query.limit) || LIMIT;
   let offset = Number(req.query.offset || 0);
   res.json(await db.getLatestProducts(filter, offset, limit));

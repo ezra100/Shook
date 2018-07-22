@@ -10,6 +10,54 @@ export enum UserType {
   Admin = 4
 }
 
+export enum Category {
+  Animals,
+  Apparel,
+  Arts,
+  Baby,
+  Business,
+  Cameras,
+  Electronics,
+  Food,
+  Furniture,
+  Hardware,
+  Health,
+  Home,
+  Luggage,
+  Mature,
+  Media,
+  Office,
+  Religious,
+  Software,
+  Sporting,
+  Toys,
+  Vehicles,
+}
+
+export let categoryNames = [
+  'Animals & Pet Supplies',
+  'Apparel & Accessories',
+  'Arts & Entertainment',
+  'Baby & Toddler',
+  'Business & Industrial',
+  'Cameras & Optics',
+  'Electronics',
+  'Food, Beverages & Tobacco',
+  'Furniture',
+  'Hardware',
+  'Health & Beauty',
+  'Home & Garden',
+  'Luggage & Bags',
+  'Mature',
+  'Media',
+  'Office Supplies',
+  'Religious & Ceremonial',
+  'Software',
+  'Sporting Goods',
+  'Toys & Games',
+  'Vehicles & Parts',
+];
+
 export interface User {
   userType: UserType;
   firstName: string;
@@ -33,7 +81,7 @@ export interface UserAuthData {
 
 
 
-export interface IProduct {
+export interface Product {
   title: string;
   subtitle: string;
   link?: string;
@@ -41,6 +89,7 @@ export interface IProduct {
   date?: Date;
   price: number;
   owner?: string;  // publisher of the product - must exist in users collection
+  category: Category;
 }
 
 export interface IReview {
@@ -103,17 +152,12 @@ export interface Order {
       orderDate: Date, paid: boolean
 }
 
-export interface MongoRegExp{
-  $regex: string,
-  $options?: string
+export interface MongoRegExp {
+  $regex: string, $options?: string
 }
 export namespace filters {
-
   export interface ProductFilter {
-    owner?: string,
-    before?: Date,
-    after?: Date,
-    title?: MongoRegExp|string,
-    link?: MongoRegExp| string,
+    owner?: string, before?: Date, after?: Date, title?: MongoRegExp|string,
+        link?: MongoRegExp|string,
   }
 }
