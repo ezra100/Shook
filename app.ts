@@ -11,12 +11,12 @@ import * as auth from './auth/auth';
 import {passport} from './auth/passport';
 import {initDB} from './DB/data-generator';
 import {mongoConnection} from './DB/MongoDB';
+import * as chatRooms from './routers/ChatRooms';
 import * as comments from './routers/comments';
+import * as DMessages from './routers/DMessages';
 import * as products from './routers/products';
 import * as reviews from './routers/reviews';
 import * as users from './routers/users';
-import * as chatRooms from './routers/ChatRooms';
-import * as DMessages from './routers/DMessages';
 
 // init the data base with fake data
 initDB();
@@ -53,10 +53,15 @@ app.use('/comments', comments.router);
 app.use('/reviews', reviews.router);
 app.use('/chatRooms', chatRooms.router);
 app.use('/DMessages', DMessages.router);
+// app.use('/', express.static(path.join(__dirname, 'public')));
 // for main page and scripts
-app.use('/', express.static(path.join(__dirname, 'public')));
+app.use(
+    '/',
+    express.static(path.join(__dirname, 'angular-app', 'dist', 'angular-app')));
 // for routes of the angular app
-app.use('/*', express.static(path.join(__dirname, 'angular-app','dist', 'angular-app')));
+app.use(
+    '/*',
+    express.static(path.join(__dirname, 'angular-app', 'dist', 'angular-app')));
 
 
 export default app;
