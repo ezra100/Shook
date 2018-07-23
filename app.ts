@@ -53,7 +53,9 @@ app.use('/comments', comments.router);
 app.use('/reviews', reviews.router);
 app.use('/chatRooms', chatRooms.router);
 app.use('/DMessages', DMessages.router);
-//app.use('/', express.static(path.join(__dirname, 'public')));
+// for main page and scripts
+app.use('/', express.static(path.join(__dirname, 'public')));
+// for routes of the angular app
 app.use('/*', express.static(path.join(__dirname, 'angular-app','dist', 'angular-app')));
 
 
