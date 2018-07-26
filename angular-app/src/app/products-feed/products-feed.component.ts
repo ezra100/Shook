@@ -3,13 +3,13 @@ import {ObservableMedia} from '@angular/flex-layout';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import * as $ from 'jquery';
+import {Moment} from 'moment';
 import {Observable, Subscription} from 'rxjs';
-import {map, startWith} from 'rxjs/operators';
+import {map, startWith, first} from 'rxjs/operators';
 
 import {categoryNames, filters, Product} from '../../../../types';
 import {ProductFilter} from '../product-filter';
 import {ProductsService} from '../products.service';
-
 
 
 @Component({
@@ -21,13 +21,11 @@ export class ProductsFeedComponent implements OnInit {
   products: Product[] = [];
   sub: Subscription;
   loadingMore: boolean = false;
-  endOfFeed: boolean = false;
+  reachedEndOfFeed: boolean = false;
   filter: ProductFilter = new ProductFilter();
-  beforeControl = new FormControl(this.filter.date.before);
-  afterControl = new FormControl(this.filter.date.after);
   fullCategoryName = categoryNames;
-  reload = false;
   public cols: number;
+  timeoutID: NodeJS.Timer;
 
   constructor(
       private service: ProductsService, private elementRef: ElementRef,
@@ -41,11 +39,8 @@ export class ProductsFeedComponent implements OnInit {
              number} = {['xs']: 1, ['sm']: 2, ['md']: 3, ['lg']: 4, ['xl']: 5};
     this.observableMedia.subscribe(x => this.cols = breakpoints[x.mqAlias]);
 
-    if (this.reload) {
-      return;
-    }
     let thisPF = this;
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.pipe(first()).subscribe(params => {
       if (params.filter) {
         this.filter = new ProductFilter(params.filter);
         this.filterProducts(false);
@@ -62,22 +57,30 @@ export class ProductsFeedComponent implements OnInit {
       }
     });
   }
-  filterProducts(navigate: boolean = true) {
+
+  filterChanged(timeout : number = 700) {
+    // clear the previous timeout
+    clearTimeout(this.timeoutID);
+    // set a new timeout
+    this.timeoutID = setTimeout(() => this.filterProducts(true, this), timeout);
+  }
+
+  filterProducts(navigate: boolean = true, thisPF = this) {
     if (navigate) {
-      this.reload = true;
       let queryParams: Params = {filter: this.filter.stringify()};
-      this.router.navigate(
-          [], {relativeTo: this.route, replaceUrl: true, queryParams});
+      thisPF.router.navigate(
+          [], {relativeTo: thisPF.route, replaceUrl: true, queryParams});
     }
-    this.sub && this.sub.unsubscribe();
-    this.sub =
-        this.service.getProductsObserver(0, null, this.filter.toMongoFilter())
+    thisPF.sub && thisPF.sub.unsubscribe();
+    thisPF.sub =
+        thisPF.service
+            .getProductsObserver(0, null, thisPF.filter.toMongoFilter())
             .subscribe(products => {
-              this.products = products;
+              thisPF.products = products;
             });
   }
   loadMore() {
-    if (this.loadingMore || this.endOfFeed) {
+    if (this.loadingMore || this.reachedEndOfFeed) {
       return;
     }
     let thisPF = this;
@@ -88,7 +91,7 @@ export class ProductsFeedComponent implements OnInit {
                        this.products.length, null, this.filter.toMongoFilter())
                    .subscribe(products => {
                      if (products.length === 0) {
-                       thisPF.endOfFeed = true;
+                       thisPF.reachedEndOfFeed = true;
                      }
                      thisPF.products.push(...products);
                      thisPF.loadingMore = false;

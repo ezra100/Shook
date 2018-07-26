@@ -1,7 +1,13 @@
 mat-card-subtitle{
     text-overflow: ellipsis;
-    height: auto;
+    word-wrap: break-word;
+    overflow: hidden;
+    max-height: 25%;
 }
+
 mat-card{
-    margin:0.5em;
+    // we need to specify it again to use the percentage in the subtitle
+    height: 15em;
+    margin: 2px;
+    margin-bottom: 10px;
 }

@@ -9,6 +9,9 @@ import {ProductsService} from './products.service';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+  ngOnInit(): void {
+
+  }
   title = 'Shook';
 }

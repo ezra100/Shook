@@ -9,46 +9,43 @@
 
     </mat-expansion-panel-header>
     <button mat-button (click)="filterProducts()">Filter</button>
-
-    Date:
-    <mat-form-field>
-        <input matInput [min]="filter.date.after" #beforeInput [(ngModel)]="filter.date.before" [formControl]="beforeControl" [matDatepicker]="beforePicker"
-            placeholder="Before">
-        <mat-datepicker-toggle matSuffix [for]="beforePicker"></mat-datepicker-toggle>
-        <mat-datepicker #beforePicker></mat-datepicker>
-    </mat-form-field>
-    <mat-form-field>
-        <input matInput #afterInput [max]="filter.date.before" [(ngModel)]="filter.date.after" [formControl]="afterControl" [matDatepicker]="afterPicker"
-            placeholder="After">
-        <mat-datepicker-toggle matSuffix [for]="afterPicker"></mat-datepicker-toggle>
-        <mat-datepicker #afterPicker></mat-datepicker>
-    </mat-form-field>
+    <div>
+        Date:
+        <mat-form-field>
+            <input matInput [min]="filter.date.after" #beforeInput [(ngModel)]="filter.date.before" (ngModelChange)="filterChanged()" [matDatepicker]="beforePicker" placeholder="Before">
+            <mat-datepicker-toggle matSuffix [for]="beforePicker"></mat-datepicker-toggle>
+            <mat-datepicker #beforePicker></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field>
+            <input matInput #afterInput [max]="filter.date.before"  [(ngModel)]="filter.date.after" (ngModelChange)="filterChanged()" [matDatepicker]="afterPicker" placeholder="After">
+            <mat-datepicker-toggle matSuffix [for]="afterPicker"></mat-datepicker-toggle>
+            <mat-datepicker #afterPicker></mat-datepicker>
+        </mat-form-field>
+    </div>
     <mat-form-field>
         <label [for]="title">Title:
-            <input matInput [(ngModel)]="filter.title.query" #title>
+            <input matInput (ngModelChange)="filterChanged()" [(ngModel)]="filter.title.query"  #title>
         </label>
-        <mat-checkbox [(ngModel)]="filter.title.isRegexp">Regular Expression</mat-checkbox>
-        <mat-checkbox *ngIf="filter.title.isRegexp" [(ngModel)]="filter.title.caseSensitive">Case Sensitive</mat-checkbox>
+        <mat-checkbox (ngModelChange)="filterChanged()" [(ngModel)]="filter.title.isRegexp">Regular Expression</mat-checkbox>
+        <mat-checkbox *ngIf="filter.title.isRegexp" (ngModelChange)="filterChanged()" [(ngModel)]="filter.title.caseSensitive">Case Sensitive</mat-checkbox>
     </mat-form-field>
     <mat-form-field>
         <label [for]="link">Link:
-            <input matInput [(ngModel)]="filter.link.query" #link>
+            <input matInput (ngModelChange)="filterChanged()"  [(ngModel)]="filter.link.query" #link>
         </label>
-        <mat-checkbox [(ngModel)]="filter.link.isRegexp">Regular Expression</mat-checkbox>
-        <mat-checkbox *ngIf="filter.link.isRegexp" [(ngModel)]="filter.link.caseSensitive">Case Sensitive</mat-checkbox>
+        <mat-checkbox (ngModelChange)="filterChanged()" [(ngModel)]="filter.link.isRegexp">Regular Expression</mat-checkbox>
+        <mat-checkbox *ngIf="filter.link.isRegexp" (ngModelChange)="filterChanged()" [(ngModel)]="filter.link.caseSensitive">Case Sensitive</mat-checkbox>
     </mat-form-field>
     <mat-form-field>
         <label [for]="ownerInput">Owner (Publisher):
-            <input matInput [(ngModel)]="filter.owner" #ownerInput>
+            <input matInput [(ngModel)]="filter.owner" (ngModelChange)="filterChanged()" #ownerInput>
         </label>
     </mat-form-field>
     <mat-form-field>
-        <label [for]="categoryInput">Category:
-            <input matInput [(ngModel)]="filter.owner" #categoryInput>
-        </label>
-    </mat-form-field>
-    <mat-form-field>
-        <mat-select placeholder="Category" [(ngModel)]="filter.category">
+        <mat-select placeholder="Category" (ngModelChange)="filterChanged(0)" [(ngModel)]="filter.category">
+            <mat-option [value]="">
+                None
+            </mat-option>
             <mat-option *ngFor="let category of fullCategoryName; let i = index" [value]="i">
                 {{category}}
             </mat-option>
@@ -56,7 +53,7 @@
     </mat-form-field>
 </mat-expansion-panel>
 <mat-divider></mat-divider>
-<mat-grid-list class="m-2"  [cols]="cols" gutterSize="2rem">
+<mat-grid-list class="m-2" rowHeight="15em" [cols]="cols" gutterSize="0.5rem">
     <mat-grid-tile *ngFor="let product of products">
         <app-product [product]="product">
         </app-product>
