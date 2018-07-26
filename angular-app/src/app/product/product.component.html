@@ -8,11 +8,9 @@
   <mat-card-subtitle>
     {{ product.price }} ₪
   </mat-card-subtitle>
-  <div class="mx-1"> 
-   Owner: {{ product.owner }}
-    <br> 
-    Date: {{ product.date | date : "dd.MM.y" }}
-    <br>
-    Category: {{ categoryNames[product.category]}}
-  </div>
+  <mat-card-content>
+      Owner: {{ product.owner }}
+      <br> Date: {{ product.date | date : "dd.MM.y" }}
+      <br> Category: {{ categoryNames[product.category]}}
+  </mat-card-content>
 </mat-card>
