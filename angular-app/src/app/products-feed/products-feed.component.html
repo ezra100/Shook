@@ -12,26 +12,35 @@
     <div>
         Date:
         <mat-form-field>
-            <input matInput [min]="filter.date.after" #beforeInput [(ngModel)]="filter.date.before" (ngModelChange)="filterChanged()" [matDatepicker]="beforePicker" placeholder="Before">
+            <input matInput [min]="filter.date.after" #beforeInput [(ngModel)]="filter.date.before" (ngModelChange)="filterChanged()"
+                [matDatepicker]="beforePicker" placeholder="Before">
             <mat-datepicker-toggle matSuffix [for]="beforePicker"></mat-datepicker-toggle>
             <mat-datepicker #beforePicker></mat-datepicker>
         </mat-form-field>
         <mat-form-field>
-            <input matInput #afterInput [max]="filter.date.before"  [(ngModel)]="filter.date.after" (ngModelChange)="filterChanged()" [matDatepicker]="afterPicker" placeholder="After">
+            <input matInput #afterInput [max]="filter.date.before" [(ngModel)]="filter.date.after" (ngModelChange)="filterChanged()"
+                [matDatepicker]="afterPicker" placeholder="After">
             <mat-datepicker-toggle matSuffix [for]="afterPicker"></mat-datepicker-toggle>
             <mat-datepicker #afterPicker></mat-datepicker>
         </mat-form-field>
     </div>
     <mat-form-field>
         <label [for]="title">Title:
-            <input matInput (ngModelChange)="filterChanged()" [(ngModel)]="filter.title.query"  #title>
+            <input matInput (ngModelChange)="filterChanged()" [(ngModel)]="filter.title.query" #title>
         </label>
         <mat-checkbox (ngModelChange)="filterChanged()" [(ngModel)]="filter.title.isRegexp">Regular Expression</mat-checkbox>
         <mat-checkbox *ngIf="filter.title.isRegexp" (ngModelChange)="filterChanged()" [(ngModel)]="filter.title.caseSensitive">Case Sensitive</mat-checkbox>
     </mat-form-field>
     <mat-form-field>
+        <label [for]="subtitle">Subtitle:
+            <input matInput (ngModelChange)="filterChanged()" [(ngModel)]="filter.subtitle.query" #subtitle>
+        </label>
+        <mat-checkbox (ngModelChange)="filterChanged()" [(ngModel)]="filter.subtitle.isRegexp">Regular Expression</mat-checkbox>
+        <mat-checkbox *ngIf="filter.subtitle.isRegexp" (ngModelChange)="filterChanged()" [(ngModel)]="filter.subtitle.caseSensitive">Case Sensitive</mat-checkbox>
+    </mat-form-field>
+    <mat-form-field>
         <label [for]="link">Link:
-            <input matInput (ngModelChange)="filterChanged()"  [(ngModel)]="filter.link.query" #link>
+            <input matInput (ngModelChange)="filterChanged()" [(ngModel)]="filter.link.query" #link>
         </label>
         <mat-checkbox (ngModelChange)="filterChanged()" [(ngModel)]="filter.link.isRegexp">Regular Expression</mat-checkbox>
         <mat-checkbox *ngIf="filter.link.isRegexp" (ngModelChange)="filterChanged()" [(ngModel)]="filter.link.caseSensitive">Case Sensitive</mat-checkbox>
@@ -50,6 +59,15 @@
                 {{category}}
             </mat-option>
         </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+        Price:
+        <label [for]="priceMinInput">Min:
+            <input matInput type="number" [max]="filter.price.max" [(ngModel)]="filter.price.min" (ngModelChange)="filterChanged()" #priceMinInput>
+        </label>
+        <label [for]="priceMaxInput">Max:
+            <input matInput type="number" [min]="filter.price.min" [(ngModel)]="filter.price.max" (ngModelChange)="filterChanged()" #priceMaxInput>
+        </label>
     </mat-form-field>
 </mat-expansion-panel>
 <mat-divider></mat-divider>

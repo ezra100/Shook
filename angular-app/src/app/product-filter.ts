@@ -35,14 +35,18 @@ export interface MongoProductFilter {
   owner?: string;
   date?: {$lt?: Date; $gte?: Date};
   title?: MongoRegExp|string;
+  subtitle?: MongoRegExp|string;
+  price?: {$gte?: number, $lte?: number};
   link?: MongoRegExp|string;
-  category?: Category
+  category?: Category;
 }
 
 export class ProductFilter {
   owner?: string = '';
   date: {before?: Moment, after?: Moment} = {};
+  price: {min?: number, max?: number} = {};
   title?: StringQuery = new StringQuery();
+  subtitle?: StringQuery = new StringQuery();
   link?: StringQuery = new StringQuery();
   category?: Category;
   toMongoFilter(): MongoProductFilter {
@@ -60,11 +64,21 @@ export class ProductFilter {
     if (this.title.query) {
       filter.title = this.title.toMongoRegexp();
     }
+    if(this.subtitle.query){
+      filter.subtitle = this.subtitle.toMongoRegexp();
+    }
     if (this.link.query) {
       filter.link = this.link.toMongoRegexp();
     }
-    if (this.category) {
+    if (this.category || this.category === 0) {
       filter.category = this.category;
+    }
+    if(this.price.min){
+      filter.price = {$gte: this.price.min};
+    }
+    if(this.price.max){
+      filter.price = filter.price || {};
+      filter.price.$lte = this.price.max;
     }
     return filter;
   }
@@ -85,5 +99,7 @@ export class ProductFilter {
     this.link = obj.link;
     this.owner = obj.owner;
     this.category = obj.category;
+    this.price = obj.price || {};
+    this.subtitle = obj.subtitle;
   }
 }
