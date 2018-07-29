@@ -1,3 +1,40 @@
-<p>
-  add-product works!
-</p>
+<h1 mat-dialog-title>Add Product</h1>
+<form (ngSubmit)="productForm.form.valid && addProduct()" id="productForm" #productForm="ngForm">
+  <div mat-dialog-content>
+
+    <mat-form-field>
+      <label [for]="title">Title:
+        <input name="title" matInput required [(ngModel)]="product.title" #title>
+      </label>
+    </mat-form-field>
+    <mat-form-field>
+      <label [for]="subtitle">Subtitle:
+        <input name="subtitle" matInput required [(ngModel)]="product.subtitle" #subtitle>
+      </label>
+    </mat-form-field>
+    <mat-form-field>
+      <label [for]="link">Link:
+        <input name="link" matInput type="url" required [(ngModel)]="product.link" #link>
+      </label>
+    </mat-form-field>
+    <mat-form-field>
+      <label [for]="price">Price:
+        <input name="price" matInput type="number" required min="0" [(ngModel)]="product.Price" #link>
+      </label>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-select placeholder="Category" name="category" [(ngModel)]="product.category" required>
+        <mat-option [value]="">
+          Select...
+        </mat-option>
+        <mat-option *ngFor="let category of fullCategoryName; let i = index" [value]="i">
+          {{category}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-button (click)="dialogRef.close()">Cancel</button>
+    <button mat-raised-button color="primary" cdkFocusInitial>Add</button>
+  </div>
+</form>

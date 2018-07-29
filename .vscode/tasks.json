@@ -7,10 +7,10 @@
             "label": "build",
             "type": "shell",
             "windows": {
-                "command": "time/T && tsc -p tsconfig.json",
+                "command": "time/T && tsc -w -p tsconfig.json",
             },
             "linux": {
-                "command": "export PATH=\"${PATH}:/home/es/.npm-global/bin\" &&date && tsc -p tsconfig.json",
+                "command": "export PATH=\"${PATH}:/home/es/.npm-global/bin\" &&date && tsc -w -p tsconfig.json",
             },
             "problemMatcher": [
                 "$tsc"

@@ -3,11 +3,12 @@
         <mat-panel-title>
             Filter Products
         </mat-panel-title>
+
         <mat-panel-description>
             {{panelOpenState ? 'Filter': 'Click to expand' }}
         </mat-panel-description>
-
     </mat-expansion-panel-header>
+    <!--todo: remove this button later-->
     <button mat-button (click)="filterProducts()">Filter</button>
     <div>
         Date:
@@ -70,6 +71,9 @@
         </label>
     </mat-form-field>
 </mat-expansion-panel>
+<button class="m-2" mat-mini-fab (click)="openDialog()">
+    <mat-icon color="primary" aria-label="Example icon-button with a heart icon" svgIcon="add"></mat-icon>
+</button>
 <mat-divider></mat-divider>
 <mat-grid-list class="m-2" rowHeight="15em" [cols]="cols" gutterSize="0.5rem">
     <mat-grid-tile *ngFor="let product of products">

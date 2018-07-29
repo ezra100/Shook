@@ -6,3 +6,11 @@
 mat-form-field *{
     display: block;
 }
+
+mat-expansion-panel{
+    width: 90%;
+    display: inline-block;
+}
+mat-icon{
+    margin-bottom: 2rem;
+}

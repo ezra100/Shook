@@ -17,11 +17,7 @@ export class ProductsService {
     let params = new HttpParams({fromObject: body});
     return this.http.get<Product[]>('/products/getLatest', {params});
   }
-  addProduct(
-      title: string, subtitle: string, link: URL, price: number,
-      category: Category): Observable<Product> {
-    let product:
-        Product = {title, subtitle, link: link.toString(), price, category};
+  addProduct(product: Product): Observable<Product> {
     return this.http.post<Product>('/products/add', product);
   }
   updateProduct(

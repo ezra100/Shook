@@ -10,8 +10,12 @@ import {ProductsService} from './products.service';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
+  resizeTimeout: NodeJS.Timer;
   ngOnInit(): void {
-
+    $(window).resize(() => {
+      clearTimeout(this.resizeTimeout);
+      this.resizeTimeout = setTimeout(() => $('.product-subtitle').dotdotdot(), 1000)
+    });
   }
   title = 'Shook';
 }

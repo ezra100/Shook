@@ -1,13 +1,16 @@
 import {Component, ElementRef, Input, OnInit, Renderer, Renderer2} from '@angular/core';
 import {ObservableMedia} from '@angular/flex-layout';
 import {FormControl} from '@angular/forms';
+import {MatDialog, MatIconRegistry} from '@angular/material';
+import {DomSanitizer} from '@angular/platform-browser';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import * as $ from 'jquery';
 import {Moment} from 'moment';
 import {Observable, Subscription} from 'rxjs';
-import {map, startWith, first} from 'rxjs/operators';
+import {first, map, startWith} from 'rxjs/operators';
 
 import {categoryNames, filters, Product} from '../../../../types';
+import {AddProductComponent} from '../add-product/add-product.component';
 import {ProductFilter} from '../product-filter';
 import {ProductsService} from '../products.service';
 
@@ -26,12 +29,17 @@ export class ProductsFeedComponent implements OnInit {
   fullCategoryName = categoryNames;
   public cols: number;
   timeoutID: NodeJS.Timer;
-
+  addedProduct: Product = {};
   constructor(
       private service: ProductsService, private elementRef: ElementRef,
       private renderer: Renderer2, private router: Router,
-      private route: ActivatedRoute, private observableMedia: ObservableMedia) {
-  }
+      private route: ActivatedRoute, private observableMedia: ObservableMedia,
+      public dialog: MatDialog, iconRegistry: MatIconRegistry,
+      sanitizer: DomSanitizer) {
+        iconRegistry.addSvgIcon(
+          'add',
+          sanitizer.bypassSecurityTrustResourceUrl('assets/icons/sharp-add-24px.svg'));
+      }
   ngOnInit() {
     // credit http://disq.us/p/1ouo8m4
     const breakpoints:
@@ -58,7 +66,7 @@ export class ProductsFeedComponent implements OnInit {
     });
   }
 
-  filterChanged(timeout : number = 700) {
+  filterChanged(timeout: number = 700) {
     // clear the previous timeout
     clearTimeout(this.timeoutID);
     // set a new timeout
@@ -96,5 +104,8 @@ export class ProductsFeedComponent implements OnInit {
                      thisPF.products.push(...products);
                      thisPF.loadingMore = false;
                    });
+  }
+  openDialog() {
+    this.dialog.open(AddProductComponent, {data: this.addedProduct});
   }
 }

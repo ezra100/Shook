@@ -82,14 +82,14 @@ export interface UserAuthData {
 
 
 export interface Product {
-  title: string;
-  subtitle: string;
+  title?: string;
+  subtitle?: string;
   link?: string;
   _id?: string;
   date?: Date;
-  price: number;
+  price?: number;
   owner?: string;  // publisher of the product - must exist in users collection
-  category: Category;
+  category?: Category;
 }
 
 export interface IReview {
