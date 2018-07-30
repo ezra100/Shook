@@ -1,0 +1,33 @@
+import {Component, OnInit} from '@angular/core';
+import {MatDialog, MatIconRegistry, MatSnackBar} from '@angular/material';
+import {DomSanitizer} from '@angular/platform-browser';
+
+import {AuthService} from '../auth.service';
+import {LoginFormComponent} from '../login-form/login-form.component';
+
+@Component({
+  selector: 'app-header',
+  templateUrl: './header.component.html',
+  styleUrls: ['./header.component.scss']
+})
+export class HeaderComponent implements OnInit {
+  auth = AuthService;
+  constructor(
+      public dialog: MatDialog, iconRegistry: MatIconRegistry,
+      sanitizer: DomSanitizer, private authService: AuthService,
+      public snackBar: MatSnackBar) {
+    iconRegistry.addSvgIcon(
+        'account',
+        sanitizer.bypassSecurityTrustResourceUrl(
+            'assets/icons/sharp-account_box-24px.svg'));
+  }
+
+  ngOnInit() {}
+  openLoginDialog() {
+    this.dialog.open(LoginFormComponent);
+  }
+  logout() {
+    this.authService.logout().subscribe(
+        msg => this.snackBar.open(msg, 'Close', {duration: 1500}), err => this.snackBar.open(err.message, "OK", {duration: 1500}));
+  }
+}

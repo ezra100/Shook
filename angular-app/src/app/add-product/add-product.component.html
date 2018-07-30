@@ -1,26 +1,17 @@
 <h1 mat-dialog-title>Add Product</h1>
-<form (ngSubmit)="productForm.form.valid && addProduct()" id="productForm" #productForm="ngForm">
+<form (ngSubmit)="productForm.form.valid && f.reportValidity() && addProduct()" id="productForm" #f #productForm="ngForm">
   <div mat-dialog-content>
-
     <mat-form-field>
-      <label [for]="title">Title:
-        <input name="title" matInput required [(ngModel)]="product.title" #title>
-      </label>
+      <input name="title" placeholder="Title" pattern=".{6,}" matInput required [(ngModel)]="product.title" #title>
     </mat-form-field>
     <mat-form-field>
-      <label [for]="subtitle">Subtitle:
-        <input name="subtitle" matInput required [(ngModel)]="product.subtitle" #subtitle>
-      </label>
+      <input name="subtitle" placeholder="Subtitle" matInput required [(ngModel)]="product.subtitle" #subtitle>
     </mat-form-field>
     <mat-form-field>
-      <label [for]="link">Link:
-        <input name="link" matInput type="url" required [(ngModel)]="product.link" #link>
-      </label>
+      <input type="url" name="link" placeholder="Link" matInput required [(ngModel)]="product.link" #link>
     </mat-form-field>
     <mat-form-field>
-      <label [for]="price">Price:
-        <input name="price" matInput type="number" required min="0" [(ngModel)]="product.Price" #link>
-      </label>
+      <input name="price" placeholder="Price" matInput type="number" required min="0" [(ngModel)]="product.price" #link>
     </mat-form-field>
     <mat-form-field>
       <mat-select placeholder="Category" name="category" [(ngModel)]="product.category" required>

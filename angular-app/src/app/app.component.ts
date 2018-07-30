@@ -1,7 +1,9 @@
 import {Component, OnInit} from '@angular/core';
+import {MatSnackBar} from '@angular/material';
 
 import {Product} from '../../../types';
 
+import {AuthService} from './auth.service';
 import {ProductsService} from './products.service';
 
 @Component({
@@ -11,11 +13,17 @@ import {ProductsService} from './products.service';
 })
 export class AppComponent implements OnInit {
   resizeTimeout: NodeJS.Timer;
+  constructor(private authService: AuthService, public snackBar: MatSnackBar) {}
   ngOnInit(): void {
     $(window).resize(() => {
       clearTimeout(this.resizeTimeout);
-      this.resizeTimeout = setTimeout(() => $('.product-subtitle').dotdotdot(), 1000)
+      this.resizeTimeout =
+          setTimeout(() => $('.product-subtitle').dotdotdot(), 1000)
     });
+    this.authService.tryGetStoredLogin().subscribe(
+        user => this.snackBar.open(
+            'Welcome ' + user.firstName, 'Close', {duration: 1500}),
+        err => console.log('User not logged in yet') && console.log(err));
   }
   title = 'Shook';
 }

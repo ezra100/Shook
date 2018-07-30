@@ -1,7 +1,7 @@
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import * as jsSHA from 'jssha';
-import {Observable} from 'rxjs';
+import {from, Observable} from 'rxjs';
 import {mergeMap} from 'rxjs/operators';
 
 import {User} from '../../../types';
@@ -23,20 +23,29 @@ type Salts = {
     constructor(private http: HttpClient) {}
 
     login(username: string, password: string): Observable<User> {
-      let obs = this.http.get<Salts>('/auth/salts')
-                    .pipe<User>(mergeMap((salts: Salts) => {
-                      let hashedPassword = sha512(
-                          sha512(password, salts.permSalt), salts.tempSalt);
-                      return this.http.put<User>(
-                          '/auth/login', {username, password: hashedPassword});
-                    }));
+      let saltObs = this.http.post<Salts>('/auth/salts', {username});
+      let obs =
+          from(saltObs.toPromise()).pipe<User>(mergeMap((salts: Salts) => {
+            console.log('salts2:' + salts.tempSalt);
+            let hashedPassword =
+                sha512(sha512(password, salts.permSalt), salts.tempSalt);
+            return this.http.put<User>(
+                '/auth/login', {username, password: hashedPassword});
+          }));
       obs.subscribe(user => AuthService.currentUser = user);
       return obs;
     }
 
     logout() {
-      let obs =  this.http.put('/auth/logout', {});
-      obs.subscribe(res => AuthService.currentUser = null)
+      let obs = this.http.put('/auth/logout', {}, {responseType: 'text'});
+      obs.subscribe(() => AuthService.currentUser = null);
+      return obs;
+    }
+
+    tryGetStoredLogin(): Observable<User> {
+      let obs = this.http.get<User>('/users/me');
+      obs.subscribe(user => AuthService.currentUser = user);
+      return obs;
     }
 
     requestPasswordReset(email?: string, username?: string) {

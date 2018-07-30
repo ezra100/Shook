@@ -8,12 +8,14 @@ import {Product} from '../types';
 export var router = express.Router();
 
 router.post(
-    '/add', async function(req: express.Request, res: express.Response) {
-      let product: Product = req.body;
-      product.owner = req.user._id;
-      product = await db.addProduct(product);
-      res.status(201).json(product);
-    });
+    '/add',
+    helpers.asyncWrapper(
+        async function(req: express.Request, res: express.Response) {
+          let product: Product = req.body;
+          product.owner = req.user._id;
+          product = await db.addProduct(product);
+          res.status(201).json(product);
+        }));
 
 router.put('/update', helpers.asyncWrapper(async function(req, res) {
   let product: Product = req.body;

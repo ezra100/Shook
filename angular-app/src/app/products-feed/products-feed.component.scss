@@ -3,8 +3,9 @@
     height: 150vh;
 }
 
-mat-form-field *{
-    display: block;
+mat-form-field{
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
 }
 
 mat-expansion-panel{
@@ -13,4 +14,8 @@ mat-expansion-panel{
 }
 mat-icon{
     margin-bottom: 2rem;
+}
+
+.filter-grid mat-grid-tile{
+    border-right: rgba(128, 128, 128, 0.34) dashed 0.05rem
 }

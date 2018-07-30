@@ -1,3 +1,17 @@
-<p>
-  login-form works!
-</p>
+<h1 mat-dialog-title>Login</h1>
+<form (ngSubmit)="loginForm.form.valid && login()" id="loginForm" #loginForm="ngForm">
+  <div mat-dialog-content>
+
+    <mat-form-field>
+        <input name="username" type="text" placeholder="Username" matInput required [(ngModel)]="username">
+    </mat-form-field>
+    <mat-form-field>
+        <input name="password" type="password" placeholder="Password" matInput required [(ngModel)]="password">
+    </mat-form-field>
+    
+  </div>
+  <div mat-dialog-actions>
+    <button mat-button (click)="dialogRef.close()">Cancel</button>
+    <button mat-raised-button color="primary" cdkFocusInitial>Login</button>
+  </div>
+</form>
