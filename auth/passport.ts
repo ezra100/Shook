@@ -10,7 +10,7 @@ export let tempSalts: {[username: string]: string} = {};
 
 
 passportMod.use(new Strategy(async function(username, password, cb) {
-  db.getUserAuthData(username)
+ return await db.getUserAuthData(username)
       .then(async (userAuthData) => {
         if (userAuthData) {
           let hashedPassword =
@@ -21,7 +21,9 @@ passportMod.use(new Strategy(async function(username, password, cb) {
         }
         return cb(null, false, {message: 'Wrong username or password'});
       })
-      .catch(cb);
+      .catch(err => 
+        {return cb(null, false, {message: 'Wrong username or password'});}
+      );
 }));
 
 passportMod.serializeUser(function(user: User, cb) {

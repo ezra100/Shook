@@ -11,6 +11,7 @@ import {first, map, startWith} from 'rxjs/operators';
 
 import {categoryNames, filters, Product} from '../../../../types';
 import {AddProductComponent} from '../add-product/add-product.component';
+import {AuthService} from '../auth.service';
 import {ProductFilter} from '../product-filter';
 import {ProductsService} from '../products.service';
 
@@ -30,16 +31,19 @@ export class ProductsFeedComponent implements OnInit {
   public cols: number;
   timeoutID: NodeJS.Timer;
   addedProduct: Product = {};
+  authService = AuthService;
+  panelOpenState: boolean = false;
   constructor(
       private service: ProductsService, private elementRef: ElementRef,
       private renderer: Renderer2, private router: Router,
       private route: ActivatedRoute, private observableMedia: ObservableMedia,
       public dialog: MatDialog, iconRegistry: MatIconRegistry,
       sanitizer: DomSanitizer) {
-        iconRegistry.addSvgIcon(
-          'add',
-          sanitizer.bypassSecurityTrustResourceUrl('assets/icons/sharp-add-24px.svg'));
-      }
+    iconRegistry.addSvgIcon(
+        'add',
+        sanitizer.bypassSecurityTrustResourceUrl(
+            'assets/icons/sharp-add-24px.svg'));
+  }
   ngOnInit() {
     // credit http://disq.us/p/1ouo8m4
     const breakpoints:

@@ -25,8 +25,7 @@ type Salts = {
     login(username: string, password: string): Observable<User> {
       let saltObs = this.http.post<Salts>('/auth/salts', {username});
       let obs =
-          from(saltObs.toPromise()).pipe<User>(mergeMap((salts: Salts) => {
-            console.log('salts2:' + salts.tempSalt);
+          from(saltObs./*to prevent double request*/toPromise()).pipe<User>(mergeMap((salts: Salts) => {
             let hashedPassword =
                 sha512(sha512(password, salts.permSalt), salts.tempSalt);
             return this.http.put<User>(

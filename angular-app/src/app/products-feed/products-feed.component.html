@@ -87,7 +87,7 @@
             </div>
         
 </mat-expansion-panel>
-<button class="m-2" mat-mini-fab (click)="openDialog()">
+<button *ngIf="authService.currentUser" class="m-2" mat-mini-fab (click)="openDialog()">
     <mat-icon color="primary" aria-label="Add product" svgIcon="add"></mat-icon>
 </button>
 <mat-divider></mat-divider>

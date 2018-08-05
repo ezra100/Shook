@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar} from '@angular/material';
-import { AuthService } from '../auth.service';
+import {Component, OnInit} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar, MatSnackBarRef, SimpleSnackBar} from '@angular/material';
+
+import {AuthService} from '../auth.service';
 
 @Component({
   selector: 'app-login-form',
@@ -8,20 +9,22 @@ import { AuthService } from '../auth.service';
   styleUrls: ['./login-form.component.scss']
 })
 export class LoginFormComponent implements OnInit {
-  username: string = "";
-  password: string = "";
-  constructor(public dialogRef: MatDialogRef<LoginFormComponent>, public authService: AuthService, public snackBar: MatSnackBar ) { }
+  username: string = '';
+  password: string = '';
+  lastSnackbar: MatSnackBarRef<SimpleSnackBar> = null;
+  constructor(
+      public dialogRef: MatDialogRef<LoginFormComponent>,
+      public authService: AuthService, public snackBar: MatSnackBar) {}
 
-  ngOnInit() {
-  }
-  login(){
-    this.authService.login(this.username, this.password).subscribe(
-      user => {
-        this.snackBar.open("Welcome " + user.firstName, "Close", {duration: 1500});
-        this.dialogRef.close();
-      }, err => {
-        this.snackBar.open(err.status === 401? "Wrong username or password" : err.message, "OK", {duration: 2000})
-      }
-    );
+  ngOnInit() {}
+  login() {
+    this.lastSnackbar && this.lastSnackbar.dismiss();
+    this.authService.login(this.username, this.password).subscribe(user => {
+      this.snackBar.open(
+          'Welcome ' + user.firstName + '!', 'Close', {duration: 3000});
+      this.dialogRef.close();
+    }, err => {this.lastSnackbar = this.snackBar.open(err.error, 'OK', {
+         duration: 4000
+       })});
   }
 }

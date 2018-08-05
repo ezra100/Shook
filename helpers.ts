@@ -42,13 +42,15 @@ export namespace helpers {
 
   // checks if url is a valid URL, includes relative url
   export function isValidURL(url: string) {
-    return /https?:/i.test( new URL(url).protocol);
+    return /https?:/i.test(new URL(url).protocol);
   }
 
   export function asyncWrapper(
       fn: (req: Request, res: Response) => Promise<any>) {
     return function(req: Request, res: Response) {
-      fn(req, res).catch((err: Error) => res.status(500).end(err.message))
+      fn(req, res).catch(
+          (err: any) => res.status(500).end(
+              typeof err === 'string' ? err : JSON.stringify(err)))
     }
   }
 

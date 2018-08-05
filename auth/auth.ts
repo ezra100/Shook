@@ -33,11 +33,16 @@ router.put('/logout', function(req: express.Request, res) {
 // requests the salts for the challengs
 router.post('/salts', helpers.asyncWrapper(async function(req, res) {
   let username = req.body.username;
+  let userData = await db.getUserAuthData(username);
+  if (!userData) {
+    // throw username + ' not found';
+    res.json({
+      tempSalt: getRandomString(hashLength),
+      permSalt: getRandomString(hashLength),
+    });
+  }
   tempSalts[username] = getRandomString(hashLength);
-  res.json({
-    tempSalt: tempSalts[username],
-    permSalt: (await db.getUserAuthData(username)).salt
-  });
+  res.json({tempSalt: tempSalts[username], permSalt: (userData).salt});
 }));
 
 //------------------------------------------------------------

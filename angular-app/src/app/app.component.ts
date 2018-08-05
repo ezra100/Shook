@@ -22,8 +22,8 @@ export class AppComponent implements OnInit {
     });
     this.authService.tryGetStoredLogin().subscribe(
         user => this.snackBar.open(
-            'Welcome ' + user.firstName, 'Close', {duration: 1500}),
-        err => console.log('User not logged in yet') && console.log(err));
+            'Welcome ' + user.firstName + '!', 'Close', {duration: 3000}),
+        err => console.log('User not logged in yet', err));
   }
   title = 'Shook';
 }

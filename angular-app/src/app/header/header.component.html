@@ -1,4 +1,4 @@
-<button *ngIf="!auth.currentUser" class="m-2" mat-raised-button color="accent" (click)="openLoginDialog()">
+<button *ngIf="!auth.currentUser" class="m-2" mat-raised-button color="primary" (click)="openLoginDialog()">
   Login
 </button>
 <button *ngIf="auth.currentUser" class="m-2" mat-raised-button color="accent" (click)="logout()">

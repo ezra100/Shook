@@ -42,6 +42,10 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // server favicon
+app.use('*', function(req, res, next){
+    console.log(Date(), req);
+    next();
+})
 app.get('/favicon.ico', function(req: Request, res: Response) {
   res.sendFile(path.join(__dirname, 'public/img/robot.gif'));
 });

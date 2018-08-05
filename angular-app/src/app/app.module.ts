@@ -2,7 +2,7 @@ import {HttpClientModule} from '@angular/common/http';
 import {enableProdMode, NgModule} from '@angular/core';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatButtonModule, MatCardModule, MatCheckboxModule, MatDatepickerModule, MatDialogModule, MatExpansionModule, MatFormFieldModule, MatGridListModule, MatIconModule, MatInputModule, MatSelectModule, MatSnackBarModule} from '@angular/material';
+import {MatButtonModule, MatCardModule, MatCheckboxModule, MatDatepickerModule, MatDialogModule, MatExpansionModule, MatFormFieldModule, MatGridListModule, MatIconModule, MatInputModule, MatSelectModule, MatSnackBarModule, MAT_SNACK_BAR_DEFAULT_OPTIONS} from '@angular/material';
 import {MatMomentDateModule} from '@angular/material-moment-adapter';
 import {MatDividerModule} from '@angular/material/divider';
 import {BrowserModule} from '@angular/platform-browser';
@@ -34,7 +34,9 @@ enableProdMode();
     MatInputModule
   ],
   entryComponents: [AddProductComponent, LoginFormComponent],
-  providers: [],
+  providers: [
+    {provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: {duration: 3000}}
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {

@@ -28,6 +28,6 @@ export class HeaderComponent implements OnInit {
   }
   logout() {
     this.authService.logout().subscribe(
-        msg => this.snackBar.open(msg, 'Close', {duration: 1500}), err => this.snackBar.open(err.message, "OK", {duration: 1500}));
+        msg => this.snackBar.open(msg, 'Close', {duration: 3000}), err => this.snackBar.open(err.message, "OK", {duration: 3000}));
   }
 }
