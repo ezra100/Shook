@@ -10,20 +10,19 @@ export let tempSalts: {[username: string]: string} = {};
 
 
 passportMod.use(new Strategy(async function(username, password, cb) {
- return await db.getUserAuthData(username)
-      .then(async (userAuthData) => {
-        if (userAuthData) {
-          let hashedPassword =
-              sha512(userAuthData.hashedPassword, tempSalts[username]);
-          if (hashedPassword === password) {
-            return cb(null, await db.getUser(username));
-          }
-        }
-        return cb(null, false, {message: 'Wrong username or password'});
-      })
-      .catch(err => 
-        {return cb(null, false, {message: 'Wrong username or password'});}
-      );
+  let userAuthData = await db.getUserAuthData(username);
+  try {
+    if (userAuthData) {
+      let hashedPassword =
+          sha512(userAuthData.hashedPassword, tempSalts[username]);
+      if (hashedPassword === password) {
+        return cb(null, await db.getUser(username));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+  }
+  return cb(null, false, {message: 'Wrong username or password'});
 }));
 
 passportMod.serializeUser(function(user: User, cb) {

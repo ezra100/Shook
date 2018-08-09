@@ -6,8 +6,8 @@
         "**/CVS": true,
         "**/*.map": true,
         "**/*.js": true,
+        "node_modules/**/*.js": false,
         "**/.DS_Store": true,
-        "**/node_modules/*" : true,
 
     }
 }

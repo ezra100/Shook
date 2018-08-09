@@ -17,12 +17,13 @@ import * as DMessages from './routers/DMessages';
 import * as products from './routers/products';
 import * as reviews from './routers/reviews';
 import * as users from './routers/users';
-
+import * as morgan from './morgan';
 // init the data base with fake data
 initDB();
 
 let secret = 'atgasdv82aergfnsg';
 var app = express();
+app.use(morgan.default);
 app.use(bodyParser.json());  // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({
   // to support URL-encoded bodies
@@ -42,10 +43,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // server favicon
-app.use('*', function(req, res, next){
-    console.log(Date(), req);
-    next();
-})
+
 app.get('/favicon.ico', function(req: Request, res: Response) {
   res.sendFile(path.join(__dirname, 'public/img/robot.gif'));
 });

@@ -15,9 +15,7 @@ router.use('/reset', reset.router);
 
 
 router.put(
-    '/login',
-    passport.authenticate(
-        'local', {failureMessage: 'wrong username or password'}),
+    '/login', passport.authenticate('local'),
     function(req, res) {
       if (req.user) {
         res.status(201).json(req.user);
