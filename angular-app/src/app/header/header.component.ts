@@ -23,6 +23,9 @@ export class HeaderComponent implements OnInit {
   }
 
   ngOnInit() {}
+  onGoToProducts() {
+    
+  }
   openLoginDialog() {
     this.dialog.open(LoginFormComponent);
   }

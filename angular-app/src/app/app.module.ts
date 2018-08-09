@@ -3,6 +3,7 @@ import {enableProdMode, NgModule} from '@angular/core';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule, MatCardModule, MatCheckboxModule, MatDatepickerModule, MatDialogModule, MatExpansionModule, MatFormFieldModule, MatGridListModule, MatIconModule, MatInputModule, MatSelectModule, MatSnackBarModule, MAT_SNACK_BAR_DEFAULT_OPTIONS} from '@angular/material';
+import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatMomentDateModule} from '@angular/material-moment-adapter';
 import {MatDividerModule} from '@angular/material/divider';
 import {BrowserModule} from '@angular/platform-browser';
@@ -34,7 +35,7 @@ enableProdMode();
     MatMomentDateModule, MatFormFieldModule, FormsModule,
     BrowserModule,       MatExpansionModule, MatCardModule,
     MatDatepickerModule, HttpClientModule,   AppRoutingModule,
-    MatInputModule
+    MatInputModule,MatToolbarModule
   ],
   entryComponents: [AddProductComponent, LoginFormComponent],
   providers: [
