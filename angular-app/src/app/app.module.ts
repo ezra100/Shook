@@ -15,13 +15,14 @@ import {HeaderComponent} from './header/header.component';
 import {LoginFormComponent} from './login-form/login-form.component';
 import {ProductComponent} from './product/product.component';
 import {ProductsFeedComponent} from './products-feed/products-feed.component';
+import { ProductFullComponent } from './product-full/product-full.component';
 
 enableProdMode();
 
 @NgModule({
   declarations: [
     AppComponent, ProductsFeedComponent, AddProductComponent, ProductComponent,
-    LoginFormComponent, HeaderComponent
+    LoginFormComponent, HeaderComponent, ProductFullComponent
   ],
   imports: [
     MatSnackBarModule,   MatIconModule,      MatDialogModule,

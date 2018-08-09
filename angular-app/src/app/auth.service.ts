@@ -24,14 +24,14 @@ type Salts = {
 
     login(username: string, password: string): Observable<User> {
       username = username.toLowerCase(); // all usernames must be lower-case
-      let saltObs = this.http.post<Salts>('/auth/salts', {username})
+      let saltObs = this.http.post<Salts>('/api/auth/salts', {username})
                         .pipe(/* prevent double call*/ share());
       let obs = saltObs.pipe<User>(
           mergeMap((salts: Salts) => {
             let hashedPassword =
                 sha512(sha512(password, salts.permSalt), salts.tempSalt);
             return this.http.put<User>(
-                '/auth/login', {username, password: hashedPassword});
+                '/api/auth/login', {username, password: hashedPassword});
           }),
           share(), catchError(err => {
             // there's no way to instruct passport js what message to return on
@@ -48,14 +48,14 @@ type Salts = {
     }
 
     logout() {
-      let obs = this.http.put('/auth/logout', {}, {responseType: 'text'})
+      let obs = this.http.put('/api/auth/logout', {}, {responseType: 'text'})
                     .pipe(share());
       obs.subscribe(() => AuthService.currentUser = null);
       return obs;
     }
 
     tryGetStoredLogin(): Observable<User> {
-      let obs = this.http.get<User>('/users/me').pipe(share());
+      let obs = this.http.get<User>('/api/users/me').pipe(share());
       obs.subscribe(user => AuthService.currentUser = user);
       return obs;
     }
@@ -70,11 +70,11 @@ type Salts = {
       } else {
         body.username = username;
       }
-      return this.http.post('/auth/reset/request', body);
+      return this.http.post('/api/auth/reset/request', body);
     }
 
     completeReset(key: string, username: string, newPassword: string) {
       return this.http.post(
-          '/auth/reset/complete', {key, username, newPassword})
+          '/api/auth/reset/complete', {key, username, newPassword})
     }
   }

@@ -11,13 +11,14 @@ import * as auth from './auth/auth';
 import {passport} from './auth/passport';
 import {initDB} from './DB/data-generator';
 import {mongoConnection} from './DB/MongoDB';
+import * as morgan from './morgan';
 import * as chatRooms from './routers/ChatRooms';
 import * as comments from './routers/comments';
 import * as DMessages from './routers/DMessages';
 import * as products from './routers/products';
 import * as reviews from './routers/reviews';
 import * as users from './routers/users';
-import * as morgan from './morgan';
+
 // init the data base with fake data
 initDB();
 
@@ -48,19 +49,22 @@ app.get('/favicon.ico', function(req: Request, res: Response) {
   res.sendFile(path.join(__dirname, 'public/img/robot.gif'));
 });
 
-app.use('/auth', auth.router);
-app.use('/users', users.router);
-app.use('/products', products.router);
-app.use('/comments', comments.router);
-app.use('/reviews', reviews.router);
-app.use('/chatRooms', chatRooms.router);
-app.use('/DMessages', DMessages.router);
-// app.use('/', express.static(path.join(__dirname, 'public')));
-// for main page and scripts
+let apiRouter = express.Router();
+
+
+apiRouter.use('/auth', auth.router);
+apiRouter.use('/users', users.router);
+apiRouter.use('/products', products.router);
+apiRouter.use('/comments', comments.router);
+apiRouter.use('/reviews', reviews.router);
+apiRouter.use('/chatRooms', chatRooms.router);
+apiRouter.use('/DMessages', DMessages.router);
+
+app.use('/api', apiRouter);
 app.use(
     '/',
     express.static(path.join(__dirname, 'angular-app', 'dist', 'angular-app')));
-// for routes of the angular app
+// for routes of the angular app 
 app.use(
     '/*',
     express.static(path.join(__dirname, 'angular-app', 'dist', 'angular-app')));
