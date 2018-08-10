@@ -73,6 +73,8 @@ PUT for update, POST for create, GET for get (no changes on server side)
 
 
 ### todo
+upload images
+
 
 * chats
     * personal chat

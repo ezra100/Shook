@@ -1,0 +1,41 @@
+<h1 mat-dialog-title>Sign Up</h1>
+<form (ngSubmit)="signupForm.form.valid && f.reportValidity() && signup()" id="signupForm" #signupForm="ngForm" #f>
+  <div mat-dialog-content>
+
+    <mat-form-field>
+      <input name="username" type="text" placeholder="Username" matInput required [(ngModel)]="user._id">
+    </mat-form-field>
+    <mat-form-field>
+      <input name="password" type="password" placeholder="Password" matInput required [(ngModel)]="user.password">
+    </mat-form-field>
+    <mat-form-field>
+      <input name="first-name" type="text" placeholder="First Name" matInput required [(ngModel)]="user.firstName">
+    </mat-form-field>
+    <mat-form-field>
+      <input name="last-name" type="text" placeholder="Last Name" matInput required [(ngModel)]="user.lastName">
+    </mat-form-field>
+    <mat-form-field>
+      <input name="email" type="email" placeholder="Email" matInput required [(ngModel)]="user.email">
+    </mat-form-field>
+    <mat-form-field>
+      <mat-select name="gender" placeholder="Gender" [(ngModel)]="user.gender">
+        <mat-option [value]="genderRef.Male">
+          Male
+        </mat-option>
+        <mat-option [value]="genderRef.Female">
+          Female
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+      <input name="address" type="text" placeholder="Address" matInput required [(ngModel)]="user.address">
+    </mat-form-field>
+    <mat-form-field>
+      <input name="img-url" type="text" placeholder="Image (URL)" matInput [(ngModel)]="user.imageURL">
+    </mat-form-field>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-button (click)="dialogRef.close()">Cancel</button>
+    <button mat-raised-button color="primary" cdkFocusInitial>Sign Up</button>
+  </div>
+</form>

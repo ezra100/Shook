@@ -10,12 +10,13 @@ import {ProductsService} from '../products.service';
 })
 export class ProductFullComponent implements OnInit {
   product: Product;
-  comments: Comment [];
+  comments: Comment [] = [];
   constructor(
       private route: ActivatedRoute, private productService: ProductsService) {}
 
   ngOnInit() {
     const id: string = this.route.snapshot.paramMap.get('id');
     this.productService.getProductByID(id).subscribe(p => this.product = p);
+    
   }
 }

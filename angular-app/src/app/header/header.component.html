@@ -2,22 +2,24 @@
   <mat-toolbar-row>
     <!-- <span>Custom Toolbar</span> -->
 
-    <button class="m-2" mat-button  routerLink="/">>
-      Home
+    <button class="m-2" mat-button routerLink="/">> Home
     </button>
     <button class="m-2" mat-button routerLink="/products">
       Products
     </button>
-    <button class="m-2" mat-button color="primary" (click)="openLoginDialog()">
+    <button class="m-2" mat-button color="primary">
       Sellers
     </button>
-    <button class="m-2" mat-button color="primary" (click)="openLoginDialog()">
+    <button class="m-2" mat-button color="primary">
       Reviews
     </button>
-    <button *ngIf="!auth.currentUser" class="m-2" mat-button color="primary" (click)="openLoginDialog()">
+    <button *ngIf="!auth.currentUser" class="m-2" mat-raised-button color="accent" (click)="openLoginDialog()">
       Login
     </button>
-    <button *ngIf="auth.currentUser" class="m-2" mat-button color="accent" (click)="logout()">
+    <button *ngIf="!auth.currentUser" class="m-2" mat-raised-button color="accent" (click)="openSignupDialog()">
+      Sign Up
+    </button>
+    <button *ngIf="auth.currentUser" class="m-2" mat-raised-button color="primary" (click)="logout()">
       Logout
     </button>
   </mat-toolbar-row>

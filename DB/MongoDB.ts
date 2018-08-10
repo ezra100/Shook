@@ -7,7 +7,7 @@ import {helpers} from '../helpers';
 import {Category, ChatRoom, DMessage, Gender, IComment, IReview, Message, Order, Product, User, UserAuthData, UserType} from '../types';
 
 import {chatRoomModel, commentModel, DMessageModel, messageModel, orderModel, productModel, reviewModel, userAuthDataModel, userModel} from './Models';
-import {chatRoomPermitedFields, commentPermitedFields, productPermitedFields, reviewPermitedFields, stripObject, userPermitedFields} from './StripForUpdate';
+import {chatRoomPermitedFields, commentPermitedFields, productPermitedFields, reviewPermitedFields, stripObject, userPermitedFields} from './helpers';
 
 let ObjectId = mongoose.Types.ObjectId;
 
@@ -145,9 +145,6 @@ export namespace db {
   // todo
   export async function
   addToBasket(username: string, productID: string, quantity: number = 1) {
-    if (quantity < 1) {
-      return await removeFromBasket(username, productID);
-    }
     let doc = await getProductByID(productID);
     if (!doc) {
       return 'product ID ' + productID + ' doesn\'t exist';
@@ -236,11 +233,12 @@ export namespace db {
           });
     });
   }
-  export async function addUser(user: User): Promise<User|null> {
+  export async function addUser(user: User): Promise<User> {
+    user = stripObject(user, userPermitedFields.concat(['_id']));
     let userDoc: any = new userModel(user);
     return await userDoc.save();
   }
-  export async function deleteUser(user: User): Promise<User|null> {
+  export async function deleteUser(user: User): Promise<User> {
     return await userModel.findByIdAndRemove(user._id);
   }
   //#endregion
@@ -255,7 +253,7 @@ export namespace db {
   }
 
   export async function updateProduct(product: Partial<Product>, owner: string):
-      Promise<Product|null> {
+      Promise<Product> {
     product = stripObject(product, productPermitedFields);
     let doc = (await productModel.findOneAndUpdate(
         {_id: product._id, owner: owner || 'block undefined'}, product,
@@ -327,7 +325,7 @@ export namespace db {
   }
 
   export async function updateReview(review: Partial<IReview>, owner: string):
-      Promise<IReview|null> {
+      Promise<IReview> {
     review = stripObject(review, reviewPermitedFields);
     let doc = await reviewModel.findOneAndUpdate(
         {_id: review._id, owner: owner || 'block undefined'}, review,
@@ -429,7 +427,7 @@ export namespace db {
     return results;
   }
   export async function updateComment(
-      comment: Partial<IComment>, owner: string): Promise<IComment|null> {
+      comment: Partial<IComment>, owner: string): Promise<IComment> {
     comment = stripObject(comment, commentPermitedFields);
     return (await commentModel.findOneAndUpdate(
                 {_id: comment._id, owner: owner || 'block undefined'}, comment,

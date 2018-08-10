@@ -1,7 +1,7 @@
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import * as jsSHA from 'jssha';
-import {from, Observable} from 'rxjs';
+import {from, Observable, empty, EMPTY} from 'rxjs';
 import {catchError, mergeMap, share} from 'rxjs/operators';
 
 import {User} from '../../../types';
@@ -23,7 +23,7 @@ type Salts = {
     constructor(private http: HttpClient) {}
 
     login(username: string, password: string): Observable<User> {
-      username = username.toLowerCase(); // all usernames must be lower-case
+      username = username.toLowerCase();  // all usernames must be lower-case
       let saltObs = this.http.post<Salts>('/api/auth/salts', {username})
                         .pipe(/* prevent double call*/ share());
       let obs = saltObs.pipe<User>(
@@ -55,7 +55,11 @@ type Salts = {
     }
 
     tryGetStoredLogin(): Observable<User> {
-      let obs = this.http.get<User>('/api/users/me').pipe(share());
+      let obs = this.http.get<User>('/api/users/me')
+                    .pipe(share(), catchError((err, caught) => {
+                            console.log(err.error);
+                            return EMPTY;
+                          }));
       obs.subscribe(user => AuthService.currentUser = user);
       return obs;
     }

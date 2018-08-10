@@ -1,5 +1,6 @@
-import {Request, Response} from 'express-serve-static-core'
+import {Request, Response} from 'express-serve-static-core';
 import * as nodemailer from 'nodemailer';
+import {URL} from 'url';
 
 import * as data from './data.json';
 
@@ -42,7 +43,11 @@ export namespace helpers {
 
   // checks if url is a valid URL, includes relative url
   export function isValidURL(url: string) {
-    return /https?:/i.test(new URL(url).protocol);
+    try {
+      return /https?:/i.test(new URL(url).protocol);
+    }catch(e){
+      return false;
+    }
   }
 
   export function asyncWrapper(

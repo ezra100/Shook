@@ -20,6 +20,7 @@ import {ProductComponent} from './product/product.component';
 import {ProductsFeedComponent} from './products-feed/products-feed.component';
 import {ReviewsComponent} from './reviews/reviews.component';
 import {SellersComponent} from './sellers/sellers.component';
+import { SignupDialogComponent } from './signup-dialog/signup-dialog.component';
 
 enableProdMode();
 
@@ -27,7 +28,7 @@ enableProdMode();
   declarations: [
     AppComponent, ProductsFeedComponent, AddProductComponent, ProductComponent,
     LoginFormComponent, HeaderComponent, ProductFullComponent, ReviewsComponent,
-    SellersComponent, HomeComponent
+    SellersComponent, HomeComponent, SignupDialogComponent
   ],
   imports: [
     MatSnackBarModule,   MatIconModule,      MatDialogModule,
@@ -39,7 +40,7 @@ enableProdMode();
     MatDatepickerModule, HttpClientModule,   AppRoutingModule,
     MatInputModule,      MatToolbarModule
   ],
-  entryComponents: [AddProductComponent, LoginFormComponent],
+  entryComponents: [AddProductComponent, LoginFormComponent, SignupDialogComponent],
   providers:
       [{provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: {duration: 3000}}],
   bootstrap: [AppComponent]

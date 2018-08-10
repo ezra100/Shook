@@ -4,6 +4,7 @@ import {DomSanitizer} from '@angular/platform-browser';
 
 import {AuthService} from '../auth.service';
 import {LoginFormComponent} from '../login-form/login-form.component';
+import { SignupDialogComponent } from '../signup-dialog/signup-dialog.component';
 
 @Component({
   selector: 'app-header',
@@ -28,6 +29,9 @@ export class HeaderComponent implements OnInit {
   }
   openLoginDialog() {
     this.dialog.open(LoginFormComponent);
+  }
+  openSignupDialog() {
+    this.dialog.open(SignupDialogComponent);
   }
   logout() {
     this.authService.logout().subscribe(

@@ -4,39 +4,28 @@ import {createUserData} from '../auth/auth';
 import {db} from '../DB/MongoDB';
 import {helpers} from '../helpers';
 import {User} from '../types';
-
 export var router = express.Router();
 
-let userProperties: string[] =
-    ['_id', 'address', 'firstName', 'lastName', 'email', 'gender', 'className'];
 // create a new user
 router.post(
     '/signup', helpers.asyncWrapper(async function(req: express.Request, res) {
-      let user: any = {};
-      for (let key of userProperties) {
-        user[key] = req.body[key];
-      }
-      user = await db.addUser(<User>user);
+      let user = await db.addUser(<User>req.body);
       if (!user) {
-        return;
+        console.error('Failed to add user', user);
+        throw 'failed to add user';
       }
       let password = req.body.password;
       createUserData(user._id, password);
-      res.status(201).end();
+      res.status(201).json(user);
     }));
 
 // update details about the current user
-router.put('/updateDetails', function(req, res) {
-  let user: any = {};
-  for (let key of userProperties) {
-    if (req.body[key]) {
-      user[key] = req.body[key];
-    }
-  }
-  let username = req.user._id;
-  let response = db.updateUserById(username, user);
-  res.status(201).end('Your details were updated successfully');
-});
+router.put('/updateDetails', helpers.asyncWrapper(async function(req, res) {
+  let user: any = req.body;
+  let userId = req.user._id;
+  let updatedUser = await db.updateUserById(userId, user);
+  res.status(201).json(updatedUser);
+}));
 // returns the details about the current logged in user
 router.get('/me', helpers.asyncWrapper(async function(req, res) {
   if (req.user) {
@@ -60,18 +49,14 @@ router.put('/unfollow', helpers.asyncWrapper(async function(req, res) {
   res.json(dbRes);
 }));
 
-router.post('/addToBasket', helpers.asyncWrapper(async function(req, res) {
+router.put('/addToBasket', helpers.asyncWrapper(async function(req, res) {
   let productID = req.body.productID;
-  let qunatity = Number(req.body.quantity || 1);
+  let qunatity = Number(req.body.quantity);
+  if (qunatity === 0) {
+    return res.json(await db.removeFromBasket(req.user._id, productID));
+  }
   return res.json(await db.addToBasket(req.user._id, productID, qunatity));
 }));
-
-
-router.delete(
-    '/removeFromBasket', helpers.asyncWrapper(async function(req, res) {
-      let productID = req.query.productID;
-      return res.json(await db.removeFromBasket(req.user._id, productID));
-    }));
 
 router.get('/basketSum', helpers.asyncWrapper(async function(req, res) {
   return res.json(await db.getBasketSum(req.user._id));
