@@ -2,7 +2,7 @@ import {Request, Response} from 'express-serve-static-core';
 import * as nodemailer from 'nodemailer';
 import {URL} from 'url';
 
-import * as data from './data.json';
+import * as data from './data';
 
 export namespace helpers {
   let reallySendEmail = true;

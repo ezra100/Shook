@@ -1,6 +1,6 @@
 node_modules/
 *.log
-data.json
+#data.ts
 **.js
 **.js.map
 *.js

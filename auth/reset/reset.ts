@@ -1,5 +1,5 @@
 import * as express from 'express';
-import {message} from '../../data.json';
+import {message} from '../../data';
 import {db} from '../../DB/MongoDB';
 import {helpers} from '../../helpers';
 import {User} from '../../types';

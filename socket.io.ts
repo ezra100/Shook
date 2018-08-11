@@ -3,7 +3,6 @@ import * as https from 'https';
 import {db} from './DB/MongoDB';
 import {helpers} from './helpers';
 import {DMessage} from './types';
-import {message} from '*.json';
 let passportSocketIo = require('passport.socketio');
 
 let socketIDMap: {[key: string]: string} = {};
@@ -75,5 +74,5 @@ export function sendDMessage(msg: DMessage) {
   if (!sid) {
     throw msg.to + 'isn\'t connected';
   }
-  sio.to(sid).emit('dmessage', message);
+  sio.to(sid).emit('dmessage', msg);
 }
