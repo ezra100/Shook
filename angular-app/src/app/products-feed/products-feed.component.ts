@@ -58,7 +58,7 @@ export class ProductsFeedComponent implements OnInit {
         this.filterProducts(false);
       }
     });
-    this.sub = this.service.getProductsObserver().subscribe(products => {
+    this.sub = this.service.getLatest().subscribe(products => {
       thisPF.products = products;
     });
     let elem = this.elementRef.nativeElement;
@@ -86,7 +86,7 @@ export class ProductsFeedComponent implements OnInit {
     thisPF.sub && thisPF.sub.unsubscribe();
     thisPF.sub =
         thisPF.service
-            .getProductsObserver(0, null, thisPF.filter.toMongoFilter())
+            .getLatest(0, null, thisPF.filter.toMongoFilter())
             .subscribe(products => {
               thisPF.products = products;
             });
@@ -99,7 +99,7 @@ export class ProductsFeedComponent implements OnInit {
     this.loadingMore = true;
 
     this.sub = this.service
-                   .getProductsObserver(
+                   .getLatest(
                        this.products.length, null, this.filter.toMongoFilter())
                    .subscribe(products => {
                      if (products.length === 0) {

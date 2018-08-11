@@ -92,7 +92,7 @@ export interface Product {
   category?: Category;
 }
 
-export interface IReview {
+export interface Review {
   _id?: string;
   date?: Date;
   owner: string;      // publisher of the review

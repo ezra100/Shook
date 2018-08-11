@@ -4,7 +4,7 @@ import * as faker from 'faker';
 import * as mongoose from 'mongoose';
 
 import {helpers} from '../helpers';
-import {Category, ChatRoom, DMessage, Gender, IComment, IReview, Message, Order, Product, User, UserAuthData, UserType} from '../types';
+import {Category, ChatRoom, DMessage, Gender, IComment, Review, Message, Order, Product, User, UserAuthData, UserType} from '../types';
 
 import {chatRoomModel, commentModel, DMessageModel, messageModel, orderModel, productModel, reviewModel, userAuthDataModel, userModel} from './Models';
 import {chatRoomPermitedFields, commentPermitedFields, productPermitedFields, reviewPermitedFields, stripObject, userPermitedFields} from './helpers';
@@ -313,8 +313,8 @@ export namespace db {
   //#endregion
 
   //#region review
-  export async function addReview(review: IReview, secure: boolean = true):
-      Promise<IReview> {
+  export async function addReview(review: Review, secure: boolean = true):
+      Promise<Review> {
     if (secure) {
       review.dislikes = [];
       review.likes = [];
@@ -324,8 +324,8 @@ export namespace db {
     return doc && doc.toObject();
   }
 
-  export async function updateReview(review: Partial<IReview>, owner: string):
-      Promise<IReview> {
+  export async function updateReview(review: Partial<Review>, owner: string):
+      Promise<Review> {
     review = stripObject(review, reviewPermitedFields);
     let doc = await reviewModel.findOneAndUpdate(
         {_id: review._id, owner: owner || 'block undefined'}, review,
@@ -349,13 +349,13 @@ export namespace db {
         (await reviewModel.remove({productID: new ObjectId(productID)}));
     return results;
   }
-  export async function getReviewByID(id: string): Promise<IReview> {
+  export async function getReviewByID(id: string): Promise<Review> {
     let doc = await reviewModel.findById(id);
     return doc && doc.toObject();
   }
   export async function getLatestReviews(
-      filter: Partial<IReview> = {}, offset: number = 0,
-      limit?: number): Promise<IReview[]> {
+      filter: Partial<Review> = {}, offset: number = 0,
+      limit?: number): Promise<Review[]> {
     let res = reviewModel.find(filter).sort('-date').skip(offset);
     if (limit) {
       res.limit(limit);

@@ -10,7 +10,7 @@ import {MongoProductFilter} from './product-filter';
 export class ProductsService {
   constructor(private http: HttpClient) {}
 
-  getProductsObserver(
+  getLatest(
       offset: number = 0, limit: number = 100,
       filter: MongoProductFilter = {}): Observable<Product[]> {
     let body: any = {offset, limit, filter: JSON.stringify(filter)};
@@ -46,4 +46,5 @@ export class ProductsService {
   getMyFeed() {
     return this.http.get<Product[]>('/api/products/myFeed');
   }
+
 }

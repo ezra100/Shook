@@ -5,6 +5,7 @@ import * as express from 'express';
 import {Request} from 'express';
 import {Response} from 'express-serve-static-core';
 import * as session from 'express-session';
+import * as https from 'https';
 import * as path from 'path';
 
 import * as auth from './auth/auth';
@@ -18,6 +19,7 @@ import * as DMessages from './routers/DMessages';
 import * as products from './routers/products';
 import * as reviews from './routers/reviews';
 import * as users from './routers/users';
+import * as io from './socket.io';
 
 // init the data base with fake data
 initDB();
@@ -30,7 +32,8 @@ app.use(bodyParser.urlencoded({
   // to support URL-encoded bodies
   extended: true
 }));
-app.use(cookieParser(secret));
+let cp = cookieParser(secret);
+app.use(cp);
 
 let mongoStore = connMongo(session);
 let options:
@@ -64,10 +67,14 @@ app.use('/api', apiRouter);
 app.use(
     '/',
     express.static(path.join(__dirname, 'angular-app', 'dist', 'angular-app')));
-// for routes of the angular app 
+// for routes of the angular app
 app.use(
     '/*',
     express.static(path.join(__dirname, 'angular-app', 'dist', 'angular-app')));
 
 
 export default app;
+
+export function init(server: https.Server){
+  io.init(server, cp, store, secret);
+}

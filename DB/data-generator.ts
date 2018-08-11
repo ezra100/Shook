@@ -5,13 +5,13 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import {createUserData} from '../auth/auth';
-import {ChatRoom, DMessage, Gender, IComment, Product, IReview, Message, User, UserAuthData, UserType, Category} from '../types';
+import {ChatRoom, DMessage, Gender, IComment, Product, Review, Message, User, UserAuthData, UserType, Category} from '../types';
 
 import {db} from './MongoDB';
 
 let users: User[];
 let products: Product[];
-let reviews: IReview[];
+let reviews: Review[];
 let chatRooms: ChatRoom[];
 
 let usersLength: number;
@@ -106,7 +106,7 @@ function getRandomUsernames(min: number = 5, max: number = 30): string[] {
   return retUsernames;
 }
 
-function getFakeReview(): Partial<IReview> {
+function getFakeReview(): Partial<Review> {
   let likeDislike = getRandomUsernamesArrays();
   let product = products[faker.random.number(productsLength - 1)];
   return {
@@ -212,7 +212,7 @@ export async function initDB(
   if (reviewsLength < productsLength * reviewsPerProduct) {
     products = await db.getLatestProducts();
     for (let i = reviewsLength; i < productsLength * reviewsPerProduct; i++) {
-      await db.addReview(<IReview>getFakeReview(), false);
+      await db.addReview(<Review>getFakeReview(), false);
     }
     reviewsLength = await db.getReviewsSize();
   }

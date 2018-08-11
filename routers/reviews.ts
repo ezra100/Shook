@@ -2,21 +2,21 @@ import * as express from 'express';
 
 import {db} from '../DB/MongoDB';
 import {helpers} from '../helpers';
-import {IReview} from '../types';
+import {Review} from '../types';
 import {LIMIT} from "../constants";
 
 export var router = express.Router();
 
 router.post(
     '/add', helpers.asyncWrapper(async function(req: express.Request, res: express.Response) {
-      let review: IReview = req.body;
+      let review: Review = req.body;
       review.owner = req.user._id;
       review = await db.addReview(review);
       res.status(201).json(review);
     }));
 
 router.put('/update', helpers.asyncWrapper(async function(req, res) {
-  let review: IReview = req.body;
+  let review: Review = req.body;
   review = await db.updateReview(review, req.user._id);
   res.status(201).json(review);
 }));
@@ -27,15 +27,12 @@ router.get('/getByID', helpers.asyncWrapper(async function(req, res) {
 }));
 
 router.get('/getLatest', helpers.asyncWrapper(async function(req, res) {
-  let filter: any = {};
-  let username = req.query.username;
-  // from the likes/dislikes array - how many elements to show
-  if (req.query.username) {
-    filter.owner = new RegExp(helpers.escapeRegExp(username), 'i');
+  let filter = req.query;
+  if(filter.date){
+    for(let key in filter.date){
+      filter.date[key] = new Date(filter.date[key]);
+    }
   }
-  if (req.query.productID) {
-    filter.productID = req.query.productID;
-  } 
   let limit = Number(req.query.limit)  || LIMIT;
   let offset = Number(req.query.offset || 0);
   let products = await db.getLatestReviews(filter, offset, limit);

@@ -6,11 +6,9 @@
  */
 
 import * as  appX from "../app";
-import * as http from "http";
 import * as https from "https";
 import * as fs from "fs";
 import * as path from "path";
-import * as express from "express";
 import * as httpolyglot from "httpolyglot";
 let app = appX.default;
 
@@ -114,3 +112,5 @@ function onListening() {
         : "port " + addr.port;
     console.log("Listening on " + bind);
 }
+
+appX.init(server);

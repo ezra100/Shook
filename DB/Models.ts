@@ -2,7 +2,7 @@ import * as mongoose from 'mongoose';
 import {Aggregate, Model, NativeError} from 'mongoose';
 
 import {helpers} from '../helpers';
-import {Category, Gender, IComment, IReview, User, UserAuthData, UserType} from '../types';
+import {Category, Gender, IComment, Review, User, UserAuthData, UserType} from '../types';
 
 
 // define a schema
@@ -194,7 +194,7 @@ let orderSchema = new Schema({
 
 
 reviewSchema.postAnyFInd(function(doc, next: Function): void {
-  let d: mongoose.Document&IReview = <any>doc;
+  let d: mongoose.Document&Review = <any>doc;
   if (d.likes && d.dislikes) {
     d.likesCount = d.likes.length;
     d.dislikesCount = d.dislikes.length;

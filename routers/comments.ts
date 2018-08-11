@@ -28,14 +28,11 @@ router.get('/getByID', helpers.asyncWrapper(async function(req, res) {
 }));
 
 router.get('/getLatest', helpers.asyncWrapper(async function(req, res) {
-  let filter: any = {};
-  let username = req.query.username;  
-  // from the likes/dislikes array - how many elements to show
-  if (username) {
-    filter._id = new RegExp(helpers.escapeRegExp(username), 'i');
-  }
-  if (req.query.reviewID) {
-    filter.reviewID = req.query.reviewID;
+  let filter = req.query;
+  if(filter.date){
+    for(let key in filter.date){
+      filter.date[key] = new Date(filter.date[key]);
+    }
   }
   let limit = Number(req.query.limit) || LIMIT;
   let offset = Number(req.query.offset || 0);
