@@ -4,10 +4,10 @@ import * as faker from 'faker';
 import * as mongoose from 'mongoose';
 
 import {helpers} from '../helpers';
-import {Category, ChatRoom, DMessage, Gender, IComment, Review, Message, Order, Product, User, UserAuthData, UserType} from '../types';
+import {Category, ChatRoom, DMessage, Gender, IComment, Message, Order, Product, Review, User, UserAuthData, UserType} from '../types';
 
-import {chatRoomModel, commentModel, DMessageModel, messageModel, orderModel, productModel, reviewModel, userAuthDataModel, userModel} from './Models';
 import {chatRoomPermitedFields, commentPermitedFields, productPermitedFields, reviewPermitedFields, stripObject, userPermitedFields} from './helpers';
+import {chatRoomModel, commentModel, DMessageModel, messageModel, orderModel, productModel, reviewModel, userAuthDataModel, userModel} from './Models';
 
 let ObjectId = mongoose.Types.ObjectId;
 
@@ -426,8 +426,8 @@ export namespace db {
     let results = await commentModel.remove({reviewID: new ObjectId(reviewID)});
     return results;
   }
-  export async function updateComment(
-      comment: Partial<IComment>, owner: string): Promise<IComment> {
+  export async function
+  updateComment(comment: Partial<IComment>, owner: string): Promise<IComment> {
     comment = stripObject(comment, commentPermitedFields);
     return (await commentModel.findOneAndUpdate(
                 {_id: comment._id, owner: owner || 'block undefined'}, comment,
@@ -647,11 +647,12 @@ export namespace db {
     export async function
     getLastChats(user: string, offset: number = 0, limit: number = 100) {
       let query = DMessageModel.aggregate([
-        {$match: {$or: [{from: user}, {to: user}]}}, {
+        {$match: {$or: [{from: user}, {to: user}]}},
+        {$sort: {date: -1}}, {
           $addFields: {
             id: {
               $cond:
-                  {if: {$eq: ['$from', user]}, then: '$to', else: '$form'}
+                  {if: {$eq: ['$from', user]}, then: '$to', else: '$from'}
             }
           }
         },
@@ -659,10 +660,33 @@ export namespace db {
           $group: {
             _id: '$id',
             messages: {$push: '$$ROOT'},
-            lastMessageDate: {$max: '$date'}
+            lastMessageDate: {$max: '$date'},
+            
           }
         },
-        {$sort: {lastMessageDate: -1}}, {$limit: limit}
+        {$sort: {lastMessageDate: -1}}, {$limit: limit},
+        {$lookup:{
+          from: 'users', 
+          localField: '_id',
+          foreignField: '_id',
+          as: 'user'
+        }},
+        {
+          '$unwind': '$user'
+        },
+        {
+          '$project': {
+            '_id': 1,
+            'messages': 1,
+            'lastMessageDate': 1,
+            'user._id': 1,
+            'user.firstName': 1,
+            'user.lastName': 1,
+            'user.gender': 1,
+            'user.userType' : 1,
+            'user.imageUrl': 1
+          }
+        }
       ]);
       return await query;
     }

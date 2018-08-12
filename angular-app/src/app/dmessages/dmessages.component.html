@@ -1,0 +1,41 @@
+<!--source: https://codepen.io/Momciloo/pen/bEdbxY -->
+
+<div class="container mx-2 my-2" *ngIf="chats && activeChat">
+    <div class="left">
+        <div class="top">
+            <input type="text" placeholder="Search" />
+            <a href="javascript:;" class="search"></a>
+        </div>
+        <ul class="people">
+            <li [ngClass]="{person: true, active: activeChat === chat}" *ngFor="let chat of chats" (click)="selectChat(chat.user._id); chat.scrollTop = chat.scrollHeight;">
+                <!--todo - replace with the user image-->
+                <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/382994/dog.png" alt="" />
+                <span class="name">{{chat.user.firstName}}</span>
+                <span class="time">{{chat.lastMessageDate | date }}</span>
+                <span class="preview">{{chat.messages[0].content}}</span>
+            </li>
+        </ul>
+    </div>
+    <div class="right">
+        <div class="top">
+            <span>To:
+                <span class="name">{{activeChat.user.firstName + " " + activeChat.user.lastName }}</span>
+            </span>
+        </div>
+
+        <div class="chat m-2" #chat>
+            <div class="conversation-start">
+                <span>{{activeChat.messages[0].date | date}}</span>
+            </div>
+            <div *ngFor="let message of activeChat.messages" [ngClass]="{ 'bubble': true,'you' : message.from !== currentUserID,'me'  : message.from === currentUserID}">
+                {{message.content}}
+            </div>
+
+        </div>
+
+        <div class="write" >
+            <input type="text" [(ngModel)]="activeChat.newMsg" />
+            <a (click)="sendMessage()" class="write-link send" *ngIf="activeChat.newMsg"></a>
+        </div>
+    </div>
+</div>

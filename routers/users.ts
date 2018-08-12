@@ -34,7 +34,11 @@ router.get('/me', helpers.asyncWrapper(async function(req, res) {
   }
   res.status(404).end('You\'re not logged in');
 }));
-
+router.get('/user', helpers.asyncWrapper(async function(req, res) {
+    let id = req.query._id;
+    res.json(await db.getUser(id, false));
+    return;
+}));
 router.put('/follow', helpers.asyncWrapper(async function(req, res) {
   let followee = req.body.followee;
   let follower = req.user._id;

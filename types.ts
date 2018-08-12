@@ -161,3 +161,9 @@ export namespace filters {
         link?: MongoRegExp|string,
   }
 }
+
+export type Chat = {
+  messages: DMessage[],
+  user: Partial<User>,
+  lastMessageDate: Date
+};

@@ -1,10 +1,11 @@
-import {HttpClient, HttpParams} from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import * as jsSHA from 'jssha';
-import {from, Observable, empty, EMPTY} from 'rxjs';
+import {EMPTY, Observable, Subject} from 'rxjs';
 import {catchError, mergeMap, share} from 'rxjs/operators';
 
 import {User} from '../../../types';
+
 
 
 function sha512(password: string, salt: string): string {
@@ -17,10 +18,13 @@ type Salts = {
   tempSalt: string
   permSalt: string
 };
+
   @Injectable({providedIn: 'root'})
   export class AuthService {
     static currentUser: User;
+    static loginSubject: Subject<User|null> = new Subject();
     constructor(private http: HttpClient) {}
+
 
     login(username: string, password: string): Observable<User> {
       username = username.toLowerCase();  // all usernames must be lower-case
@@ -42,25 +46,28 @@ type Salts = {
             }
             throw err;
           }));
-
-      obs.subscribe(user => AuthService.currentUser = user);
+      obs.subscribe(user => {
+        AuthService.loginSubject.next(user);
+      });
       return obs;
     }
 
     logout() {
       let obs = this.http.put('/api/auth/logout', {}, {responseType: 'text'})
                     .pipe(share());
-      obs.subscribe(() => AuthService.currentUser = null);
+      obs.subscribe(() => AuthService.loginSubject.next());
       return obs;
     }
 
     tryGetStoredLogin(): Observable<User> {
       let obs = this.http.get<User>('/api/users/me')
-                    .pipe(share(), catchError((err, caught) => {
+                    .pipe(share(), catchError((err) => {
                             console.log(err.error);
                             return EMPTY;
                           }));
-      obs.subscribe(user => AuthService.currentUser = user);
+      obs.subscribe(user => {
+        AuthService.loginSubject.next(user);
+      });
       return obs;
     }
 
@@ -82,3 +89,4 @@ type Salts = {
           '/api/auth/reset/complete', {key, username, newPassword})
     }
   }
+  AuthService.loginSubject.subscribe(user => AuthService.currentUser = user);

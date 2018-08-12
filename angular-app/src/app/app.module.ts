@@ -21,6 +21,7 @@ import {ProductsFeedComponent} from './products-feed/products-feed.component';
 import {ReviewsComponent} from './reviews/reviews.component';
 import {SellersComponent} from './sellers/sellers.component';
 import { SignupDialogComponent } from './signup-dialog/signup-dialog.component';
+import { DmessagesComponent } from './dmessages/dmessages.component';
 
 enableProdMode();
 
@@ -28,7 +29,7 @@ enableProdMode();
   declarations: [
     AppComponent, ProductsFeedComponent, AddProductComponent, ProductComponent,
     LoginFormComponent, HeaderComponent, ProductFullComponent, ReviewsComponent,
-    SellersComponent, HomeComponent, SignupDialogComponent
+    SellersComponent, HomeComponent, SignupDialogComponent, DmessagesComponent
   ],
   imports: [
     MatSnackBarModule,   MatIconModule,      MatDialogModule,

@@ -79,11 +79,8 @@ upload images
 * chats
     * personal chat
     * socket.io
-* filter by creation date range
 * products list
-* price for product
-    * allow users to report prices for the product (?)
-* external entities / sellers
+
 
 * search
 * routing
@@ -124,4 +121,4 @@ upload images
 css - spacing etc. (use bootstrap?)
 filtering - angular, server side (deserializing date)
 -----------------------------------------------
-header: products, reviews, DMessage, Chat Rooms     login/logout
+header: products, reviews, DMessage, Chat Rooms, Orders     login/logout

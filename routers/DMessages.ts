@@ -32,7 +32,7 @@ router.get('/getRecent', helpers.asyncWrapper(async function(req, res) {
     res.status(401).end('You\'re not logged in');
     return;
   }
-  let limit = Number(req.query.limit);
-  let offset = Number(req.query.offset);
+  let limit = Number(req.query.limit) || 20;
+  let offset = Number(req.query.offset) || 0;
   res.json(await db.DirectMessages.getLastChats(req.user._id, offset, limit));
 }));

@@ -5,6 +5,7 @@ import { ProductsFeedComponent } from './products-feed/products-feed.component';
 import { ReviewsComponent } from './reviews/reviews.component';
 import { SellersComponent } from './sellers/sellers.component';
 import { HomeComponent } from './home/home.component';
+import { DmessagesComponent } from './dmessages/dmessages.component';
 
 
 const routes: Routes = [
@@ -12,7 +13,8 @@ const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' }, //i would rather the '' path will be to some random feed of all kinds sellers, products and reviews.
   { path: 'reviews', component: ReviewsComponent },
   { path: 'sellers', component: SellersComponent },
-  { path: 'home', component: HomeComponent }
+  { path: 'home', component: HomeComponent },
+  {path: 'dmessages', component: DmessagesComponent}
 ];
 
 @NgModule({

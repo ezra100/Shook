@@ -37,7 +37,7 @@ export function init(
     secret: string) {
   sio = io(server);
   sio.use(passportSocketIo.authorize({
-    cookieParser: cookieParser,  // the same middleware you registrer in express
+      // the same middleware you registrer in express
     key: 'connect.sid',  // the name of the cookie where express/connect stores
                          // its session_id
     secret: secret,      // the session_secret to parse the cookie

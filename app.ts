@@ -76,5 +76,5 @@ app.use(
 export default app;
 
 export function init(server: https.Server){
-  io.init(server, cp, store, secret);
+  io.init(server, cookieParser, store, secret);
 }
