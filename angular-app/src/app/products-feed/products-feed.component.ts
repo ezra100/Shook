@@ -39,10 +39,6 @@ export class ProductsFeedComponent implements OnInit {
       private route: ActivatedRoute, private observableMedia: ObservableMedia,
       public dialog: MatDialog, iconRegistry: MatIconRegistry,
       sanitizer: DomSanitizer) {
-    iconRegistry.addSvgIcon(
-        'add',
-        sanitizer.bypassSecurityTrustResourceUrl(
-            'assets/icons/sharp-add-24px.svg'));
   }
   ngOnInit() {
     // credit http://disq.us/p/1ouo8m4
@@ -61,13 +57,13 @@ export class ProductsFeedComponent implements OnInit {
     this.sub = this.service.getLatest().subscribe(products => {
       thisPF.products = products;
     });
-    let elem = this.elementRef.nativeElement;
-    elem.height = screen.height * 2.5;
-    this.renderer.listen(elem, 'scroll', function() {
-      if ($(elem).scrollTop() > 0.8 * $(elem).height()) {
-        thisPF.loadMore();
-      }
-    });
+    // let elem = this.elementRef.nativeElement;
+    // elem.height = screen.height * 2.5;
+    // this.renderer.listen(elem, 'scroll', function() {
+    //   if ($(elem).scrollTop() > 0.8 * $(elem).height()) {
+    //     thisPF.loadMore();
+    //   }
+    // });
   }
 
   filterChanged(timeout: number = 700) {
@@ -85,8 +81,7 @@ export class ProductsFeedComponent implements OnInit {
     }
     thisPF.sub && thisPF.sub.unsubscribe();
     thisPF.sub =
-        thisPF.service
-            .getLatest(0, null, thisPF.filter.toMongoFilter())
+        thisPF.service.getLatest(0, null, thisPF.filter.toMongoFilter())
             .subscribe(products => {
               thisPF.products = products;
             });
@@ -98,16 +93,16 @@ export class ProductsFeedComponent implements OnInit {
     let thisPF = this;
     this.loadingMore = true;
 
-    this.sub = this.service
-                   .getLatest(
-                       this.products.length, null, this.filter.toMongoFilter())
-                   .subscribe(products => {
-                     if (products.length === 0) {
-                       thisPF.reachedEndOfFeed = true;
-                     }
-                     thisPF.products.push(...products);
-                     thisPF.loadingMore = false;
-                   });
+    this.sub =
+        this.service
+            .getLatest(this.products.length, null, this.filter.toMongoFilter())
+            .subscribe(products => {
+              if (products.length === 0) {
+                thisPF.reachedEndOfFeed = true;
+              }
+              thisPF.products.push(...products);
+              thisPF.loadingMore = false;
+            });
   }
   openDialog() {
     this.dialog.open(AddProductComponent, {data: this.addedProduct});

@@ -6,6 +6,7 @@ import {DMessage} from './types';
 let passportSocketIo = require('passport.socketio');
 
 let socketIDMap: {[key: string]: string} = {};
+let dmPath = '/socket.io/DMessages';
 
 function onAuthorizeSuccess(data: any, accept: Function) {
   console.log('successful connection to socket.io');
@@ -35,9 +36,9 @@ let sio: io.Server;
 export function init(
     server: https.Server, cookieParser: any, sessionStore: any,
     secret: string) {
-  sio = io(server);
+  sio = io(server, {path:dmPath});
   sio.use(passportSocketIo.authorize({
-      // the same middleware you registrer in express
+    // the same middleware you registrer in express
     key: 'connect.sid',  // the name of the cookie where express/connect stores
                          // its session_id
     secret: secret,      // the session_secret to parse the cookie
@@ -53,17 +54,19 @@ export function init(
       console.error('socket doesn\'t have user assigned to it', socket);
       return;
     }
-    socketIDMap[user] = socket.id;
+    socketIDMap[user._id] = socket.id;
     socket.on('diconnect', () => {
-      delete socketIDMap[user];
+      delete socketIDMap[user._id];
     });
     socket.on('dmessage', (msg: DMessage) => {
-      msg.from = user;
+      msg.from = user._id;
       msg.date = new Date();
       db.DirectMessages.addDMessage(msg);
+      // send back, for confirmation
+      socket.emit('dmessage', msg);
       try {
         sendDMessage(<DMessage>msg);
-      } finally {
+      } catch {
       }
     })
   })

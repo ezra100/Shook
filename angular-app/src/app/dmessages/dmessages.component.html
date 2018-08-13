@@ -1,41 +1,45 @@
 <!--source: https://codepen.io/Momciloo/pen/bEdbxY -->
 
-<div class="container mx-2 my-2" *ngIf="chats && activeChat">
+<div class="container mx-2 my-2" *ngIf="fChats">
     <div class="left">
         <div class="top">
-            <input type="text" placeholder="Search" />
-            <a href="javascript:;" class="search"></a>
+            <input type="text" placeholder="Search" [(ngModel)]="query" (ngModelChange)="filterChats()" />
+            <mat-checkbox [(ngModel)]="searchMsgs" (ngModelChange)="filterChats()"  *ngIf="query">Search messages</mat-checkbox>
         </div>
         <ul class="people">
-            <li [ngClass]="{person: true, active: activeChat === chat}" *ngFor="let chat of chats" (click)="selectChat(chat.user._id); chat.scrollTop = chat.scrollHeight;">
+            <li [ngClass]="{person: true, active: activeChat === chat}" *ngFor="let chat of fChats" (click)="selectChat(chat.user._id); chat.scrollTop = chat.scrollHeight;">
                 <!--todo - replace with the user image-->
                 <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/382994/dog.png" alt="" />
                 <span class="name">{{chat.user.firstName}}</span>
                 <span class="time">{{chat.lastMessageDate | date }}</span>
-                <span class="preview">{{chat.messages[0].content}}</span>
+                <span class="preview">{{chat.messages[chat.messages.length-1].content}}</span>
             </li>
         </ul>
     </div>
-    <div class="right">
+    <div class="right" *ngIf="activeChat">
         <div class="top">
             <span>To:
                 <span class="name">{{activeChat.user.firstName + " " + activeChat.user.lastName }}</span>
+                <span> ({{activeChat.user._id}})</span>
             </span>
         </div>
 
-        <div class="chat m-2" #chat>
+        <div class="chat m-2">
             <div class="conversation-start">
                 <span>{{activeChat.messages[0].date | date}}</span>
             </div>
-            <div *ngFor="let message of activeChat.messages" [ngClass]="{ 'bubble': true,'you' : message.from !== currentUserID,'me'  : message.from === currentUserID}">
+            <div *ngFor="let message of (activeChat.messages)" [ngClass]="{ 'bubble': true,'you' : message.from !== currentUserID,'me'  : message.from === currentUserID}">
                 {{message.content}}
             </div>
 
         </div>
 
         <div class="write" >
-            <input type="text" [(ngModel)]="activeChat.newMsg" />
-            <a (click)="sendMessage()" class="write-link send" *ngIf="activeChat.newMsg"></a>
+            <input type="text" (keyup.enter)="activeChat.newMsg && sendMessage()"  placeholder="Write message..." [(ngModel)]="activeChat.newMsg" />
+            <button mat-icon-button color="primary" (click)="sendMessage()" *ngIf="activeChat.newMsg">
+                <mat-icon>send</mat-icon>
+            </button>
         </div>
     </div>
 </div>
+<h1 class="m-5" *ngIf="!fChats">Log in to view messages!</h1>

@@ -1,26 +1,58 @@
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {Observable, Subject} from 'rxjs';
+import {filter, map} from 'rxjs/operators';
 import * as io from 'socket.io-client';
 
-import {Chat, DMessage} from '../../../types';
+import {Chat, DMessage, User} from '../../../types';
 
 import {AuthService} from './auth.service';
+import {helpers} from './helpers';
 
 const dmUriBase = '/api/DMessages';
 @Injectable({providedIn: 'root'})
 export class DMessagesService {
-  private static socket: SocketIOClient.Socket = null;
+  static socket: SocketIOClient.Socket;
+  static msgSubject: Subject<DMessage> = new Subject();
   chats: Chat[] = null;
   constructor(private http: HttpClient) {}
-  send(to: string, content: string) {
-    this.getSingletonSocket().emit('dmessage', {to, content});
+  // do static init for the service
+  static init() {
+    AuthService.loginSubject.subscribe(user => {
+      if (this.socket) {
+        this.socket.close();
+      }
+      if (user) {
+        this.socket = io('/', {path: '/socket.io/DMessages'});
+        this.socket.on('dmessage', (message: DMessage) => {
+          message.date = new Date(message.date);
+          DMessagesService.msgSubject.next(message);
+        });
+      }
+    });
+    this.socket = io('/', {path: '/socket.io/DMessages'});
+    this.socket.on('dmessage', (message: DMessage) => {
+      message.date = new Date(message.date);
+      DMessagesService.msgSubject.next(message);
+    });
   }
-  getMesssages(otherUser: string) {
-    return this.http.get<DMessage[]>(
-        dmUriBase + '/getMessages',
-        {params: new HttpParams({fromObject: {otherUser}})});
+
+  getSocket() {
+    return DMessagesService.socket;
+  }
+  send(to: string, content: string) {
+    this.getSocket().emit('dmessage', {to, content});
+  }
+  getChat(otherUser: string) {
+    return this.http
+        .get<Chat>(
+            dmUriBase + '/getChat',
+            {params: new HttpParams({fromObject: {otherUser}})})
+        .pipe(map(c => {
+          c.lastMessageDate = new Date(c.lastMessageDate);
+          c.messages.forEach(m => m.date = new Date(m.date));
+          return c;
+        }));
   }
   getRecent(limit: number = 100, offset: number = 0) {
     return this.http
@@ -39,19 +71,12 @@ export class DMessagesService {
   }
 
   getDmessageObservable() {
-    return new Observable<DMessage>((subscriber) => {
-      let socket = this.getSingletonSocket();
-      socket.on('dmessage', (message: DMessage) => {
-        message.date = new Date(message.date);
-        subscriber.next(message);
-      });
-      return () => {};
-    });
+    return DMessagesService.msgSubject;
   }
-  getSingletonSocket() {
-    if (!DMessagesService.socket) {
-      DMessagesService.socket = io(dmUriBase);
-    }
-    return DMessagesService.socket;
+  getUserList(query: string) {
+    query = helpers.escapeRegExp(query);
+    let filter = { $or: [{_id: {$regex: query, $options: 'i '}}, {firstName: {$regex: query, $options: 'i '}},{lastName: {$regex: query, $options: 'i '}}] }
   }
 }
+
+DMessagesService.init();

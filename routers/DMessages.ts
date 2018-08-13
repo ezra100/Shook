@@ -18,13 +18,13 @@ router.post('/send', helpers.asyncWrapper(async function(req, res) {
   res.json(await db.DirectMessages.addDMessage(message));
 }));
 
-router.get('/getMessages', helpers.asyncWrapper(async function(req, res) {
+router.get('/getChat', helpers.asyncWrapper(async function(req, res) {
   if (!req.user) {
     res.status(401).end('You\'re not logged in');
     return;
   }
   let otherUser = req.query.otherUser;
-  res.json(await db.DirectMessages.getDirectMessages(req.user._id, otherUser));
+  res.json(await db.DirectMessages.getChat(req.user._id, otherUser));
 }));
 
 router.get('/getRecent', helpers.asyncWrapper(async function(req, res) {
@@ -34,5 +34,6 @@ router.get('/getRecent', helpers.asyncWrapper(async function(req, res) {
   }
   let limit = Number(req.query.limit) || 20;
   let offset = Number(req.query.offset) || 0;
+  let dateOffset = req.query.dateOffset? new Date(req.query.dateOffset): null;
   res.json(await db.DirectMessages.getLastChats(req.user._id, offset, limit));
 }));

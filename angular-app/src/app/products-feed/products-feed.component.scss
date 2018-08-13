@@ -19,3 +19,34 @@ mat-icon{
 .filter-grid mat-grid-tile{
     border-right: rgba(128, 128, 128, 0.34) dashed 0.05rem
 }
+
+.divider-msg {
+    position: relative;
+    width: 100%;
+    margin-bottom: 27px;
+    text-align: center;
+
+    span {
+        font-size: 14px;
+        display: inline-block;
+        color: var(--grey);
+
+        &:before, &:after {
+            position: absolute;
+            top: 10px;
+            display: inline-block;
+            width: 30%;
+            height: 1px;
+            content: '';
+            background-color: var(--light);
+        }
+
+        &:before {
+            left: 0;
+        }
+
+        &:after {
+            right: 0;
+        }
+    }
+}

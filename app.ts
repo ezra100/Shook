@@ -22,7 +22,7 @@ import * as users from './routers/users';
 import * as io from './socket.io';
 
 // init the data base with fake data
-initDB();
+//initDB();
 
 let secret = 'atgasdv82aergfnsg';
 var app = express();

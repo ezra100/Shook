@@ -10,85 +10,85 @@
     </mat-expansion-panel-header>
     <!--todo: remove this button later-->
     <button mat-button (click)="filterProducts()">Filter</button>
-        
-            <div>
-                Date:
-                <br>
-                <mat-form-field>
-                    <input matInput [min]="filter.date.after" #beforeInput [(ngModel)]="filter.date.before" (ngModelChange)="filterChanged()"
-                        [matDatepicker]="beforePicker" placeholder="Before">
-                    <mat-datepicker-toggle matSuffix [for]="beforePicker"></mat-datepicker-toggle>
-                    <mat-datepicker #beforePicker></mat-datepicker>
-                </mat-form-field>
-                <mat-form-field>
-                    <input matInput #afterInput [max]="filter.date.before" [(ngModel)]="filter.date.after" (ngModelChange)="filterChanged()"
-                        [matDatepicker]="afterPicker" placeholder="After">
-                    <mat-datepicker-toggle matSuffix [for]="afterPicker"></mat-datepicker-toggle>
-                    <mat-datepicker #afterPicker></mat-datepicker>
-                </mat-form-field>
-            </div>
-        
-        
-            <div>
-                <mat-form-field>
-                        <input matInput (ngModelChange)="filterChanged()" [(ngModel)]="filter.title.query" placeholder="Title" #title>
-                </mat-form-field>
-                <mat-checkbox (ngModelChange)="filterChanged()" [(ngModel)]="filter.title.isRegexp">Regular Expression</mat-checkbox>
-                <mat-checkbox *ngIf="filter.title.isRegexp" (ngModelChange)="filterChanged()" [(ngModel)]="filter.title.caseSensitive">Case Sensitive</mat-checkbox>
-            </div>
-        
-        
-            <div>
-                <mat-form-field>
-                        <input matInput placeholder="Subtitle" (ngModelChange)="filterChanged()" [(ngModel)]="filter.subtitle.query" #subtitle>
-                </mat-form-field>
-                <mat-checkbox (ngModelChange)="filterChanged()" [(ngModel)]="filter.subtitle.isRegexp">Regular Expression</mat-checkbox>
-                <mat-checkbox *ngIf="filter.subtitle.isRegexp" (ngModelChange)="filterChanged()" [(ngModel)]="filter.subtitle.caseSensitive">Case Sensitive</mat-checkbox>
-            </div>
-        
-        
-            <div>
-                <mat-form-field>
-                        <input matInput placeholder="Link" (ngModelChange)="filterChanged()" [(ngModel)]="filter.link.query" #link>
-                </mat-form-field>
-                <mat-checkbox (ngModelChange)="filterChanged()" [(ngModel)]="filter.link.isRegexp">Regular Expression</mat-checkbox>
-                <mat-checkbox *ngIf="filter.link.isRegexp" (ngModelChange)="filterChanged()" [(ngModel)]="filter.link.caseSensitive">Case Sensitive</mat-checkbox>
-            </div>
-        
-        
-            <mat-form-field>
-                    <input matInput placeholder="Owner (Publisher)" [(ngModel)]="filter.owner" (ngModelChange)="filterChanged()" #ownerInput>
-            </mat-form-field>
-        
-        
-            <mat-form-field>
-                <mat-select placeholder="Category" (ngModelChange)="filterChanged(0)" [(ngModel)]="filter.category">
-                    <mat-option [value]="">
-                        None
-                    </mat-option>
-                    <mat-option *ngFor="let category of fullCategoryName; let i = index" [value]="i">
-                        {{category}}
-                    </mat-option>
-                </mat-select>
-            </mat-form-field>
-        
-        
-            <div>
-                Price:
-                <br>
-                <mat-form-field>
-                    <input matInput type="number" [max]="filter.price.max" [(ngModel)]="filter.price.min" (ngModelChange)="filterChanged()" placeholder="Min"
-                        #priceMinInput>
-                </mat-form-field>
-                <mat-form-field>
-                    <input matInput type="number" [min]="filter.price.min" [(ngModel)]="filter.price.max" placeholder="Max" (ngModelChange)="filterChanged()"
-                        #priceMaxInput>
-                </mat-form-field>
-            </div>
-        
+
+    <div>
+        Date:
+        <br>
+        <mat-form-field>
+            <input matInput [min]="filter.date.after" #beforeInput [(ngModel)]="filter.date.before" (ngModelChange)="filterChanged()"
+                [matDatepicker]="beforePicker" placeholder="Before">
+            <mat-datepicker-toggle matSuffix [for]="beforePicker"></mat-datepicker-toggle>
+            <mat-datepicker #beforePicker></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field>
+            <input matInput #afterInput [max]="filter.date.before" [(ngModel)]="filter.date.after" (ngModelChange)="filterChanged()"
+                [matDatepicker]="afterPicker" placeholder="After">
+            <mat-datepicker-toggle matSuffix [for]="afterPicker"></mat-datepicker-toggle>
+            <mat-datepicker #afterPicker></mat-datepicker>
+        </mat-form-field>
+    </div>
+
+
+    <div>
+        <mat-form-field>
+            <input matInput (ngModelChange)="filterChanged()" [(ngModel)]="filter.title.query" placeholder="Title" #title>
+        </mat-form-field>
+        <mat-checkbox (ngModelChange)="filterChanged()" [(ngModel)]="filter.title.isRegexp">Regular Expression</mat-checkbox>
+        <mat-checkbox *ngIf="filter.title.isRegexp" (ngModelChange)="filterChanged()" [(ngModel)]="filter.title.caseSensitive">Case Sensitive</mat-checkbox>
+    </div>
+
+
+    <div>
+        <mat-form-field>
+            <input matInput placeholder="Subtitle" (ngModelChange)="filterChanged()" [(ngModel)]="filter.subtitle.query" #subtitle>
+        </mat-form-field>
+        <mat-checkbox (ngModelChange)="filterChanged()" [(ngModel)]="filter.subtitle.isRegexp">Regular Expression</mat-checkbox>
+        <mat-checkbox *ngIf="filter.subtitle.isRegexp" (ngModelChange)="filterChanged()" [(ngModel)]="filter.subtitle.caseSensitive">Case Sensitive</mat-checkbox>
+    </div>
+
+
+    <div>
+        <mat-form-field>
+            <input matInput placeholder="Link" (ngModelChange)="filterChanged()" [(ngModel)]="filter.link.query" #link>
+        </mat-form-field>
+        <mat-checkbox (ngModelChange)="filterChanged()" [(ngModel)]="filter.link.isRegexp">Regular Expression</mat-checkbox>
+        <mat-checkbox *ngIf="filter.link.isRegexp" (ngModelChange)="filterChanged()" [(ngModel)]="filter.link.caseSensitive">Case Sensitive</mat-checkbox>
+    </div>
+
+
+    <mat-form-field>
+        <input matInput placeholder="Owner (Publisher)" [(ngModel)]="filter.owner" (ngModelChange)="filterChanged()" #ownerInput>
+    </mat-form-field>
+
+
+    <mat-form-field>
+        <mat-select placeholder="Category" (ngModelChange)="filterChanged(0)" [(ngModel)]="filter.category">
+            <mat-option [value]="">
+                None
+            </mat-option>
+            <mat-option *ngFor="let category of fullCategoryName; let i = index" [value]="i">
+                {{category}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+
+
+    <div>
+        Price:
+        <br>
+        <mat-form-field>
+            <input matInput type="number" [max]="filter.price.max" [(ngModel)]="filter.price.min" (ngModelChange)="filterChanged()" placeholder="Min"
+                #priceMinInput>
+        </mat-form-field>
+        <mat-form-field>
+            <input matInput type="number" [min]="filter.price.min" [(ngModel)]="filter.price.max" placeholder="Max" (ngModelChange)="filterChanged()"
+                #priceMaxInput>
+        </mat-form-field>
+    </div>
+
 </mat-expansion-panel>
 <button *ngIf="authService.currentUser" class="m-2" mat-mini-fab (click)="openDialog()">
-    <mat-icon color="primary" aria-label="Add product" svgIcon="add"></mat-icon>
+    <mat-icon color="primary" aria-label="Add product">add</mat-icon>
 </button>
 <mat-divider></mat-divider>
 <mat-grid-list class="m-2" rowHeight="15em" [cols]="cols" gutterSize="0.5rem">
@@ -97,3 +97,11 @@
         </app-product>
     </mat-grid-tile>
 </mat-grid-list>
+<button *ngIf="!loadingMore && !reachedEndOfFeed" class="m-2" mat-fab (click)="loadMore()">
+    <mat-icon color="primary" aria-label="Load more" >autorenew</mat-icon>
+</button>
+<mat-spinner *ngIf="loadingMore">
+</mat-spinner>
+<div class="divider-msg" *ngIf="reachedEndOfFeed">
+    <span>End of products feed</span>
+</div>

@@ -35,9 +35,9 @@ router.get('/me', helpers.asyncWrapper(async function(req, res) {
   res.status(404).end('You\'re not logged in');
 }));
 router.get('/user', helpers.asyncWrapper(async function(req, res) {
-    let id = req.query._id;
-    res.json(await db.getUser(id, false));
-    return;
+  let id = req.query._id;
+  res.json(await db.getUser(id, false));
+  return;
 }));
 router.put('/follow', helpers.asyncWrapper(async function(req, res) {
   let followee = req.body.followee;
@@ -64,4 +64,16 @@ router.put('/addToBasket', helpers.asyncWrapper(async function(req, res) {
 
 router.get('/basketSum', helpers.asyncWrapper(async function(req, res) {
   return res.json(await db.getBasketSum(req.user._id));
+}));
+
+router.get('/userList', helpers.asyncWrapper(async function(req, res) {
+  let filter: any = {};
+  for (let key of ['_id', 'firstName', 'lastName', 'gender', 'userType']) {
+    if (req.query.filter[key]) {
+      filter[key] = req.query.filter[key];
+    }
+  }
+  let limit = Number(req.query.limit || 150);
+  let offset = Number(req.query.offset || 0);
+  return db.getUsersList(filter, limit, offset);
 }));

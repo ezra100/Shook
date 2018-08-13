@@ -4,7 +4,7 @@ import * as faker from 'faker';
 import * as mongoose from 'mongoose';
 
 import {helpers} from '../helpers';
-import {Category, ChatRoom, DMessage, Gender, IComment, Message, Order, Product, Review, User, UserAuthData, UserType} from '../types';
+import {Category, Chat, ChatRoom, DMessage, Gender, IComment, Message, Order, Product, Review, User, UserAuthData, UserType} from '../types';
 
 import {chatRoomPermitedFields, commentPermitedFields, productPermitedFields, reviewPermitedFields, stripObject, userPermitedFields} from './helpers';
 import {chatRoomModel, commentModel, DMessageModel, messageModel, orderModel, productModel, reviewModel, userAuthDataModel, userModel} from './Models';
@@ -114,6 +114,18 @@ export namespace db {
     }
     let doc = await query;
     return doc && doc.toObject();
+  }
+
+  export async function getUsersList(filter: any = {}, limit?: number, skip?: number) {
+    let query = userModel.find(filter).select(
+        '_id firstName lastName gender userType imageUrl');
+    if(limit){
+      query.limit(limit);
+    }
+    if(skip){
+      query.skip(skip);
+    }
+    return await query;
   }
 
 
@@ -631,21 +643,31 @@ export namespace db {
     }
 
     // get all messages between 2 users
-    export async function getDirectMessages(
-        user1: string, user2: string, offset: number = 0, limit?: number) {
+    export async function getChat(
+        user: string, otherUser: string, offset: number = 0, limit?: number) {
       let query =
           DMessageModel
-              .find({$or: [{from: user1, to: user2}, {from: user2, to: user1}]})
+              .find({
+                $or:
+                    [{from: user, to: otherUser}, {from: otherUser, to: user}]
+              })
               .sort('-date')
               .skip(offset);
       if (limit) {
         query.limit(limit);
       }
-      return await query;
+      let messages: DMessage[] = (<any[]>await query).reverse();
+
+      return <Chat>{
+        lastMessageDate: messages[messages.length - 1].date,
+        messages,
+        user: await getUser(otherUser)
+      };
     }
 
-    export async function
-    getLastChats(user: string, offset: number = 0, limit: number = 100) {
+    export async function getLastChats(
+        user: string, offset: number = 0, limit: number = 100,
+        dateOffset?: Date) {
       let query = DMessageModel.aggregate([
         {$match: {$or: [{from: user}, {to: user}]}},
         {$sort: {date: -1}}, {
@@ -664,11 +686,14 @@ export namespace db {
             
           }
         },
+        //if date offset is defined, then add this match to array aggregation
+       ... dateOffset? [ {$match: {lastMessageDate: {$lt: dateOffset}}}] : []
+        ,
         {$sort: {lastMessageDate: -1}}, {$limit: limit},
         {$lookup:{
           from: 'users', 
           localField: '_id',
-          foreignField: '_id',
+          foreignField: '_id', 
           as: 'user'
         }},
         {
@@ -677,7 +702,7 @@ export namespace db {
         {
           '$project': {
             '_id': 1,
-            'messages': 1,
+            'messages': { $reverseArray: '$messages' },
             'lastMessageDate': 1,
             'user._id': 1,
             'user.firstName': 1,

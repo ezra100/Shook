@@ -17,10 +17,7 @@ export class HeaderComponent implements OnInit {
       public dialog: MatDialog, iconRegistry: MatIconRegistry,
       sanitizer: DomSanitizer, private authService: AuthService,
       public snackBar: MatSnackBar) {
-    iconRegistry.addSvgIcon(
-        'account',
-        sanitizer.bypassSecurityTrustResourceUrl(
-            'assets/icons/sharp-account_box-24px.svg'));
+
   }
 
   ngOnInit() {}
