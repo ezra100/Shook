@@ -7,18 +7,14 @@
     <a class="m-2" mat-button routerLink="/sellers"> Sellers </a>
     <a class="m-2" mat-button routerLink="/reviews"> Reviews </a>
     <a class="m-2" mat-button routerLink="/dmessages"> DM </a>
-
-    <h1>
-      Welcome to {{ title  }}!
-    </h1>
     <button *ngIf="!auth.currentUser" class="m-2" mat-raised-button color="accent" (click)="openLoginDialog()" style="float:right">
-      Login
+      <span> Login</span>
     </button>
     <button *ngIf="!auth.currentUser" class="m-2" mat-raised-button color="accent" (click)="openSignupDialog()" style="float:right">
-      Sign Up
+      <span> Sign Up</span>
     </button>
-    <button *ngIf="auth.currentUser" class="m-2" mat-raised-button color="primary" (click)="logout()" style="float:right"> 
-      Logout
+    <button *ngIf="auth.currentUser" class="m-2" mat-raised-button color="primary" (click)="logout()" style="float:right">
+      <span> Logout</span>
     </button>
   </mat-toolbar-row>
 </mat-toolbar>

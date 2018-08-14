@@ -73,10 +73,7 @@ export class DMessagesService {
   getDmessageObservable() {
     return DMessagesService.msgSubject;
   }
-  getUserList(query: string) {
-    query = helpers.escapeRegExp(query);
-    let filter = { $or: [{_id: {$regex: query, $options: 'i '}}, {firstName: {$regex: query, $options: 'i '}},{lastName: {$regex: query, $options: 'i '}}] }
-  }
+
 }
 
 DMessagesService.init();

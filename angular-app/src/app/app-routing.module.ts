@@ -6,6 +6,7 @@ import { ReviewsComponent } from './reviews/reviews.component';
 import { SellersComponent } from './sellers/sellers.component';
 import { HomeComponent } from './home/home.component';
 import { DmessagesComponent } from './dmessages/dmessages.component';
+import { AuthGuard } from './AuthGuard';
 
 
 const routes: Routes = [
@@ -14,7 +15,7 @@ const routes: Routes = [
   { path: 'reviews', component: ReviewsComponent },
   { path: 'sellers', component: SellersComponent },
   { path: 'home', component: HomeComponent },
-  {path: 'dmessages', component: DmessagesComponent}
+  {path: 'dmessages',canActivate: [AuthGuard], component: DmessagesComponent}
 ];
 
 @NgModule({

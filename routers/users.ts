@@ -66,14 +66,17 @@ router.get('/basketSum', helpers.asyncWrapper(async function(req, res) {
   return res.json(await db.getBasketSum(req.user._id));
 }));
 
-router.get('/userList', helpers.asyncWrapper(async function(req, res) {
-  let filter: any = {};
-  for (let key of ['_id', 'firstName', 'lastName', 'gender', 'userType']) {
-    if (req.query.filter[key]) {
-      filter[key] = req.query.filter[key];
-    }
-  }
+// it's supposed to be get, but it's easier to send a nested object via post
+router.get('/usersList', helpers.asyncWrapper(async function(req, res) {
+  let query = helpers.escapeRegExp(req.query.query);
+  let filter = {
+    $or: [
+      {_id: {$regex: query, $options: 'i'}},
+      {firstName: {$regex: query, $options: 'i'}},
+      {lastName: {$regex: query, $options: 'i'}}
+    ]
+  };
   let limit = Number(req.query.limit || 150);
   let offset = Number(req.query.offset || 0);
-  return db.getUsersList(filter, limit, offset);
+  return res.json(await  db.getUsersList(filter, limit, offset));
 }));

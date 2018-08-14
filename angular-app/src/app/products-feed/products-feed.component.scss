@@ -1,52 +1,59 @@
-:host{
+:host {
     overflow-y: scroll;
-    height: 150vh;
+    height: 100%;
 }
 
-mat-form-field{
+mat-form-field {
     margin-left: 0.5rem;
     margin-right: 0.5rem;
 }
 
-mat-expansion-panel{
+mat-expansion-panel {
     width: 90%;
     display: inline-block;
 }
-mat-icon{
+
+mat-icon {
     margin-bottom: 2rem;
 }
 
-.filter-grid mat-grid-tile{
-    border-right: rgba(128, 128, 128, 0.34) dashed 0.05rem
+.filter-grid mat-grid-tile {
+    border-right: rgba(128, 128, 128, 0.34) dashed 0.05rem;
 }
 
 .divider-msg {
     position: relative;
-    width: 100%;
-    margin-bottom: 27px;
+    width: auto;
+    margin: 1px;
     text-align: center;
 
     span {
-        font-size: 14px;
-        display: inline-block;
-        color: var(--grey);
-
         &:before, &:after {
+            content: "";
             position: absolute;
-            top: 10px;
-            display: inline-block;
-            width: 30%;
-            height: 1px;
-            content: '';
-            background-color: var(--light);
+            height: 5px;
+            border-bottom: 1px solid white;
+            border-top: 1px solid white;
+            top: 0;
+            width: 100%;
         }
 
         &:before {
-            left: 0;
+            right: 100%;
+            margin-right: 15px;
         }
 
         &:after {
-            right: 0;
+            left: 100%;
+            margin-left: 15px;
         }
+    }
+}
+
+.center {
+    margin: auto;
+
+    @at-root button#{&} {
+        left: 45%;
     }
 }

@@ -116,13 +116,14 @@ export namespace db {
     return doc && doc.toObject();
   }
 
-  export async function getUsersList(filter: any = {}, limit?: number, skip?: number) {
+  export async function
+  getUsersList(filter: any = {}, limit?: number, skip?: number) {
     let query = userModel.find(filter).select(
         '_id firstName lastName gender userType imageUrl');
-    if(limit){
+    if (limit) {
       query.limit(limit);
     }
-    if(skip){
+    if (skip) {
       query.skip(skip);
     }
     return await query;
@@ -659,7 +660,8 @@ export namespace db {
       let messages: DMessage[] = (<any[]>await query).reverse();
 
       return <Chat>{
-        lastMessageDate: messages[messages.length - 1].date,
+        lastMessageDate:
+            messages.length > 0 ? messages[messages.length - 1].date : null,
         messages,
         user: await getUser(otherUser)
       };

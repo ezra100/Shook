@@ -1,18 +1,29 @@
 <!--source: https://codepen.io/Momciloo/pen/bEdbxY -->
 
-<div class="container mx-2 my-2" *ngIf="fChats">
+<div class="my-container mx-2 my-2" *ngIf="fChats">
     <div class="left">
         <div class="top">
-            <input type="text" placeholder="Search" [(ngModel)]="query" (ngModelChange)="filterChats()" />
-            <mat-checkbox [(ngModel)]="searchMsgs" (ngModelChange)="filterChats()"  *ngIf="query">Search messages</mat-checkbox>
+            <input type="search" [placeholder]="isSearchUsers?  'Search for Users' : 'Search in chats'" [(ngModel)]="query" (ngModelChange)="search()"
+            />
+            <button mat-mini-fab [color]="isSearchUsers ? 'accent' : 'primary'" (click)="isSearchUsers = !isSearchUsers; search()">
+                <mat-icon>{{ isSearchUsers? 'arrow_back' : 'add' }}</mat-icon>
+            </button>
+
+            <mat-checkbox [(ngModel)]="searchMsgs" (ngModelChange)="filterChats()" *ngIf="query && !isSearchUsers">Search messages</mat-checkbox>
+
         </div>
-        <ul class="people">
+        <mat-chip-list *ngIf="usersListResults && isSearchUsers" class="mat-chip-list-stacked">
+            <mat-chip (click)="addChatByID(user._id)" *ngFor="let user of usersListResults" selected color="primary">
+                {{ user._id + ": " + user.firstName + " " + user.lastName}}
+            </mat-chip>
+        </mat-chip-list>
+        <ul class="people" *ngIf="!usersListResults || !isSearchUsers">
             <li [ngClass]="{person: true, active: activeChat === chat}" *ngFor="let chat of fChats" (click)="selectChat(chat.user._id); chat.scrollTop = chat.scrollHeight;">
                 <!--todo - replace with the user image-->
                 <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/382994/dog.png" alt="" />
                 <span class="name">{{chat.user.firstName}}</span>
                 <span class="time">{{chat.lastMessageDate | date }}</span>
-                <span class="preview">{{chat.messages[chat.messages.length-1].content}}</span>
+                <span *ngIf="chat.messages.length > 0" class="preview">{{chat.messages[chat.messages.length-1].content}}</span>
             </li>
         </ul>
     </div>
@@ -24,8 +35,8 @@
             </span>
         </div>
 
-        <div class="chat m-2">
-            <div class="conversation-start">
+        <div class="chat">
+            <div class="conversation-start" *ngIf="activeChat.messages.length > 0" >
                 <span>{{activeChat.messages[0].date | date}}</span>
             </div>
             <div *ngFor="let message of (activeChat.messages)" [ngClass]="{ 'bubble': true,'you' : message.from !== currentUserID,'me'  : message.from === currentUserID}">
@@ -34,12 +45,14 @@
 
         </div>
 
-        <div class="write" >
-            <input type="text" (keyup.enter)="activeChat.newMsg && sendMessage()"  placeholder="Write message..." [(ngModel)]="activeChat.newMsg" />
+        <div class="write">
+            <input type="text" (keyup.enter)="activeChat.newMsg && sendMessage()" placeholder="Write message..." [(ngModel)]="activeChat.newMsg"
+            />
             <button mat-icon-button color="primary" (click)="sendMessage()" *ngIf="activeChat.newMsg">
                 <mat-icon>send</mat-icon>
             </button>
         </div>
     </div>
 </div>
-<h1 class="m-5" *ngIf="!fChats">Log in to view messages!</h1>
+<h1 class="my-5 mx-auto" *ngIf="!fChats && ! currentUserID">Log in to view messages!</h1>
+<mat-progress-bar *ngIf="!fChats &&  currentUserID" mode="buffer"></mat-progress-bar>

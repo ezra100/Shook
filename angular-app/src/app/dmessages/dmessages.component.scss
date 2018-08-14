@@ -43,30 +43,9 @@ $primary: rgb(103, 58, 183);
     --blue: #00b0ff;
 }
 
-body {
-    background-color: var(--bg);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-
-    @include font;
-
-    background-image: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/382994/image.jpg");
-    background-size: cover;
-    background-repeat: none;
-}
-
-.wrapper {
-    position: relative;
-    left: 50%;
-    width: var(--wrapper);
-    height: 800px;
-    transform: translate(-50%, 0);
-}
-
-.container {
+.my-container {
     background-color: var(--white);
-    height: 80vh;
+    height: 90vh;
 
     .left {
         overflow-y: scroll;
@@ -100,33 +79,15 @@ body {
         }
 
         input {
-            float: left;
-            width: 188px;
-            height: 42px;
-            padding: 0 15px;
             border: 1px solid var(--light);
             background-color: #eceff1;
             border-radius: 21px;
-
+            width:85%;
             @include font;
 
             &:focus {
                 outline: none;
             }
-        }
-
-        a.search {
-            display: block;
-            float: left;
-            width: 42px;
-            height: 42px;
-            margin-left: 10px;
-            border: 1px solid var(--light);
-            background-color: $primary;
-            background-image: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/382994/name-type.png");
-            background-repeat: no-repeat;
-            background-position: top 12px left 14px;
-            border-radius: 50%;
         }
 
         .people {
@@ -199,9 +160,11 @@ body {
                     &.active {
                         background-color: $primary;
                     }
+
                     &:hover:not(.active) {
-                        background-color: lighten( $primary , 10%) ;
+                        background-color: lighten($primary, 10%);
                     }
+
                     width: calc(100% + 2px);
                     padding-left: calc(10% + 1px);
 
@@ -226,9 +189,8 @@ body {
 
         .top {
             width: 100%;
-            height: 10%;
-            padding: 15px 29px;
-            background-color: #eceff1;
+            height: auto;
+            background-color: lighten($primary, 50%);
 
             span {
                 font-size: 15px;
@@ -243,7 +205,13 @@ body {
         }
 
         .chat {
-            overflow-y: scroll;
+            overflow-y: auto;
+
+            // when there's a scroll on the y it creates an overflow on the x
+            // so we'll just disable it and pad it a bit
+            overflow-x: hidden;
+            padding-right: 1%;
+            padding-left: 1%;
             position: relative;
             border-width: 1px 1px 1px 0;
             border-style: solid;
@@ -255,33 +223,37 @@ body {
             // display: block;
             // display: flex;
             .bubble {
-                transition-timing-function: cubic-bezier(.4,-.04, 1, 1);
+                transition-timing-function: cubic-bezier(0.4, -0.04, 1, 1);
+
                 // @for $i from 1 through 10 {
                 //     &:nth-of-type(#{$i}) {
                 //         animation-duration: .15s * $i;
                 //     }
                 // }
+           
             }
         }
 
         .write {
             height: 10%;
-            padding-left: 8px;
-            border: 1px solid var(--light);
-            background-color: #eceff1;
-            width: calc(100% - 58px);
+            margin-left: 1%;
+            margin-top: 1%;
+            margin-bottom: 1%;
+            border: 1px solid $primary;
+            background-color:lighten($primary, 50%);
+            width: 95%;
             border-radius: 5px;
 
             input {
                 font-size: 16px;
                 float: left;
-                width: 347px;
-                height: 40px;
+                width: 90%;
+                height: 100%;
                 padding: 0 10px;
                 color: var(--dark);
                 border: 0;
                 outline: none;
-                background-color: #eceff1;
+                background-color: rgba(102, 51, 153, 0);
 
                 @include font;
             }

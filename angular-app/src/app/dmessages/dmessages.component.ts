@@ -1,4 +1,5 @@
 import {Component, OnInit} from '@angular/core';
+import {CanActivate} from '@angular/router';
 
 import {Chat, DMessage, Message, User} from '../../../../types';
 import {AuthService} from '../auth.service';
@@ -10,17 +11,18 @@ import {UsersService} from '../users.service';
   templateUrl: './dmessages.component.html',
   styleUrls: ['./dmessages.component.scss']
 })
-export class DmessagesComponent implements OnInit {
+export class DmessagesComponent implements OnInit{
   chats: Chat[] = null;
   fChats: Chat[] = null;
   currentUserID: string = null;
   activeChat: Chat&{newMsg?: string} = null;
   query: string = '';
   searchMsgs: boolean = false;
+  usersListResults: User[];
+  isSearchUsers: boolean = false;
   constructor(
       private dmessageService: DMessagesService,
       private userService: UsersService) {}
-
   ngOnInit() {
     // on login init chats
     let self = this;
@@ -52,7 +54,9 @@ export class DmessagesComponent implements OnInit {
       this.currentUserID = null;
     }
   }
-
+  search() {
+    this.isSearchUsers ? this.searchUsers() : this.filterChats()
+  }
   addMessage(msg: DMessage) {
     let participant =
         msg.from === AuthService.currentUser._id ? msg.to : msg.from;
@@ -78,7 +82,7 @@ export class DmessagesComponent implements OnInit {
       this.chats[i].lastMessageDate = msg.date;
     }
     this.chats.sort(
-        (a, b) =>  - a.lastMessageDate.getTime() + b.lastMessageDate.getTime());
+        (a, b) => -a.lastMessageDate.getTime() + b.lastMessageDate.getTime());
     this.filterChats();
   }
 
@@ -91,7 +95,7 @@ export class DmessagesComponent implements OnInit {
       return;
     }
     this.dmessageService.send(this.activeChat.user._id, this.activeChat.newMsg);
-    this.activeChat.newMsg = "";
+    this.activeChat.newMsg = '';
   }
   filterChats() {
     // escape the query
@@ -103,5 +107,28 @@ export class DmessagesComponent implements OnInit {
         c => regex.test(c.user._id) || regex.test(c.user.firstName) ||
             regex.test(c.user.lastName) ||
             (this.searchMsgs && c.messages.find(m => regex.test(m.content))));
+  }
+  searchUsers() {
+    let self = this;
+    this.userService.getUserList(self.query).subscribe(userList => {
+      self.usersListResults = userList;
+    })
+  }
+  addChatByID(userID: string) {
+    let chatTryFind = this.chats.find(c => c.user._id === userID);
+    if (chatTryFind) {
+      this.activeChat = chatTryFind;
+      this.isSearchUsers = false;
+      this.filterChats();
+      return;
+    }
+    this.dmessageService.getChat(userID).subscribe(chat => {
+      this.activeChat = chat;
+      this.chats.push(chat);
+      this.chats.sort(
+          (a, b) => -a.lastMessageDate.getTime() + b.lastMessageDate.getTime());
+      this.filterChats();
+    });
+    this.isSearchUsers = false;
   }
 }

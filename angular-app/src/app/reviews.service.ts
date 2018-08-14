@@ -13,9 +13,13 @@ export class ReviewsService {
   update(review: Partial<Review>) {
     return this.http.put<Review>(reviewsUriBase + '/update', review);
   }
-  getById(id: string) {
+  getByReviewId(id: string) {
     let params = new HttpParams({fromObject: {_id: id}});
     return this.http.get<Review>(reviewsUriBase + '/getById', {params});
+  }
+  getByProductID(productID: string){
+    let params = new HttpParams({fromObject: {productID}});
+    return this.http.get<Review[]>(reviewsUriBase + '/getLatest', {params});
   }
   getLatest(filter: any = {}) {
     return this.http.get<Review[]>(

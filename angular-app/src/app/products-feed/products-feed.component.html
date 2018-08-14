@@ -8,9 +8,6 @@
             {{panelOpenState ? 'Filter': 'Click to expand' }}
         </mat-panel-description>
     </mat-expansion-panel-header>
-    <!--todo: remove this button later-->
-    <button mat-button (click)="filterProducts()">Filter</button>
-
     <div>
         Date:
         <br>
@@ -63,8 +60,8 @@
 
     <mat-form-field>
         <mat-select placeholder="Category" (ngModelChange)="filterChanged(0)" [(ngModel)]="filter.category">
-            <mat-option [value]="">
-                None
+            <mat-option style="color: gray" [value]="">
+                All
             </mat-option>
             <mat-option *ngFor="let category of fullCategoryName; let i = index" [value]="i">
                 {{category}}
@@ -97,11 +94,10 @@
         </app-product>
     </mat-grid-tile>
 </mat-grid-list>
-<button *ngIf="!loadingMore && !reachedEndOfFeed" class="m-2" mat-fab (click)="loadMore()">
+<button *ngIf="!loadingMore && !reachedEndOfFeed" class="center" mat-fab (click)="loadMore()">
     <mat-icon color="primary" aria-label="Load more" >autorenew</mat-icon>
 </button>
-<mat-spinner *ngIf="loadingMore">
-</mat-spinner>
-<div class="divider-msg" *ngIf="reachedEndOfFeed">
+<mat-progress-bar *ngIf="loadingMore" mode="buffer"></mat-progress-bar>
+<div class="divider-msg fancy" *ngIf="reachedEndOfFeed">
     <span>End of products feed</span>
 </div>

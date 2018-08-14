@@ -2,7 +2,7 @@ import {HttpClientModule} from '@angular/common/http';
 import {enableProdMode, NgModule} from '@angular/core';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MAT_SNACK_BAR_DEFAULT_OPTIONS, MatButtonModule, MatCardModule, MatCheckboxModule, MatDatepickerModule, MatDialogModule, MatExpansionModule, MatFormFieldModule, MatGridListModule, MatIconModule, MatInputModule, MatProgressSpinnerModule, MatSelectModule, MatSnackBarModule} from '@angular/material';
+import {MAT_SNACK_BAR_DEFAULT_OPTIONS, MatButtonModule, MatCardModule, MatCheckboxModule, MatChipsModule, MatDatepickerModule, MatDialogModule, MatExpansionModule, MatFormFieldModule, MatGridListModule, MatIconModule, MatInputModule, MatProgressBarModule, MatProgressSpinnerModule, MatSelectModule, MatSnackBarModule} from '@angular/material';
 import {MatMomentDateModule} from '@angular/material-moment-adapter';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatToolbarModule} from '@angular/material/toolbar';
@@ -23,6 +23,8 @@ import {ReversePipe} from './reverse.pipe'
 import {ReviewsComponent} from './reviews/reviews.component';
 import {SellersComponent} from './sellers/sellers.component';
 import {SignupDialogComponent} from './signup-dialog/signup-dialog.component';
+import { ReviewCardComponent } from './review-card/review-card.component';
+import { AuthGuard } from './AuthGuard';
 
 enableProdMode();
 
@@ -31,23 +33,28 @@ enableProdMode();
     AppComponent, ProductsFeedComponent, AddProductComponent, ProductComponent,
     LoginFormComponent, HeaderComponent, ProductFullComponent, ReviewsComponent,
     SellersComponent, HomeComponent, SignupDialogComponent, DmessagesComponent,
-    ReversePipe
+    ReversePipe,
+    ReviewCardComponent
   ],
   imports: [
-    MatSnackBarModule,   MatIconModule,      MatDialogModule,
-    MatDividerModule,    FlexLayoutModule,   MatGridListModule,
-    MatInputModule,      MatSelectModule,    MatCheckboxModule,
-    ReactiveFormsModule, MatButtonModule,    BrowserAnimationsModule,
-    MatMomentDateModule, MatFormFieldModule, FormsModule,
-    BrowserModule,       MatExpansionModule, MatCardModule,
-    MatDatepickerModule, HttpClientModule,   AppRoutingModule,
-    MatInputModule,      MatToolbarModule,   MatProgressSpinnerModule,
-
+    MatProgressBarModule, MatChipsModule,
+    MatSnackBarModule,    MatIconModule,
+    MatDialogModule,      MatDividerModule,
+    FlexLayoutModule,     MatGridListModule,
+    MatInputModule,       MatSelectModule,
+    MatCheckboxModule,    ReactiveFormsModule,
+    MatButtonModule,      BrowserAnimationsModule,
+    MatMomentDateModule,  MatFormFieldModule,
+    FormsModule,          BrowserModule,
+    MatExpansionModule,   MatCardModule,
+    MatDatepickerModule,  HttpClientModule,
+    AppRoutingModule,     MatInputModule,
+    MatToolbarModule,     MatProgressSpinnerModule,
   ],
   entryComponents:
       [AddProductComponent, LoginFormComponent, SignupDialogComponent],
   providers:
-      [{provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: {duration: 3000}}],
+      [AuthGuard, {provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: {duration: 3000}}],
   bootstrap: [AppComponent]
 })
 export class AppModule {
