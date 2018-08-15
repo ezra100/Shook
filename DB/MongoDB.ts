@@ -47,54 +47,22 @@ export namespace db {
     return doc && doc.toObject();
   }
 
+  export async function authorizeUser(userID: string, adminID?: string) {
+    // verify that it's an admin if needed
+    if (adminID) {
+      let admin: User = (await userModel.findById(adminID)).toObject();
+      if (admin.userType !== UserType.Admin) {
+        throw 'You\'re not the admin';
+      }
+    }
+    return await userModel.findOneAndUpdate(
+        {_id: userID}, {$set: {isAuthorized: true}});
+  }
   //#region users
   // todo: update this
   export async function getUsers(
       filter: any = {}, offset: number = 0, limit?: number,
       showPrivateData: boolean = false): Promise<User[]> {
-    for (const key of Object.keys(filter)) {
-      if (filter[key] === '') {
-        delete filter[key];
-        continue;
-      }
-      switch (getUserKeyType(key)) {
-        case 'string':
-
-          if (key === '_id') {
-            // it it's username, just make sure that the search is case
-            // insensitive
-            filter[key] = new RegExp(helpers.escapeRegExp(filter[key]), 'i');
-          } else {
-            // replace it with a regex that will search for any one of the given
-            // words
-            filter[key] = new RegExp(
-                filter[key]
-                    .split(/\s+/)
-                    // escape regex characters
-                    .map(
-                        (v: any) =>
-                            v.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'))
-                    .join('|'),
-                'gi');
-          }
-          break;
-        case 'boolean':
-
-          if (typeof filter[key] === 'string') {
-            filter[key] = (filter[key] === 'true');
-          }
-          break;
-        case 'number':
-          // exception for 'gender' since it's an enum
-          if (typeof filter[key] === 'string' ||
-              filter[key] instanceof String) {
-            filter[key] = parseInt(filter[key], 10);
-          }
-          if (key === 'gender' && filter[key] === 0) {
-            delete filter[key];
-          }
-      }
-    }
     let query = userModel.find(filter).sort('-_id').skip(offset);
     if (limit) {
       query.limit(limit);
@@ -140,11 +108,11 @@ export namespace db {
     if (!doc) {
       return 'followee doesn\'t exist';
     }
-    return (
-        await userModel
-            .update(
-                {_id: follower.toLowerCase()}, {$addToSet: {follows: followee}})
-            .exec());
+    return (await userModel
+                .update(
+                    {_id: follower.toLowerCase(), isAuthorized: true},
+                    {$addToSet: {follows: followee}})
+                .exec());
   }
   export async function removeFollowee(follower: string, followee: string) {
     followee = followee.toLowerCase();
@@ -251,8 +219,16 @@ export namespace db {
     let userDoc: any = new userModel(user);
     return await userDoc.save();
   }
-  export async function deleteUser(user: User): Promise<User> {
-    return await userModel.findByIdAndRemove(user._id);
+  export async function deleteUser(userID: string, adminID?: string):
+      Promise<User> {
+    // verify that it's an admin if needed
+    if (adminID) {
+      let admin: User = (await userModel.findById(adminID)).toObject();
+      if (admin.userType !== UserType.Admin) {
+        throw 'You\'re not the admin';
+      }
+    }
+    return await userModel.findByIdAndRemove(userID);
   }
   //#endregion
   //#region  product
@@ -348,7 +324,7 @@ export namespace db {
   export async function
   deleteReview(id: string, removeComments: boolean = true) {
     if (removeComments) {
-      deleteCommentsByReviewID(id);
+      deleteCommentsByProductID(id);
     }
     let doc = await reviewModel.findByIdAndRemove(id);
     return doc && doc.toObject();
@@ -356,7 +332,7 @@ export namespace db {
   export async function deleteReviewsByProductID(productID: string) {
     let reviews = await getLatestReviews({productID: productID});
     reviews.forEach((review) => {
-      deleteCommentsByReviewID(review._id);
+      deleteCommentsByProductID(review._id);
     });
     let results =
         (await reviewModel.remove({productID: new ObjectId(productID)}));
@@ -435,8 +411,9 @@ export namespace db {
   export async function deleteComment(id: string) {
     commentModel.findByIdAndRemove(id);
   }
-  export async function deleteCommentsByReviewID(reviewID: string) {
-    let results = await commentModel.remove({reviewID: new ObjectId(reviewID)});
+  export async function deleteCommentsByProductID(productID: string) {
+    let results =
+        await commentModel.remove({productID: new ObjectId(productID)});
     return results;
   }
   export async function

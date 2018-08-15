@@ -49,14 +49,19 @@ $primary: rgb(103, 58, 183);
 
     .left {
         overflow-y: scroll;
+        overflow-x: hidden;
         float: left;
         width: 37.6%;
-        height: 100%;
+        height: inherit;
         border: 1px solid var(--light);
         background-color: var(--white);
-
+        @media only screen and (max-width: 768px){
+            width: 95vw;
+            z-index: 0;
+        }
         ul {
             list-style: none;
+            padding:0 
         }
 
         .top {
@@ -99,7 +104,7 @@ $primary: rgb(103, 58, 183);
             .person {
                 position: relative;
                 width: 100%;
-                padding: 12px 10% 16px;
+                padding: 12px 5% 16px;
                 cursor: pointer;
                 background-color: var(--white);
 
@@ -166,8 +171,6 @@ $primary: rgb(103, 58, 183);
                     }
 
                     width: calc(100% + 2px);
-                    padding-left: calc(10% + 1px);
-
                     span {
                         color: var(--white);
                         background: transparent;
@@ -185,8 +188,13 @@ $primary: rgb(103, 58, 183);
         position: relative;
         float: left;
         width: 62.4%;
-        height: 100%;
-
+        height: inherit;
+        background-color: white;
+        @media only screen and (max-width: 768px){
+            width: 95vw;
+            z-index: 1;
+            position: absolute;
+        }
         .top {
             width: 100%;
             height: auto;
@@ -384,5 +392,12 @@ $primary: rgb(103, 58, 183);
     100% {
         margin-right: 0;
         opacity: 1;
+    }
+}
+
+.small-only{
+    display: none;
+    @media only screen and (max-width: 768px){
+        display: unset;
     }
 }

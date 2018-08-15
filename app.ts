@@ -19,6 +19,7 @@ import * as DMessages from './routers/DMessages';
 import * as products from './routers/products';
 import * as reviews from './routers/reviews';
 import * as users from './routers/users';
+import * as admin from './routers/admin';
 import * as io from './socket.io';
 
 // init the data base with fake data
@@ -62,6 +63,7 @@ apiRouter.use('/comments', comments.router);
 apiRouter.use('/reviews', reviews.router);
 apiRouter.use('/chatRooms', chatRooms.router);
 apiRouter.use('/DMessages', DMessages.router);
+apiRouter.use('/admin', admin.router);
 
 app.use('/api', apiRouter);
 app.use(

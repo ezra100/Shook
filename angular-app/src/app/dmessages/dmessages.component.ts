@@ -11,7 +11,7 @@ import {UsersService} from '../users.service';
   templateUrl: './dmessages.component.html',
   styleUrls: ['./dmessages.component.scss']
 })
-export class DmessagesComponent implements OnInit{
+export class DmessagesComponent implements OnInit {
   chats: Chat[] = null;
   fChats: Chat[] = null;
   currentUserID: string = null;
@@ -23,9 +23,12 @@ export class DmessagesComponent implements OnInit{
   constructor(
       private dmessageService: DMessagesService,
       private userService: UsersService) {}
-  ngOnInit() {
+  ngOnInit() {;
     // on login init chats
     let self = this;
+    window.onhashchange = () => {
+      self.selectChat(location.hash.substr(1));
+    };
     if (AuthService.currentUser) {
       self.initChats(AuthService.currentUser);
     }
@@ -88,6 +91,7 @@ export class DmessagesComponent implements OnInit{
 
   selectChat(userID: string) {
     this.activeChat = this.chats.find(c => c.user._id === userID);
+    location.hash = userID;
   }
   sendMessage() {
     if (!this.activeChat || !this.activeChat.newMsg) {

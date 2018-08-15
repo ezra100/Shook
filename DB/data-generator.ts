@@ -120,12 +120,12 @@ function getFakeReview(): Partial<Review> {
 
 function getFakeComment(): Partial<IComment> {
   let likeDislike = getRandomUsernamesArrays();
-  let review = reviews[faker.random.number(reviewsLength - 1)];
+  let product = products[faker.random.number(reviewsLength - 1)];
   return {
     owner: users[faker.random.number(usersLength - 1)]._id,
         comment: faker.lorem.paragraphs(3), dislikes: likeDislike[1],
-        likes: likeDislike[0], reviewID: review._id,
-        date: faker.date.between(review.date, Date()),
+        likes: likeDislike[0], productID: product._id,
+        date: faker.date.between(product.date, Date()),
   }
 }
 

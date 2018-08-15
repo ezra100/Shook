@@ -68,7 +68,8 @@ export interface User {
   address: string;
   imageURL: string;
   follows?: string[];
-  basket?: {productID: string, quantity: number}[]
+  basket?: {productID: string, quantity: number}[];
+  isAuthorized?: boolean;
 }
 
 export interface UserAuthData {
@@ -111,7 +112,7 @@ export interface IComment {
   _id?: string;
   date?: Date;
   owner: string;     // publisher of the comment
-  reviewID: string;  // review.id
+  productID: string;  // review.id
   comment: string;
   likes?: string[];  // array of usernames of those who liked the comment
   likesCount?: number;

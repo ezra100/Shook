@@ -12,6 +12,9 @@ router.post(
     helpers.asyncWrapper(
         async function(req: express.Request, res: express.Response) {
           let product: Product = req.body;
+          if(!req.user ){
+            throw "You're not logged in";
+          }
           product.owner = req.user._id;
           product = await db.addProduct(product);
           res.status(201).json(product);

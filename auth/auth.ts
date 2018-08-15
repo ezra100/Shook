@@ -14,15 +14,22 @@ router.use('/reset', reset.router);
 
 
 
-router.put(
-    '/login', passport.authenticate('local'),
-    function(req, res) {
-      if (req.user) {
-        res.status(201).json(req.user);
-        return;
+router.put('/login', function(req, res, next) {
+  passport.authenticate('local', function(err, user, info) {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      return res.status(400).end(info.message);
+    }
+    req.logIn(user, function(err) {
+      if (err) {
+        return next(err);
       }
-      res.status(400).end('Wrong username or password');
+      return res.json(user);
     });
+  })(req, res, next);
+});
 router.put('/logout', function(req: express.Request, res) {
   req.logout();
   res.end('You\'ve logged out successfully');

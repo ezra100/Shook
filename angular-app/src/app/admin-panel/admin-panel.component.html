@@ -1,0 +1,25 @@
+<mat-grid-list class="m-2" [cols]="cols" gutterSize="0.5rem">
+  <mat-grid-tile *ngFor="let user of awaitingUsers">
+    <mat-card>
+      <mat-card-title>
+        {{ user._id }}
+      </mat-card-title>
+      <mat-card-content>
+          First Name: {{ user.firstName }}
+          <br> Last Name: {{ user.lastName }}
+          <br> Email: {{ user.email }}
+      </mat-card-content>
+      <mat-card-actions>
+        <button color="primary" (click)="authorizeUser(user._id)" mat-button>Authorize</button>
+        <button color="warn" (click)="deleteUser(user._id)" mat-button>Delete</button>
+      </mat-card-actions>
+    </mat-card>
+  </mat-grid-tile>
+</mat-grid-list>
+<button *ngIf="!loadingMore && !reachedEndOfFeed" class="center" mat-fab (click)="loadMore()">
+  <mat-icon color="primary" aria-label="Load more">autorenew</mat-icon>
+</button>
+<mat-progress-bar *ngIf="loadingMore" mode="buffer"></mat-progress-bar>
+<div class="divider-msg fancy" *ngIf="reachedEndOfFeed">
+  <span>End of users feed</span>
+</div>

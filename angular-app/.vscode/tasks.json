@@ -6,12 +6,16 @@
         {
             "label": "build & watch",
             "type": "shell",
-            "command": "ng b --watch --extract-css"
+            "command": "ng b --watch",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         },
         {
             "label": "build production",
             "type": "shell",
-            "command": "ng b --build-optimizer --prod --extract-css"
+            "command": "ng b --build-optimizer --prod"
         }
     ]
 }

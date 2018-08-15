@@ -1,5 +1,6 @@
 import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
+import {Router} from '@angular/router';
 import * as jsSHA from 'jssha';
 import {EMPTY, Observable, Subject} from 'rxjs';
 import {catchError, mergeMap, share} from 'rxjs/operators';
@@ -23,7 +24,7 @@ type Salts = {
   export class AuthService {
     static currentUser: User;
     static loginSubject: Subject<User|null> = new Subject();
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient, private router: Router) {}
 
 
     login(username: string, password: string): Observable<User> {
@@ -37,15 +38,7 @@ type Salts = {
             return this.http.put<User>(
                 '/api/auth/login', {username, password: hashedPassword});
           }),
-          share(), catchError(err => {
-            // there's no way to instruct passport js what message to return on
-            // failure, therefore
-            // we change the message here
-            if (err.error === 'Unauthorized') {
-              err.error = 'Wrong username or password';
-            }
-            throw err;
-          }));
+          share());
       obs.subscribe(user => {
         AuthService.loginSubject.next(user);
       });
@@ -55,6 +48,8 @@ type Salts = {
     logout() {
       let obs = this.http.put('/api/auth/logout', {}, {responseType: 'text'})
                     .pipe(share());
+      // for security, don't keep showing sensivtive data
+      this.router.navigate(['/home']);
       obs.subscribe(() => AuthService.loginSubject.next());
       return obs;
     }

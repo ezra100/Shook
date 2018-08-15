@@ -25,6 +25,9 @@ import {SellersComponent} from './sellers/sellers.component';
 import {SignupDialogComponent} from './signup-dialog/signup-dialog.component';
 import { ReviewCardComponent } from './review-card/review-card.component';
 import { AuthGuard } from './AuthGuard';
+import { AdminPanelComponent } from './admin-panel/admin-panel.component';
+import { UserCardComponent } from './user-card/user-card.component';
+import { AdminGuard } from './admin-guard';
 
 enableProdMode();
 
@@ -34,7 +37,9 @@ enableProdMode();
     LoginFormComponent, HeaderComponent, ProductFullComponent, ReviewsComponent,
     SellersComponent, HomeComponent, SignupDialogComponent, DmessagesComponent,
     ReversePipe,
-    ReviewCardComponent
+    ReviewCardComponent,
+    AdminPanelComponent,
+    UserCardComponent
   ],
   imports: [
     MatProgressBarModule, MatChipsModule,
@@ -54,7 +59,7 @@ enableProdMode();
   entryComponents:
       [AddProductComponent, LoginFormComponent, SignupDialogComponent],
   providers:
-      [AuthGuard, {provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: {duration: 3000}}],
+      [AuthGuard, AdminGuard, {provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: {duration: 3000}}],
   bootstrap: [AppComponent]
 })
 export class AppModule {

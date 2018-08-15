@@ -1,10 +1,11 @@
 import {Injectable} from '@angular/core';
 import {CanActivate} from '@angular/router';
 import {AuthService} from './auth.service';
+import { UserType } from '../../../types';
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class AdminGuard implements CanActivate {
   canActivate() {
-    return Boolean(AuthService.currentUser);
+    return AuthService.currentUser.userType === UserType.Admin;
   }
 }

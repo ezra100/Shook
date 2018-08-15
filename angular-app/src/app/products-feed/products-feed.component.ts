@@ -1,15 +1,12 @@
-import {Component, ElementRef, Input, OnInit, Renderer, Renderer2} from '@angular/core';
+import {Component, ElementRef, OnInit, Renderer2} from '@angular/core';
 import {ObservableMedia} from '@angular/flex-layout';
-import {FormControl} from '@angular/forms';
 import {MatDialog, MatIconRegistry} from '@angular/material';
 import {DomSanitizer} from '@angular/platform-browser';
 import {ActivatedRoute, Params, Router} from '@angular/router';
-import * as $ from 'jquery';
-import {Moment} from 'moment';
-import {Observable, Subscription} from 'rxjs';
-import {first, map, startWith} from 'rxjs/operators';
+import {Subscription} from 'rxjs';
+import {first} from 'rxjs/operators';
 
-import {categoryNames, filters, Product} from '../../../../types';
+import {categoryNames, Product} from '../../../../types';
 import {AddProductComponent} from '../add-product/add-product.component';
 import {AuthService} from '../auth.service';
 import {ProductFilter} from '../product-filter';
@@ -34,11 +31,9 @@ export class ProductsFeedComponent implements OnInit {
   authService = AuthService;
   panelOpenState: boolean = false;
   constructor(
-      private service: ProductsService, private elementRef: ElementRef,
-      private renderer: Renderer2, private router: Router,
+      private service: ProductsService, private router: Router,
       private route: ActivatedRoute, private observableMedia: ObservableMedia,
-      public dialog: MatDialog, iconRegistry: MatIconRegistry,
-      sanitizer: DomSanitizer) {
+      public dialog: MatDialog) {
   }
   ngOnInit() {
     // credit http://disq.us/p/1ouo8m4

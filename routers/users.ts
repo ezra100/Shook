@@ -3,7 +3,7 @@ import * as express from 'express';
 import {createUserData} from '../auth/auth';
 import {db} from '../DB/MongoDB';
 import {helpers} from '../helpers';
-import {User} from '../types';
+import {User, UserType} from '../types';
 export var router = express.Router();
 
 // create a new user
@@ -80,3 +80,4 @@ router.get('/usersList', helpers.asyncWrapper(async function(req, res) {
   let offset = Number(req.query.offset || 0);
   return res.json(await  db.getUsersList(filter, limit, offset));
 }));
+

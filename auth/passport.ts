@@ -16,13 +16,18 @@ passportMod.use(new Strategy(async function(username, password, cb) {
       let hashedPassword =
           sha512(userAuthData.hashedPassword, tempSalts[username]);
       if (hashedPassword === password) {
-        return cb(null, await db.getUser(username));
+        let user = await db.getUser(username, true);
+        if (!user.isAuthorized) {
+          return cb(null, false, {message: 'user not authorized yet'});
+        }
+        return cb(null, user);
       }
     }
+    return cb(null, false, {message: 'Wrong username or password'});
   } catch (err) {
     console.log(err);
   }
-  return cb(null, false, {message: 'Wrong username or password'});
+  return cb(null, false, {message: 'Something went wrong'});
 }));
 
 passportMod.serializeUser(function(user: User, cb) {

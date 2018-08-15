@@ -1,6 +1,6 @@
 <!--source: https://codepen.io/Momciloo/pen/bEdbxY -->
 
-<div class="my-container mx-2 my-2" *ngIf="fChats">
+<div class="my-container mx-2" *ngIf="fChats">
     <div class="left">
         <div class="top">
             <input type="search" [placeholder]="isSearchUsers?  'Search for Users' : 'Search in chats'" [(ngModel)]="query" (ngModelChange)="search()"
@@ -14,11 +14,11 @@
         </div>
         <mat-chip-list *ngIf="usersListResults && isSearchUsers" class="mat-chip-list-stacked">
             <mat-chip (click)="addChatByID(user._id)" *ngFor="let user of usersListResults" selected color="primary">
-                {{ user._id + ": " + user.firstName + " " + user.lastName}}
+                <b> {{ user._id}}</b> {{ ": " + user.firstName + " " + user.lastName}}
             </mat-chip>
         </mat-chip-list>
         <ul class="people" *ngIf="!usersListResults || !isSearchUsers">
-            <li [ngClass]="{person: true, active: activeChat === chat}" *ngFor="let chat of fChats" (click)="selectChat(chat.user._id); chat.scrollTop = chat.scrollHeight;">
+            <li [ngClass]="{person: true, active: activeChat === chat}" *ngFor="let chat of fChats" (click)="selectChat(chat.user._id)">
                 <!--todo - replace with the user image-->
                 <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/382994/dog.png" alt="" />
                 <span class="name">{{chat.user.firstName}}</span>
@@ -29,6 +29,9 @@
     </div>
     <div class="right" *ngIf="activeChat">
         <div class="top">
+            <button class="small-only" mat-icon-button color="primary" (click)="selectChat('')">
+                <mat-icon>arrow_back</mat-icon>
+            </button>
             <span>To:
                 <span class="name">{{activeChat.user.firstName + " " + activeChat.user.lastName }}</span>
                 <span> ({{activeChat.user._id}})</span>
@@ -36,7 +39,7 @@
         </div>
 
         <div class="chat">
-            <div class="conversation-start" *ngIf="activeChat.messages.length > 0" >
+            <div class="conversation-start" *ngIf="activeChat.messages.length > 0">
                 <span>{{activeChat.messages[0].date | date}}</span>
             </div>
             <div *ngFor="let message of (activeChat.messages)" [ngClass]="{ 'bubble': true,'you' : message.from !== currentUserID,'me'  : message.from === currentUserID}">

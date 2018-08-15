@@ -68,7 +68,8 @@ let userSchema: Schema = new Schema({
     productID: {type: Schema.Types.ObjectId, required: true, ref: 'Product'},
     quantity: {type: Number, required: true, min: 1},
     _id: false
-  }]
+  }],
+  isAuthorized: {type:Boolean, default: false}
 });
 
 let userDataSchema: Schema = new Schema({
@@ -133,12 +134,12 @@ let reviewSchema = new Schema({
 let commentSchema = new Schema({
   owner: {type: String, required: true, ref: 'User'},
   date: {type: Date, default: Date.now, index: true},
-  reviewID: {
+  productID: {
     type: Schema.Types.ObjectId,
-    ref: 'Review',
+    ref: 'Product',
     required: true,
     index: true
-  },  // review._id
+  },  // product._id
   comment: {type: String, minlength: 1, required: true},
   likes: [{
     type: String,
@@ -232,7 +233,7 @@ commentSchema.preAnyUpdate(function(next: Function): void {
   let update: any = this.getUpdate();
   delete update.owner;
   delete update.date;
-  delete update.reviewID;
+  delete update.productID;
 
   next();
 });
