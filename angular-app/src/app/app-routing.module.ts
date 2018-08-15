@@ -23,7 +23,7 @@ const routes: Routes = [
   {path: 'sellers', component: SellersComponent},
   {path: 'home', component: HomeComponent},
   {path: 'dmessages', canActivate: [AuthGuard], component: DmessagesComponent},
-  {path: 'admin', canActivate[AdminGuard], component: AdminPanelComponent}
+  {path: 'admin', canActivate:[AdminGuard], component: AdminPanelComponent}
 ];
 
 @NgModule({
