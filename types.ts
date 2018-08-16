@@ -150,6 +150,7 @@ export interface ChatRoom {
   connected?: number;
 
   messages: Message[];
+  lastMsg: Message;
 }
 
 export interface Order {

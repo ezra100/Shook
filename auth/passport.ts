@@ -1,7 +1,7 @@
 import * as passportMod from 'passport';
 import {Strategy} from 'passport-local';
 
-import {db} from '../DB/MongoDB';
+import {UserAuth, Users} from '../DB/Models';
 import {User, UserAuthData} from '../types'
 
 import {getRandomString, hashLength, sha512} from './crypto';
@@ -10,13 +10,13 @@ export let tempSalts: {[username: string]: string} = {};
 
 
 passportMod.use(new Strategy(async function(username, password, cb) {
-  let userAuthData = await db.getUserAuthData(username);
+  let userAuthData = await UserAuth.getUserAuthData(username);
   try {
     if (userAuthData) {
       let hashedPassword =
           sha512(userAuthData.hashedPassword, tempSalts[username]);
       if (hashedPassword === password) {
-        let user = await db.getUser(username, true);
+        let user = await Users.getUser(username, true);
         if (!user.isAuthorized) {
           return cb(null, false, {message: 'user not authorized yet'});
         }
@@ -35,7 +35,7 @@ passportMod.serializeUser(function(user: User, cb) {
 });
 
 passportMod.deserializeUser(async function(username: string, cb) {
-  db.getUser(username, true).then((user) => cb(null, <User>user));
+  Users.getUser(username, true).then((user) => cb(null, <User>user));
 });
 
 export var passport: passportMod.PassportStatic = passportMod;

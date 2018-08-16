@@ -1,6 +1,6 @@
 import io = require('socket.io');
 import * as https from 'https';
-import {db} from './DB/MongoDB';
+import {ChatRooms} from './DB/Models';
 import {helpers} from './helpers';
 import {ChatRoom, Message} from './types';
 let passportSocketIo = require('passport.socketio');
@@ -12,7 +12,7 @@ let roomsCache: {[key: string]: ChatRoom} = {};
 
 async function getRoomFromCache(roomID: string) {
   if (!roomsCache[roomID]) {
-    roomsCache[roomID] = await db.ChatRooms.getRoomByID(roomID);
+    roomsCache[roomID] = await ChatRooms.getRoomByID(roomID);
     roomsCache[roomID].connected = 0;
   }
   return roomsCache[roomID];

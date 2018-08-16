@@ -1,6 +1,6 @@
 import io = require('socket.io');
 import * as https from 'https';
-import {db} from './DB/MongoDB';
+import {DirectMessages} from './DB/Models';
 import {helpers} from './helpers';
 import {DMessage} from './types';
 let passportSocketIo = require('passport.socketio');
@@ -35,7 +35,7 @@ export function init(
     socket.on('dmessage', (msg: DMessage) => {
       msg.from = user._id;
       msg.date = new Date();
-      db.DirectMessages.addDMessage(msg);
+      DirectMessages.addDMessage(msg);
       // send back, for confirmation
       socket.emit('dmessage', msg);
       try {

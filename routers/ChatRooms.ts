@@ -1,6 +1,6 @@
 import * as express from 'express';
 
-import {db} from '../DB/MongoDB';
+import * as db from '../DB/Models';
 import {helpers} from '../helpers';
 import {ChatRoom, Message, User} from '../types';
 import { Router } from 'express-serve-static-core';

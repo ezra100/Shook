@@ -1,6 +1,6 @@
 import * as express from 'express';
 import {message} from '../../data';
-import {db} from '../../DB/MongoDB';
+import {UserAuth, Users} from '../../DB/Models';
 import {helpers} from '../../helpers';
 import {User} from '../../types';
 import {getRandomString, hashLength, sha512} from '../crypto';
@@ -14,9 +14,9 @@ router.post('/request', helpers.asyncWrapper(async function(req, res) {
   let user:  User;
   // the user can send an email or a username to reset
   if (req.body.email) {
-    user = await db.findUserByEmail(req.body.email);
+    user = await Users.findUserByEmail(req.body.email);
   } else if (req.body.username) {
-    user = <User> await db.getUser(req.body.username);
+    user = <User> await Users.getUser(req.body.username);
   }
   if (!user) {
     res.status(400).end('user not found');
@@ -28,7 +28,7 @@ router.post('/request', helpers.asyncWrapper(async function(req, res) {
     console.log(user);
     console.error(user._id + ' not found');
   }
-  db.updateUserAuthData(
+  UserAuth.updateUserAuthData(
       user._id, {recoveryKey: key, recoverydate: new Date()});
   helpers.sendEmail(
       user.email, user.firstName + ' ' + user.lastName,
@@ -48,7 +48,7 @@ router.post('/complete', helpers.asyncWrapper(async function(req, res) {
   let key = req.body.key;
   let username = req.body.username;
   let newPassword = req.body.newPassword;
-  let userData = await db.getUserAuthData(username);
+  let userData = await UserAuth.getUserAuthData(username);
   if (newPassword && userData && userData.recoveryKey === key) {
     // if more than 24 hours past since the creation
     if ((new Date()).getTime() - userData.recoverydate.getTime() >=
@@ -62,7 +62,7 @@ router.post('/complete', helpers.asyncWrapper(async function(req, res) {
     // new salt, because why not
     let newSalt = getRandomString(hashLength);
     let newPasswordHash = sha512(newPassword, newSalt);
-    db.updateUserAuthData(username, {
+    UserAuth.updateUserAuthData(username, {
       recoveryKey: undefined,  // prevent reuse of the recovery key
       hashedPassword: newPasswordHash,
       salt: newSalt

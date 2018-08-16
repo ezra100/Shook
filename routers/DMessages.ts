@@ -1,6 +1,6 @@
 import * as express from 'express';
 
-import {db} from '../DB/MongoDB';
+import {DirectMessages} from '../DB/Models';
 import {helpers} from '../helpers';
 import {DMessage} from '../types';
 
@@ -15,7 +15,7 @@ router.post('/send', helpers.asyncWrapper(async function(req, res) {
   let to = req.body.to;
   let content = req.body.content;
   let message: DMessage = {from: req.user._id, to, content, date: new Date()};
-  res.json(await db.DirectMessages.addDMessage(message));
+  res.json(await DirectMessages.addDMessage(message));
 }));
 
 router.get('/getChat', helpers.asyncWrapper(async function(req, res) {
@@ -24,7 +24,7 @@ router.get('/getChat', helpers.asyncWrapper(async function(req, res) {
     return;
   }
   let otherUser = req.query.otherUser;
-  res.json(await db.DirectMessages.getChat(req.user._id, otherUser));
+  res.json(await DirectMessages.getChat(req.user._id, otherUser));
 }));
 
 router.get('/getRecent', helpers.asyncWrapper(async function(req, res) {
@@ -35,5 +35,5 @@ router.get('/getRecent', helpers.asyncWrapper(async function(req, res) {
   let limit = Number(req.query.limit) || 20;
   let offset = Number(req.query.offset) || 0;
   let dateOffset = req.query.dateOffset? new Date(req.query.dateOffset): null;
-  res.json(await db.DirectMessages.getLastChats(req.user._id, offset, limit));
+  res.json(await DirectMessages.getLastChats(req.user._id, offset, limit));
 }));

@@ -44,7 +44,7 @@ export class ChatRoomsComponent implements OnInit {
         setTimeout(() => self.initChats(user), 500);
         return;
       }
-      this.chatRoomsService.getRecent().subscribe(chats => {
+      this.chatRoomsService.getMyRooms().subscribe(chats => {
         this.fChats = this.chats = chats;
         this.activeChat = this.fChats[0];
         this.chatRoomsService.getMsgObservable().subscribe(
@@ -103,15 +103,15 @@ export class ChatRoomsComponent implements OnInit {
       self.usersListResults = userList;
     })
   }
-  addChatByID(userID: string) {
-    let chatTryFind = this.chats.find(c => c.user._id === userID);
+  addChatByID(roomID: string) {
+    let chatTryFind = this.chats.find(c => c._id === roomID);
     if (chatTryFind) {
       this.activeChat = chatTryFind;
       this.isSearchUsers = false;
       this.filterChats();
       return;
     }
-    this.chatRoomsService.g(userID).subscribe(chat => {
+    this.chatRoomsService.getRoom(roomID).subscribe(chat => {
       this.activeChat = chat;
       this.chats.push(chat);
       //todo manage empty messages

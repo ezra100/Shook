@@ -1,6 +1,6 @@
 import * as express from 'express';
 
-import {db} from '../DB/MongoDB';
+import {UserAuth} from '../DB/Models';
 import {helpers} from '../helpers';
 import {UserAuthData} from '../types';
 
@@ -38,7 +38,7 @@ router.put('/logout', function(req: express.Request, res) {
 // requests the salts for the challengs
 router.post('/salts', helpers.asyncWrapper(async function(req, res) {
   let username = req.body.username;
-  let userData = await db.getUserAuthData(username);
+  let userData = await UserAuth.getUserAuthData(username);
   if (!userData) {
     // throw username + ' not found';
     res.json({
@@ -56,5 +56,5 @@ export async function createUserData(username: string, password: string) {
   let salt = getRandomString();
   let hash = sha512(password, salt);
   let userAuthData: UserAuthData = {salt, _id: username, hashedPassword: hash};
-  await db.createUserAuthData(userAuthData);
+  await UserAuth.createUserAuthData(userAuthData);
 }

@@ -5,9 +5,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import {createUserData} from '../auth/auth';
-import {ChatRoom, DMessage, Gender, IComment, Product, Review, Message, User, UserAuthData, UserType, Category} from '../types';
+import {Category, ChatRoom, DMessage, Gender, IComment, Message, Product, Review, User, UserAuthData, UserType} from '../types';
 
-import {db} from './MongoDB';
+import * as db from './Models';
 
 let users: User[];
 let products: Product[];
@@ -69,7 +69,7 @@ function getFakeProduct(): Partial<Product> {
     owner: users[faker.random.number(usersLength - 1)]._id,
     date: faker.date.past(5),
     price: faker.random.number({min: 5, max: 100, precision: 0.05}),
-    category : faker.random.number(Category.Vehicles),
+    category: faker.random.number(Category.Vehicles),
   };
 }
 
@@ -136,7 +136,7 @@ function getFakeDMessage() {
     to = users[faker.random.number(users.length - 1)]._id;
   }
   let dMessage: DMessage = {
-    content: faker.lorem.sentences(faker.random.number({min:1, max:7})),
+    content: faker.lorem.sentences(faker.random.number({min: 1, max: 7})),
     date: faker.date.past(3),
     from,
     to
@@ -144,21 +144,26 @@ function getFakeDMessage() {
   return dMessage;
 }
 
-function getFakeMessage() {
+function getFakeMessage(members: string[]) {
   return <Message>{
-    content: faker.lorem.sentences(faker.random.number({min:1, max:7})),
+    content: faker.lorem.sentences(faker.random.number({min: 1, max: 7})),
     date: faker.date.past(3),
-    from: users[faker.random.number(users.length - 1)]._id,
-    roomID: chatRooms[faker.random.number(chatRooms.length - 1)]._id
+    from: members[faker.random.number(members.length - 1)]
   };
 }
 
 function getFakeChatRoom() {
+  let members = getRandomUsernames(10, 90);
+  let messages: Message[] = [];
+  for (var i = 0; i < faker.random.number(50); i++) {
+    messages.push(getFakeMessage(members));
+  }
   return <ChatRoom>{
-    members: getRandomUsernames(10, 90),
+    members,
     admins: getRandomUsernames(0, 8),
     owner: users[faker.random.number(users.length - 1)]._id,
-    name: faker.internet.userName()
+    name: faker.internet.userName(),
+    messages
   };
 }
 
@@ -166,14 +171,14 @@ function getFakeChatRoom() {
 
 async function initProducts(size: number = 1500) {
   for (let i = 0; i < size; i++) {
-    db.addProduct(getFakeProduct(), false);
+    db.Products.addProduct(getFakeProduct(), false);
   }
 }
 
 
 async function initUsers(size: number = 50, logPasswod: boolean = true) {
   for (let pack of getFakeUsers(size)) {
-    db.addUser(pack.user);
+    db.Users.addUser(pack.user);
     await createUserData(pack.user._id, pack.password);
     // log
     if (logPasswod) {
@@ -191,49 +196,33 @@ async function initUsers(size: number = 50, logPasswod: boolean = true) {
 export async function initDB(
     usersSizeGoal: number = 100, avgProductsPerUser = 5,
     reviewsPerProduct: number = 5, requiredChatRooms: number = 100,
-    commentsPerReview = 8, DMessagePerUser = 300,
-    MessagesPerChat: number = 100) {
-  usersLength = await db.getUsersSize();
-  productsLength = await db.getProductsSize();
-  reviewsLength = await db.getProductsSize();
-  commentsLength = await db.getCommentsSize();
-  users = await db.getUsers();
-  roomsLenght = await db.ChatRooms.getRoomsSize();
-  DMessageLength = await db.DirectMessages.getDMessageSize();
-  messageLength = await db.ChatRooms.getMessagesSize();
+    DMessagePerUser = 300) {
+  usersLength = await db.Users.getCount();
+  productsLength = await db.Products.getCount();
+  reviewsLength = await db.Reviews.getCount();
+  roomsLenght = await db.ChatRooms.getCount();
+  DMessageLength = await db.DirectMessages.getCount();
+  users = await db.Users.getIDs();
+
   if (usersLength < usersSizeGoal) {
     await initUsers(usersSizeGoal - usersLength);
-    usersLength = await db.getUsersSize();
+    usersLength = await db.Users.getCount();
   }
   if (productsLength < usersSizeGoal * avgProductsPerUser) {
     await initProducts((usersSizeGoal * avgProductsPerUser) - productsLength);
-    productsLength = await db.getProductsSize();
+    productsLength = await db.Products.getCount();
   }
   if (reviewsLength < productsLength * reviewsPerProduct) {
-    products = await db.getLatestProducts();
+    products = await db.Products.getIDs();
     for (let i = reviewsLength; i < productsLength * reviewsPerProduct; i++) {
-      await db.addReview(<Review>getFakeReview(), false);
+      await db.Reviews.addReview(<Review>getFakeReview(), false);
     }
-    reviewsLength = await db.getReviewsSize();
-  }
-  if (commentsLength < reviewsLength * commentsPerReview) {
-    reviews = await db.getLatestReviews();
-    for (let i = commentsLength; i < reviewsLength * commentsPerReview; i++) {
-      await db.addComment(<IComment>getFakeComment(), false);
-    }
-    commentsLength = await db.getCommentsSize();
+    reviewsLength = await db.Reviews.getCount();
   }
   if (roomsLenght < requiredChatRooms) {
     for (; roomsLenght < requiredChatRooms; roomsLenght++) {
       let room = getFakeChatRoom();
       await db.ChatRooms.addChatRoom(room.name, room.owner, room.admins);
-    }
-  }
-  if (messageLength < MessagesPerChat * roomsLenght) {
-    // for the fake message generator
-    chatRooms = await db.ChatRooms.getRooms();
-    for (; messageLength < MessagesPerChat * roomsLenght; messageLength++) {
-      await db.ChatRooms.addMessage(getFakeMessage(), false);
     }
   }
   if (DMessageLength < usersLength * DMessagePerUser) {

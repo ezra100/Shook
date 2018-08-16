@@ -34,8 +34,8 @@ export class ChatRoomsService {
   }
   constructor(private http: HttpClient) {}
 
-  enterRoom(roomID: string) {
-    this.getSocket().emit('join', roomID);
+  enterRoom(roomIDs: string | string[]) {
+    this.getSocket().emit('join', roomIDs);
   }
 
   leaveRoom(roomID: string) {
@@ -50,11 +50,15 @@ export class ChatRoomsService {
     return ChatRoomsService.msgSubject;
   }
 
+  getMyRooms(){
+    return this.http.get<ChatRoom[]>('/api/rooms/groupsImMemberOf');
+  }
+
   getSocket() {
     return ChatRoomsService.socket;
   }
   searchForChats(query: string, searchInMessages: string) {}
-  getChat(roomID: string): Observable<ChatRoom> {
+  getRoom(roomID: string): Observable<ChatRoom> {
     return this.http.get<ChatRoom>(
         '/api/rooms/getByID', {params: new HttpParams({fromObject: {roomID}})});
   }
