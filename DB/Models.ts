@@ -156,22 +156,22 @@ let commentSchema = new Schema({
   dislikesCount: Number,
 
 });
-
+let messageSchema = new Schema({
+  date: {type: Date, default: Date.now, index: true},
+  content: {type: String, required: true},
+  owner: {type: String, ref: 'User', index: true}
+});
 
 let chatRoomSchema = new Schema({
   name: {type: String, required: true, index: true},
   admins: [{type: String, required: true, ref: 'User', index: true}],
   owner: {type: String, required: true},
   members: [{type: String, required: true, ref: 'User', index: true}],
-
+  memberRequests:  [{type: String, required: true, ref: 'User', index: true}],
+  messages : [messageSchema]
 });
 
-let messageSchema = new Schema({
-  date: {type: Date, default: Date.now, index: true},
-  roomID: {type: String, ref: 'ChatRoom'},
-  content: {type: String, required: true},
-  owner: {type: String, ref: 'User', index: true}
-});
+
 
 let DMessageSchema = new Schema({
   from: {type: String, ref: 'User', index: true, required: true},

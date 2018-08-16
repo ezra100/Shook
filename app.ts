@@ -20,7 +20,8 @@ import * as products from './routers/products';
 import * as reviews from './routers/reviews';
 import * as users from './routers/users';
 import * as admin from './routers/admin';
-import * as io from './socket.io';
+import * as dmsgIO from './socket.io.dmessage';
+import * as roomsIO from './socket.io.rooms';
 
 // init the data base with fake data
 //initDB();
@@ -61,7 +62,7 @@ apiRouter.use('/users', users.router);
 apiRouter.use('/products', products.router);
 apiRouter.use('/comments', comments.router);
 apiRouter.use('/reviews', reviews.router);
-apiRouter.use('/chatRooms', chatRooms.router);
+apiRouter.use('/rooms', chatRooms.router);
 apiRouter.use('/DMessages', DMessages.router);
 apiRouter.use('/admin', admin.router);
 
@@ -78,5 +79,7 @@ app.use(
 export default app;
 
 export function init(server: https.Server){
-  io.init(server, cookieParser, store, secret);
+  dmsgIO.init(server, cookieParser, store, secret);
+  roomsIO.init(server, cookieParser, store, secret);
+
 }

@@ -7,7 +7,7 @@ import {helpers} from '../helpers';
 import {Category, Chat, ChatRoom, DMessage, Gender, IComment, Message, Order, Product, Review, User, UserAuthData, UserType} from '../types';
 
 import {chatRoomPermitedFields, commentPermitedFields, productPermitedFields, reviewPermitedFields, stripObject, userPermitedFields} from './helpers';
-import {chatRoomModel, commentModel, DMessageModel, messageModel, orderModel, productModel, reviewModel, userAuthDataModel, userModel} from './Models';
+import {chatRoomModel, commentModel, DMessageModel, orderModel, productModel, reviewModel, userAuthDataModel, userModel} from './Models';
 
 let ObjectId = mongoose.Types.ObjectId;
 
@@ -34,7 +34,7 @@ export namespace db {
   export async function updateUserAuthData(
       username: string, data: Partial<UserAuthData>): Promise<void> {
     return await userAuthDataModel.findByIdAndUpdate(
-        username, data, {upsert: true});
+        username, {$set: data}, {upsert: true});
   }
   export async function createUserAuthData(data: UserAuthData): Promise<void> {
     await userAuthDataModel.create(data);
@@ -204,7 +204,7 @@ export namespace db {
     user = stripObject(user, userPermitedFields);
     return new Promise((resolve, reject) => {
       userModel.findByIdAndUpdate(
-          username, user, (err: Error, oldUser: User) => {
+          username, {$set: user}, (err: Error, oldUser: User) => {
             if (err) {
               reject(err);
               return;
@@ -245,7 +245,7 @@ export namespace db {
       Promise<Product> {
     product = stripObject(product, productPermitedFields);
     let doc = (await productModel.findOneAndUpdate(
-        {_id: product._id, owner: owner || 'block undefined'}, product,
+        {_id: product._id, owner: owner || 'block undefined'}, {$set: product},
         {new /* return the new document*/: true}));
     return doc && doc.toObject();
   }
@@ -317,7 +317,7 @@ export namespace db {
       Promise<Review> {
     review = stripObject(review, reviewPermitedFields);
     let doc = await reviewModel.findOneAndUpdate(
-        {_id: review._id, owner: owner || 'block undefined'}, review,
+        {_id: review._id, owner: owner || 'block undefined'}, {$set: review},
         {new /* return the new document*/: true});
     return doc && doc.toObject();
   }
@@ -420,8 +420,8 @@ export namespace db {
   updateComment(comment: Partial<IComment>, owner: string): Promise<IComment> {
     comment = stripObject(comment, commentPermitedFields);
     return (await commentModel.findOneAndUpdate(
-                {_id: comment._id, owner: owner || 'block undefined'}, comment,
-                {new: /* return the new document*/ true}))
+                {_id: comment._id, owner: owner || 'block undefined'},
+                {$set: comment}, {new: /* return the new document*/ true}))
         .toObject();
   }
   export async function getCommentByID(id: string): Promise<IComment> {
@@ -468,10 +468,6 @@ export namespace db {
       return await chatRoomModel.estimatedDocumentCount().exec();
     }
 
-    export async function getMessagesSize() {
-      return await messageModel.estimatedDocumentCount().exec();
-    }
-
     export async function addChatRoom(
         name: string, owner: string, admins: string[],
         verifyAdmins: boolean = true) {
@@ -498,13 +494,17 @@ export namespace db {
     updateRoom(id: number, owner: string, chatRoom: Partial<ChatRoom>) {
       chatRoom = stripObject(chatRoom, chatRoomPermitedFields);
       let doc = await chatRoomModel.findOneAndUpdate(
-          {_id: id, owner: owner}, chatRoom, {new: true});
+          {_id: id, owner: owner}, {$set: chatRoom}, {new: true});
       return doc && doc.toObject();
     }
+
+
     export async function getRooms(filter: any = {}): Promise<ChatRoom[]> {
       return (await chatRoomModel.find(filter)).map(d => d.toObject());
     }
-
+    export async function getRoomByID(roomID: string): Promise<ChatRoom> {
+      return (await chatRoomModel.findById(roomID)).toObject();
+    }
     export async function
     addMember(member: string, adminName: string, roomID: string) {
       if (!await getUser(member)) {
@@ -517,7 +517,7 @@ export namespace db {
                 /* maek sure the given admin is actually an admin of that room*/
                 {$elemMatch: adminName}
           },
-          {$addToSet: {members: member}});
+          {$addToSet: {members: member}, $pull: {memberRequests: member}});
     }
     export async function
     removeMember(member: string, adminName: string, roomID: string) {
@@ -567,27 +567,31 @@ export namespace db {
       delete message._id;
       if (verifyMember) {
         let chat = await chatRoomModel.find(
-            {_id: message.roomID, members: {$elemMatch: message.owner}});
+            {_id: message.roomID, members: {$elemMatch: message.from}});
         if (!chat) {
-          throw message.owner + ' is not a member of this room';
+          throw message.from + ' is not a member of this room';
         }
       }
-      let doc = await messageModel.create(message);
-      return doc && doc.toObject();
+      let queryResults = await chatRoomModel.updateOne(
+          {_id: message.roomID}, {$push:{messages:message}});
+      return queryResults && queryResults.toObject();
     }
-    export async function deleteMessage(id: string, requesting: string) {
-      let doc =
-          <mongoose.Document&Message>await messageModel.findOne({_id: id});
-      if (!doc) {
-        throw id + ' id doesn\'t exist';
+    export async function deleteMessage(msg: Message, requesting: string) {
+      let roomDoc = <mongoose.Document&ChatRoom>await chatRoomModel.findOne(
+          {_id: msg._id});
+      if (!roomDoc) {
+        throw msg.roomID + ': room id doesn\'t exist';
       }
-      if (doc.owner === requesting) {
-        return await messageModel.deleteOne({_id: id, owner: requesting});
+      let msgDoc = roomDoc.messages.find(m => m._id === msg._id);
+      if (!msgDoc) {
+        throw `Message with id ${msg._id} doesn't exists in room ${msg.roomID}`;
       }
-      let chatRoom = <mongoose.Document&ChatRoom>await chatRoomModel.findOne(
-          {_id: doc.roomID});
-      if (chatRoom.admins.indexOf(requesting) >= 0) {
-        return await messageModel.deleteOne({_id: id});
+      if (msgDoc.from === requesting ||
+          roomDoc.admins.find(uID => uID === msg.from)) {
+        return await chatRoomModel.update(
+            {_id: roomDoc._id}, {$pull: {_id: msg._id}});
+      } else {
+        throw 'You\'re not authorized to delete this message';
       }
     }
     export async function
@@ -725,7 +729,7 @@ export namespace db {
     }
 
     export async function markOrderAsPaid(orderID: string) {
-      return await orderModel.updateOne({_id: orderID}, {paid: true});
+      return await orderModel.updateOne({_id: orderID}, {$set: {paid: true}});
     }
   }
 

@@ -148,7 +148,7 @@ function getFakeMessage() {
   return <Message>{
     content: faker.lorem.sentences(faker.random.number({min:1, max:7})),
     date: faker.date.past(3),
-    owner: users[faker.random.number(users.length - 1)]._id,
+    from: users[faker.random.number(users.length - 1)]._id,
     roomID: chatRooms[faker.random.number(chatRooms.length - 1)]._id
   };
 }

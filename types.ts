@@ -111,7 +111,7 @@ export interface Review {
 export interface IComment {
   _id?: string;
   date?: Date;
-  owner: string;     // publisher of the comment
+  owner: string;      // publisher of the comment
   productID: string;  // review.id
   comment: string;
   likes?: string[];  // array of usernames of those who liked the comment
@@ -124,8 +124,10 @@ export interface IComment {
 
 export interface Message {
   _id?: string;
-  owner: string;
-  roomID: string;
+  from: string;
+  // roomID exists only on insertion and when sending a single message via
+  // socket.io
+  roomID?: string;
   content: string;
   date?: Date;
 }
@@ -143,8 +145,11 @@ export interface ChatRoom {
   name: string;
   admins: string[];
   members: string[];
-  // memberRequests: string[];
+  memberRequests: string[];
   owner: string;
+  connected?: number;
+
+  messages: Message[];
 }
 
 export interface Order {

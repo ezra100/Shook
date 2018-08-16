@@ -7,7 +7,6 @@ import * as io from 'socket.io-client';
 import {Chat, DMessage, User} from '../../../types';
 
 import {AuthService} from './auth.service';
-import {helpers} from './helpers';
 
 const dmUriBase = '/api/DMessages';
 @Injectable({providedIn: 'root'})

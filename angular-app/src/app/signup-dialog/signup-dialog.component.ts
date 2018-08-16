@@ -29,5 +29,7 @@ export class SignupDialogComponent implements OnInit {
          duration: 4000
        })});
   }
-
+  log(obj:any){
+    console.log(obj);
+  }
 }

@@ -27,7 +27,7 @@ export class AdminPanelComponent implements OnInit {
         users => 
         {this.awaitingUsers = users});
   }
-
+  // todo - implement load more
   authorizeUser(userID: string) {
     this.adminService.authorizeUser(userID).subscribe(user => {
       let index = this.awaitingUsers.findIndex(u => u._id === user._id);

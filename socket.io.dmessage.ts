@@ -8,30 +8,7 @@ let passportSocketIo = require('passport.socketio');
 let socketIDMap: {[key: string]: string} = {};
 let dmPath = '/socket.io/DMessages';
 
-function onAuthorizeSuccess(data: any, accept: Function) {
-  console.log('successful connection to socket.io');
 
-  // The accept-callback still allows us to decide whether to
-  // accept the connection or not.
-  accept(null, true);
-}
-
-function onAuthorizeFail(
-    data: any, message: string, error: any, accept: Function) {
-  if (error) throw new Error(message);
-  console.log('failed connection to socket.io:', message);
-
-  // We use this callback to log all of our failed connections.
-  accept(null, false);
-
-  // OR
-
-  // If you use socket.io@1.X the callback looks different
-  // If you don't want to accept the connection
-  if (error) accept(new Error(message));
-  // this error will be sent to the user as a special error-package
-  // see: http://socket.io/docs/client-api/#socket > error-object
-}
 let sio: io.Server;
 export function init(
     server: https.Server, cookieParser: any, sessionStore: any,
@@ -44,9 +21,6 @@ export function init(
     secret: secret,      // the session_secret to parse the cookie
     store:
         sessionStore,  // we NEED to use a sessionstore. no memorystore please
-    success:
-        onAuthorizeSuccess,  // *optional* callback on success - read more below
-    fail: onAuthorizeFail
   }));
   sio.on('connection', (socket) => {
     let user = socket.request.user;
@@ -55,7 +29,7 @@ export function init(
       return;
     }
     socketIDMap[user._id] = socket.id;
-    socket.on('diconnect', () => {
+    socket.on('disconnect', () => {
       delete socketIDMap[user._id];
     });
     socket.on('dmessage', (msg: DMessage) => {

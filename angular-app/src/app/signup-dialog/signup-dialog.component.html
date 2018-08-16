@@ -1,5 +1,6 @@
 <h1 mat-dialog-title>Sign Up</h1>
-<form (ngSubmit)="signupForm.form.valid && f.reportValidity() && signup()" id="signupForm" #signupForm="ngForm" #f>
+<form (ngSubmit)=" imgUrlInput.required = (!imgFileInput.files || ! imgFileInput.files.length); signupForm.form.valid && f.reportValidity() && signup()"
+  id="signupForm" #signupForm="ngForm" #f>
   <div mat-dialog-content>
 
     <mat-form-field>
@@ -18,7 +19,7 @@
       <input name="email" type="email" placeholder="Email" matInput required [(ngModel)]="user.email">
     </mat-form-field>
     <mat-form-field>
-      <mat-select name="gender" placeholder="Gender" [(ngModel)]="user.gender">
+      <mat-select name="gender" placeholder="Gender" required [(ngModel)]="user.gender">
         <mat-option [value]="genderRef.Male">
           Male
         </mat-option>
@@ -30,9 +31,14 @@
     <mat-form-field>
       <input name="address" type="text" placeholder="Address" matInput required [(ngModel)]="user.address">
     </mat-form-field>
-    <mat-form-field>
-      <input name="img-url" type="text" placeholder="Image (URL)" matInput [(ngModel)]="user.imageURL">
+    <mat-form-field>`
+      <input #imgUrlInput name="img-url" type="url" placeholder="Image (URL)" matInput [(ngModel)]="user.imageURL">
     </mat-form-field>
+    <div>
+      <!--todo, add clear button-->
+      <button type="button" md-button (click)="imgFileInput.click()">Add a photo</button>
+      <input name="img-file" #imgFileInput type="file" placeholder="Image (URL)" hidden accept="image/*">
+    </div>
   </div>
   <div mat-dialog-actions>
     <button mat-button (click)="dialogRef.close()">Cancel</button>

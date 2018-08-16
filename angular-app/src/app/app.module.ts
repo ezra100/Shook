@@ -28,6 +28,7 @@ import { AuthGuard } from './AuthGuard';
 import { AdminPanelComponent } from './admin-panel/admin-panel.component';
 import { UserCardComponent } from './user-card/user-card.component';
 import { AdminGuard } from './admin-guard';
+import { ChatRoomsComponent } from './chat-rooms/chat-rooms.component';
 
 enableProdMode();
 
@@ -39,7 +40,8 @@ enableProdMode();
     ReversePipe,
     ReviewCardComponent,
     AdminPanelComponent,
-    UserCardComponent
+    UserCardComponent,
+    ChatRoomsComponent
   ],
   imports: [
     MatProgressBarModule, MatChipsModule,
