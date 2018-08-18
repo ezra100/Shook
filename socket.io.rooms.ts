@@ -2,7 +2,7 @@ import io = require('socket.io');
 import * as https from 'https';
 import {ChatRooms} from './DB/Models';
 import {helpers} from './helpers';
-import {ChatRoom, Message} from './types';
+import {ChatRoom, Message, User} from './types';
 let passportSocketIo = require('passport.socketio');
 
 let socketIDMap: {[key: string]: string} = {};
@@ -12,7 +12,7 @@ let roomsCache: {[key: string]: ChatRoom} = {};
 
 async function getRoomFromCache(roomID: string) {
   if (!roomsCache[roomID]) {
-    roomsCache[roomID] = await ChatRooms.getRoomByID(roomID);
+    roomsCache[roomID] = await ChatRooms.getRoomByID(roomID, false);
     roomsCache[roomID].connected = 0;
   }
   return roomsCache[roomID];
@@ -45,23 +45,35 @@ export function init(
         sessionStore,  // we NEED to use a sessionstore. no memorystore please
   }));
   sio.on('connection', (socket) => {
-    let user = socket.request.user;
+    let user: User = socket.request.user;
+    console.log('socket connected', socket.id, user._id);
     if (!user) {
       console.error('socket doesn\'t have user assigned to it', socket);
       return;
     }
     socketIDMap[socket.id] = user._id;
-    socket.on('disconnect', () => {
-      delete socketIDMap[socket.id];
-    });
-    socket.on('join', async (roomID: string) => {
-      let room = await increaseConnectedCount(roomID);
-      if (!room) {
-        socket.emit('error', `room with room id ${roomID} doesn't exist`);
-        return;
+    socket.on(
+        'disconnect',
+        () => {console.log(
+            'socket disconnected', socket.id, socket.rooms, user._id)});
+    socket.on(
+        'disconnecting',
+        () => {Object.keys(socket.rooms)
+                   .forEach(room => room.length === 24 && decreaseConnectedCount(room))});
+    socket.on('join', async (roomIDs: string|string[]) => {
+      if (typeof roomIDs === 'string') {
+        roomIDs = [roomIDs];
       }
-      socket.join(roomID, (err) => console.log(err));
-      socket.emit('joined', room);
+      roomIDs.forEach(async (roomID, i, arr) => {
+        let room = await increaseConnectedCount(roomID);
+        if (!room) {
+          arr.splice(i, 1);
+          socket.emit('error', `room with room id ${roomID} doesn't exist`);
+          return;
+        }
+      });
+      socket.join(roomIDs, (err) => console.log(err));
+      socket.emit('joined', roomIDs);
     });
     socket.on('leave', async (roomID: string) => {
       let room = await decreaseConnectedCount(roomID);
@@ -69,10 +81,11 @@ export function init(
         socket.emit('error', `room with room id ${roomID} doesn't exist`);
         return;
       }
-      socket.join(roomID, (err) => console.log(err));
+      socket.leave(roomID);
       socket.emit('left', room);
     });
     socket.on('msg', async (msg: Message) => {
+      console.log(`msg from ${user._id}`);
       msg.date = new Date();
       msg.from = user._id;
       let room = await getRoomFromCache(msg.roomID);
@@ -81,6 +94,7 @@ export function init(
       }
       if (room.members.find(uID => uID === user._id)) {
         socket.to(msg.roomID).emit('msg', msg);
+        socket.emit('msg', msg);
       }
     });
   })

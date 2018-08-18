@@ -1,5 +1,5 @@
 <h1 mat-dialog-title>Add Product</h1>
-<form (ngSubmit)="productForm.form.valid && f.reportValidity() && addProduct()" id="productForm" #f #productForm="ngForm">
+<form (ngSubmit)="productForm.form.valid && f.reportValidity() && addProduct() && f.reset()" id="productForm" #f #productForm="ngForm">
   <div mat-dialog-content>
     <mat-form-field>
       <input name="title" placeholder="Title" pattern=".{6,}" matInput required [(ngModel)]="product.title" #title>

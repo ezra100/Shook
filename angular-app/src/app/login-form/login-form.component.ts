@@ -24,8 +24,6 @@ export class LoginFormComponent implements OnInit {
           'Welcome ' + user.firstName + '!', 'Close', {duration: 3000});
       this.dialogRef.close();
     }, err => {
-      
-
       this.lastSnackbar = this.snackBar.open(err.error, 'OK', {
          duration: 4000
        })});

@@ -1,0 +1,17 @@
+<h1 mat-dialog-title>Member Requests: {{room.name}}</h1>
+<div mat-dialog-content>
+  <div *ngFor="let memberID of room.memberRequests" class="py-3 px-2">
+    <span class="mr-auto">{{memberID}}</span>
+    <div class="buttons pr-1">
+      <button mat-icon-button color="warn" (click)="deleteRequest(memberID)">
+        <mat-icon aria-label="Delete member request">cancel</mat-icon>
+      </button>
+      <button mat-icon-button (click)="authorize(memberID)" color="primary">
+        <mat-icon aria-label="Authorize User">check</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="dialogRef.close()">Back</button>
+</div>

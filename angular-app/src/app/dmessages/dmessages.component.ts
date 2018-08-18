@@ -5,6 +5,7 @@ import {Chat, DMessage, Message, User} from '../../../../types';
 import {AuthService} from '../auth.service';
 import {DMessagesService} from '../d-messages.service';
 import {UsersService} from '../users.service';
+import { helpers } from '../helpers';
 
 @Component({
   selector: 'app-dmessages',
@@ -84,8 +85,7 @@ export class DmessagesComponent implements OnInit {
       this.chats[i].messages.push(msg);
       this.chats[i].lastMessageDate = msg.date;
     }
-    this.chats.sort(
-        (a, b) => -a.lastMessageDate.getTime() + b.lastMessageDate.getTime());
+    this.chats.unshift(...this.chats.splice(i, 1));
     this.filterChats();
   }
 
@@ -130,7 +130,7 @@ export class DmessagesComponent implements OnInit {
       this.activeChat = chat;
       this.chats.push(chat);
       this.chats.sort(
-          (a, b) => -a.lastMessageDate.getTime() + b.lastMessageDate.getTime());
+          (a, b) => -helpers.compareDMChats(a,b));
       this.filterChats();
     });
     this.isSearchUsers = false;

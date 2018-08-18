@@ -1,63 +1,65 @@
 <!--source: https://codepen.io/Momciloo/pen/bEdbxY -->
 
 <div class="my-container mx-2" *ngIf="fChats">
-  <div class="left">
-      <div class="top">
-          <input type="search" [placeholder]="isSearchUsers?  'Search for Users' : 'Search in chats'" [(ngModel)]="query" (ngModelChange)="search()"
-          />
-          <button mat-mini-fab [color]="isSearchUsers ? 'accent' : 'primary'" (click)="isSearchUsers = !isSearchUsers; search()">
-              <mat-icon>{{ isSearchUsers? 'arrow_back' : 'add' }}</mat-icon>
-          </button>
+    <div class="left">
+        <div class="top">
+            <input type="search" [placeholder]="isSearchInAddMode?  'Search in open chats' : 'Search in all chats'" [(ngModel)]="query" (ngModelChange)="search()"
+            />
+            <button mat-mini-fab [color]="isSearchInAddMode ? 'accent' : 'primary'" (click)="isSearchInAddMode = !isSearchInAddMode; search()">
+                <mat-icon>{{ isSearchInAddMode? 'arrow_back' : 'add' }}</mat-icon>
+            </button>
 
-          <mat-checkbox [(ngModel)]="searchMsgs" (ngModelChange)="filterChats()" *ngIf="query && !isSearchUsers">Search messages</mat-checkbox>
+            <mat-checkbox [(ngModel)]="searchMsgs" (ngModelChange)="filterChats()" *ngIf="query">Search messages</mat-checkbox>
+            <mat-checkbox [(ngModel)]="searchMembers" (ngModelChange)="filterChats()" *ngIf="query">Search Members</mat-checkbox>
 
-      </div>
-      <mat-chip-list *ngIf="usersListResults && isSearchUsers" class="mat-chip-list-stacked">
-          <mat-chip (click)="addChatByID(user._id)" *ngFor="let user of usersListResults" selected color="primary">
-              <b> {{ user._id}}</b> {{ ": " + user.firstName + " " + user.lastName}}
-          </mat-chip>
-      </mat-chip-list>
-      <ul class="people" *ngIf="!usersListResults || !isSearchUsers">
-          <li [ngClass]="{person: true, active: chat === activeChat}" *ngFor="let chat of fChats" (click)="selectChat(chat.user._id)">
-              <!--todo - replace with the user image-->
-              <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/382994/dog.png" alt="" />
-              <span class="name">{{chat.user.firstName}}</span>
-              <span class="time">{{chat.lastMessageDate | date }}</span>
-              <span *ngIf="chat.messages.length > 0" class="preview">{{chat.messages[chat.messages.length-1].content}}</span>
-          </li>
-      </ul>
-  </div>
-  <div *ngFor="let chat of chats" class="dmm" [hidden]="!activeChat ||  activeChat._id !== chat._id">
-      <div class="right" *ngIf="activeChat && activeChat._id === chat._id">
-          <div class="top">
-              <button class="small-only" mat-icon-button color="primary" (click)="selectChat('')">
-                  <mat-icon>arrow_back</mat-icon>
-              </button>
-              <span>To:
-                  <span class="name">{{chat.user.firstName + " " + chat.user.lastName }}</span>
-                  <span> ({{chat.user._id}})</span>
-              </span>
-          </div>
+        </div>
+        <mat-chip-list *ngIf="chatsListResults && isSearchInAddMode" class="mat-chip-list-stacked">
+            <mat-chip (click)="addChatByID(chat._id)" *ngFor="let chat of chatsListResults" selected color="primary">
+                <b> {{ chat.name}}</b>
+            </mat-chip>
+        </mat-chip-list>
+        <ul class="people" *ngIf="!chatsListResults || !isSearchInAddMode">
+            <li [ngClass]="{person: true, active: chat === activeChat}" *ngFor="let chat of fChats" (click)="selectChat(chat._id)">
+                <span class="name">{{chat.name}}</span>
+                <span class="time">{{chat.lastMsg && chat.lastMsg.date | date }}</span>
+                <span *ngIf="chat.messages.length > 0" class="preview">{{chat.messages[chat.messages.length-1].content}}</span>
+            </li>
+        </ul>
+    </div>
+    <div class="right" *ngIf="activeChat">
+        <div class="top">
+            <button class="small-only" mat-icon-button color="primary" (click)="selectChat('')">
+                <mat-icon>arrow_back</mat-icon>
+            </button>
+            <span>To:
+                <span class="name">{{activeChat.name }}</span>
+            </span>
+            <button mat-raised-button *ngIf="activeChat.admins.indexOf(currentUserID) > -1" color="accent" [matBadge]="activeChat.memberRequests.length" matBadgePosition="before" matBadgeColor="primary" class="requests-button" (click)="openRequestsDialog()">Member Requests</button>
+        </div>
 
-          <div class="chat">
-              <div class="conversation-start" *ngIf="chat.messages.length > 0">
-                  <span>{{chat.messages[0].date | date}}</span>
-              </div>
-              <div *ngFor="let message of (chat.messages)" [ngClass]="{ 'bubble': true,'you' : message.from !== currentUserID,'me'  : message.from === currentUserID}">
-                  {{message.content}}
-              </div>
+        <div class="chat">
+            <div class="conversation-start" *ngIf="activeChat.messages.length > 0">
+                <span>{{activeChat.messages.length && activeChat.messages[0].date | date}}</span>
+            </div>
+            <div *ngFor="let message of (activeChat.messages)" [ngClass]="{ 'bubble': true,'you' : message.from !== currentUserID,'me'  : message.from === currentUserID}">
+                <span class="from">{{message.from}}</span>
+                {{message.content}}
+            </div>
 
-          </div>
+        </div>
 
-          <div class="write">
-              <input type="text" (keyup.enter)="chat.newMsg && sendMessage()" placeholder="Write message..." [(ngModel)]="chat.newMsg"
-              />
-              <button mat-icon-button color="primary" (click)="sendMessage()" *ngIf="chat.newMsg">
-                  <mat-icon>send</mat-icon>
-              </button>
-          </div>
-      </div>
-  </div>
+        <div class="write" *ngIf="activeChat.members.indexOf(currentUserID) > -1">
+            <input type="text" (keyup.enter)="activeChat.newMsg && sendMessage()" placeholder="Write message..." [(ngModel)]="activeChat.newMsg"
+            />
+            <button mat-icon-button color="primary" (click)="sendMessage()" *ngIf="activeChat.newMsg">
+                <mat-icon>send</mat-icon>
+            </button>
+        </div>
+        <div *ngIf="activeChat.members.indexOf(currentUserID) === -1">
+                <button *ngIf="activeChat.memberRequests.indexOf(currentUserID) === -1" mat-flat-button (click)="sendMemberRequest()" color="primary">Join</button>
+                <span *ngIf="activeChat.memberRequests.indexOf(currentUserID) > -1">Pending for approval</span>
+        </div>
+    </div>
 </div>
 <h1 class="my-5 mx-auto" *ngIf="!fChats && ! currentUserID">Log in to view messages!</h1>
 <mat-progress-bar *ngIf="!fChats &&  currentUserID" mode="buffer"></mat-progress-bar>

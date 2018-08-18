@@ -93,7 +93,7 @@ export namespace Reviews {
     if (limit) {
       res.limit(limit);
     }
-    return (await res.exec()).map(doc => doc.toObject());
+    return (<any[]> await res.exec());
   }
 
 

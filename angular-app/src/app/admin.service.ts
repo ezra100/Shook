@@ -1,4 +1,4 @@
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 
 import {User} from '../../../types';
@@ -12,7 +12,9 @@ export class AdminService {
   deleteUser(userID: string) {
     return this.http.put<User>('/api/admin/deleteUser', {userID});
   }
-  getAwaitingUsers() {
-    return this.http.get<User[]>('/api/admin/usersToAuthorize');
+  getAwaitingUsers(offset: number = 0) {
+    return this.http.get<User[]>(
+        '/api/admin/usersToAuthorize',
+        {params: new HttpParams({fromObject: {offset: String(offset)}})});
   }
 }

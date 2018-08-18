@@ -1,11 +1,16 @@
 import {Component, OnInit} from '@angular/core';
-import {CanActivate} from '@angular/router';
 
-import {Chat, ChatRoom, Message, User} from '../../../../types';
+import {ChatRoom, Message, User} from '../../../../types';
 import {AuthService} from '../auth.service';
 import {ChatRoomsService} from '../chat-rooms.service';
-import {UsersService} from '../users.service';
+import {helpers} from '../helpers';
+import { MatDialog } from '@angular/material';
+import { MemberRequestsComponent } from '../member-requests/member-requests.component';
 
+
+//todo: request to join
+//  authorize/delete request
+// add/delete admins
 @Component({
   selector: 'app-chat-rooms',
   templateUrl: './chat-rooms.component.html',
@@ -18,18 +23,16 @@ export class ChatRoomsComponent implements OnInit {
   activeChat: ChatRoom&{newMsg?: string} = null;
   query: string = '';
   searchMsgs: boolean = false;
-  usersListResults: User[];
-  isSearchUsers: boolean = false;
-  constructor(
-      private chatRoomsService: ChatRoomsService,
-      private userService: UsersService) {}
+  searchMembers: boolean = false;
+  chatsListResults: ChatRoom[];
+  isSearchInAddMode: boolean = false;
+  constructor(private chatRoomsService: ChatRoomsService, public dialog: MatDialog) {}
   ngOnInit() {
-    ;
-    // on login init chats
     let self = this;
     window.onhashchange = () => {
       self.selectChat(location.hash.substr(1));
     };
+    // on login init chats
     if (AuthService.currentUser) {
       self.initChats(AuthService.currentUser);
     }
@@ -38,6 +41,9 @@ export class ChatRoomsComponent implements OnInit {
 
   initChats(user: User) {
     if (user) {
+      // in order that the server's socket will recognize
+      // the user we need to reconnect
+      this.chatRoomsService.reconnect();
       this.currentUserID = user._id;
       let self = this;
       if (!this.chatRoomsService) {
@@ -49,6 +55,8 @@ export class ChatRoomsComponent implements OnInit {
         this.activeChat = this.fChats[0];
         this.chatRoomsService.getMsgObservable().subscribe(
             (msg) => this.addMessage(msg));
+
+        this.chatRoomsService.join(chats.map(c => c._id));
       })
     }
     // on logout - delete all chats
@@ -59,7 +67,7 @@ export class ChatRoomsComponent implements OnInit {
     }
   }
   search() {
-    this.isSearchUsers ? this.searchUsers() : this.filterChats()
+    this.isSearchInAddMode ? this.searchChats() : this.filterChats()
   }
   addMessage(msg: Message) {
     let i = this.chats.findIndex(c => c._id === msg.roomID);
@@ -89,36 +97,43 @@ export class ChatRoomsComponent implements OnInit {
   }
   filterChats() {
     // escape the query
-    let regex = new RegExp(
-        this.query.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&'), 'i');
+    let regex = new RegExp(helpers.escapeRegExp(this.query), 'i');
     // search for the query in username, first name, last name and in the
     // messages if checked
     this.fChats = this.chats.filter(
         c => regex.test(c._id) || regex.test(c.name) ||
             (this.searchMsgs && c.messages.find(m => regex.test(m.content))));
   }
-  searchUsers() {
+  searchChats() {
     let self = this;
-    this.userService.getUserList(self.query).subscribe(userList => {
-      self.usersListResults = userList;
+    this.chatRoomsService.getRooms(self.query, this.searchMembers, this.searchMsgs).subscribe(chats => {
+      self.chatsListResults = chats;
     })
   }
   addChatByID(roomID: string) {
+    let self = this;
     let chatTryFind = this.chats.find(c => c._id === roomID);
     if (chatTryFind) {
       this.activeChat = chatTryFind;
-      this.isSearchUsers = false;
+      this.isSearchInAddMode = false;
       this.filterChats();
       return;
     }
     this.chatRoomsService.getRoom(roomID).subscribe(chat => {
+      self.chatRoomsService.join(roomID);
       this.activeChat = chat;
       this.chats.push(chat);
-      //todo manage empty messages
-      this.chats.sort(
-          (a, b) => -a.messages[a.messages.length-1].date.getTime() + b.messages[a.messages.length-1].date.getTime());
+      // todo manage empty messages
+      this.chats.sort((a, b) => -helpers.compareChatRooms(a, b));
       this.filterChats();
     });
-    this.isSearchUsers = false;
+    this.isSearchInAddMode = false;
+  }
+  openRequestsDialog(){
+    this.dialog.open(MemberRequestsComponent, {data:this.activeChat});
+  }
+  // sends a member request to the active chat
+  sendMemberRequest(){
+    this.chatRoomsService.sendMemberRequest(this.activeChat._id);
   }
 }

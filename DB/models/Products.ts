@@ -77,7 +77,7 @@ export namespace Products {
     if (limit) {
       res.limit(limit);
     }
-    return (await res.exec()).map(doc => doc.toObject());
+    return (await res.exec());
   }
 
   // export async function addCategory() {

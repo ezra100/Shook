@@ -18,7 +18,6 @@ export class AddProductComponent implements OnInit {
   ngOnInit() {
   }
   addProduct() {
-    // todo - clear form once submitted successfully
     let obs = this.productService.addProduct(this.product);
     this.dialogRef.close();
     return obs;

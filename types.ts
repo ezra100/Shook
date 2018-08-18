@@ -125,7 +125,7 @@ export interface IComment {
 export interface Message {
   _id?: string;
   from: string;
-  // roomID exists only on insertion and when sending a single message via
+  // roomID exists only before insertion and when sending a single message via
   // socket.io
   roomID?: string;
   content: string;
@@ -144,13 +144,14 @@ export interface ChatRoom {
   _id?: string;
   name: string;
   admins: string[];
-  members: string[];
-  memberRequests: string[];
+  members?: string[];
+  memberRequests?: string[];
   owner: string;
   connected?: number;
 
   messages: Message[];
-  lastMsg: Message;
+  //created on extraction from DB
+  lastMsg?: Message;
 }
 
 export interface Order {

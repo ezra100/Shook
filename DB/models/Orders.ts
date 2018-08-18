@@ -47,7 +47,7 @@ export namespace orders {
 
     export async function getOrderByUser(owner: string) {
       let docs = await orderModel.find({owner}).sort('-orderDate').exec();
-      return docs.map(doc => doc.toObject());
+      return docs;
     }
 
     export async function markOrderAsPaid(orderID: string) {

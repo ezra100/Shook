@@ -12,6 +12,8 @@ import {AdminService} from '../admin.service';
 export class AdminPanelComponent implements OnInit {
   awaitingUsers: User[];
   cols: number;
+  reachedEndOfFeed: boolean = false;
+  loadingMore: boolean = false;
   constructor(
       private adminService: AdminService,
       private observableMedia: ObservableMedia) {}
@@ -24,10 +26,8 @@ export class AdminPanelComponent implements OnInit {
     this.observableMedia.subscribe(x => this.cols = breakpoints[x.mqAlias]);
 
     this.adminService.getAwaitingUsers().subscribe(
-        users => 
-        {this.awaitingUsers = users});
+        users => {this.awaitingUsers = users});
   }
-  // todo - implement load more
   authorizeUser(userID: string) {
     this.adminService.authorizeUser(userID).subscribe(user => {
       let index = this.awaitingUsers.findIndex(u => u._id === user._id);
@@ -39,5 +39,19 @@ export class AdminPanelComponent implements OnInit {
       let index = this.awaitingUsers.findIndex(u => u._id === user._id);
       this.awaitingUsers.splice(index, 1);
     })
+  }
+  loadMore() {
+    if (this.loadingMore || this.reachedEndOfFeed) {
+      return;
+    }
+    this.loadingMore = true;
+    this.adminService.getAwaitingUsers(this.awaitingUsers.length)
+        .subscribe(awaitingUsers => {
+          if (awaitingUsers.length === 0) {
+            this.reachedEndOfFeed = true;
+          }
+          this.loadingMore = false;
+          this.awaitingUsers.push(...awaitingUsers);
+        })
   }
 }

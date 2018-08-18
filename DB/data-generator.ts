@@ -11,8 +11,7 @@ import * as db from './Models';
 
 let users: User[];
 let products: Product[];
-let reviews: Review[];
-let chatRooms: ChatRoom[];
+
 
 let usersLength: number;
 let productsLength: number;
@@ -163,7 +162,7 @@ function getFakeChatRoom() {
     admins: getRandomUsernames(0, 8),
     owner: users[faker.random.number(users.length - 1)]._id,
     name: faker.internet.userName(),
-    messages
+    messages: messages
   };
 }
 
@@ -203,31 +202,44 @@ export async function initDB(
   roomsLenght = await db.ChatRooms.getCount();
   DMessageLength = await db.DirectMessages.getCount();
   users = await db.Users.getIDs();
-
+  console.log('DB init started');
   if (usersLength < usersSizeGoal) {
+    console.log('initializing users');
     await initUsers(usersSizeGoal - usersLength);
     usersLength = await db.Users.getCount();
+    console.log('users: done');
   }
   if (productsLength < usersSizeGoal * avgProductsPerUser) {
+    console.log('initializing products');
     await initProducts((usersSizeGoal * avgProductsPerUser) - productsLength);
     productsLength = await db.Products.getCount();
+    console.log('products: done');
+
   }
   if (reviewsLength < productsLength * reviewsPerProduct) {
+    console.log('initializing reviews');
     products = await db.Products.getIDs();
     for (let i = reviewsLength; i < productsLength * reviewsPerProduct; i++) {
       await db.Reviews.addReview(<Review>getFakeReview(), false);
     }
     reviewsLength = await db.Reviews.getCount();
+    console.log('reviews: done');
   }
   if (roomsLenght < requiredChatRooms) {
+    console.log('initializing chat rooms...')
     for (; roomsLenght < requiredChatRooms; roomsLenght++) {
       let room = getFakeChatRoom();
-      await db.ChatRooms.addChatRoom(room.name, room.owner, room.admins);
+      await db.ChatRooms.addChatRoom(room);
+      
     }
+    console.log('chat rooms: done');
   }
   if (DMessageLength < usersLength * DMessagePerUser) {
+    console.log('initializing DM');
     for (; DMessageLength < usersLength * DMessagePerUser; DMessageLength++) {
       await db.DirectMessages.addDMessage(getFakeDMessage(), false);
     }
+    console.log('DM: done');
   }
+  console.log('init DB done')
 }

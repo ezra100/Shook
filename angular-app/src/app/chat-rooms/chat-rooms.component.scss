@@ -55,13 +55,15 @@ $primary: rgb(103, 58, 183);
         height: inherit;
         border: 1px solid var(--light);
         background-color: var(--white);
-        @media only screen and (max-width: 768px){
+
+        @media only screen and (max-width: 768px) {
             width: 95vw;
             z-index: 0;
         }
+
         ul {
             list-style: none;
-            padding:0 
+            padding: 0;
         }
 
         .top {
@@ -87,7 +89,8 @@ $primary: rgb(103, 58, 183);
             border: 1px solid var(--light);
             background-color: #eceff1;
             border-radius: 21px;
-            width:85%;
+            width: 85%;
+
             @include font;
 
             &:focus {
@@ -171,6 +174,7 @@ $primary: rgb(103, 58, 183);
                     }
 
                     width: calc(100% + 2px);
+
                     span {
                         color: var(--white);
                         background: transparent;
@@ -190,15 +194,23 @@ $primary: rgb(103, 58, 183);
         width: 62.4%;
         height: inherit;
         background-color: white;
-        @media only screen and (max-width: 768px){
+
+        @media only screen and (max-width: 768px) {
             width: 95vw;
             z-index: 1;
             position: absolute;
         }
+
         .top {
             width: 100%;
             height: auto;
             background-color: lighten($primary, 50%);
+
+            .requests-button {
+                position: absolute;
+                right: 5%;
+                z-index: 1;
+            }
 
             span {
                 font-size: 15px;
@@ -248,7 +260,7 @@ $primary: rgb(103, 58, 183);
             margin-top: 1%;
             margin-bottom: 1%;
             border: 1px solid $primary;
-            background-color:lighten($primary, 50%);
+            background-color: lighten($primary, 50%);
             width: 95%;
             border-radius: 5px;
 
@@ -288,6 +300,11 @@ $primary: rgb(103, 58, 183);
             }
 
             &.you {
+                .from {
+                    font-weight: bold;
+                    color: #00b0ff;
+                }
+
                 float: left;
                 color: var(--white);
                 background-color: $primary;
@@ -301,6 +318,10 @@ $primary: rgb(103, 58, 183);
             }
 
             &.me {
+                .from {
+                    display: none;
+                }
+
                 float: right;
                 color: var(--dark);
                 background-color: #eceff1;
@@ -395,9 +416,10 @@ $primary: rgb(103, 58, 183);
     }
 }
 
-.small-only{
+.small-only {
     display: none;
-    @media only screen and (max-width: 768px){
+
+    @media only screen and (max-width: 768px) {
         display: unset;
     }
 }

@@ -23,7 +23,7 @@ import * as dmsgIO from './socket.io.dmessage';
 import * as roomsIO from './socket.io.rooms';
 
 // init the data base with fake data
-//initDB();
+initDB();
 
 let secret = 'atgasdv82aergfnsg';
 var app = express();
