@@ -2,6 +2,7 @@ import * as express from 'express';
 
 import * as db from '../DB/Models';
 import {helpers} from '../helpers';
+import upload from '../multer';
 import {updateRoom, updateRoomArr} from '../socket.io.rooms';
 import {Action, ChatRoom, LikeType, LikeUpdate, Message, User} from '../types';
 
@@ -187,3 +188,17 @@ router.put('/removeLikeDislike', helpers.asyncWrapper(async function(req, res) {
   });
   return res.json(results);
 }));
+
+router.post('/getImgURL', (req, res, next) => {
+  if (req.user) {
+    next();
+  } else {
+    res.status(400).end('you must be logged in to upload a file');
+  }
+}, upload.any(), helpers.asyncWrapper(async function(req, res) {
+  let files = <Express.Multer.File[]>req.files;
+  if (files && files[0]) {
+    res.status(201).json('/pub/img/' + files[0].filename);
+  }
+  res.status(500).end('file not found');
+}))

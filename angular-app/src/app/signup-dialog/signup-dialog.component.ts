@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { MatSnackBarRef, SimpleSnackBar, MatDialogRef, MatSnackBar } from '@angular/material';
 import { Gender, User } from '../../../../types';
 import { UsersService } from '../users.service';
@@ -9,7 +9,7 @@ import { UsersService } from '../users.service';
   styleUrls: ['./signup-dialog.component.scss']
 })
 export class SignupDialogComponent implements OnInit {
-
+  @ViewChild('imgFileInput') imgFileInput:ElementRef;
   user : Partial<User> = {};
   lastSnackbar: MatSnackBarRef<SimpleSnackBar> = null;
   genderRef = Gender;
@@ -20,7 +20,18 @@ export class SignupDialogComponent implements OnInit {
   ngOnInit() {}
   signup() {
     this.lastSnackbar && this.lastSnackbar.dismiss();
-    this.usersService.signup(this.user).subscribe((user: User) => {
+    let file : File = null;
+    if(!this.user.imageURL){
+      let element = <HTMLInputElement> this.imgFileInput.nativeElement;
+      if(element.files && element.files[0] ){
+        file =  element.files[0];
+      }
+      else{
+        console.error('no img url, and no img file either');
+        return;
+      }
+    }
+    this.usersService.signup(this.user, file).subscribe((user: User) => {
       this.snackBar.open(
         user.firstName + ' successfully signed up!', 'Close');
       this.dialogRef.close();

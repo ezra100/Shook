@@ -2,7 +2,7 @@ import {HttpClientModule} from '@angular/common/http';
 import {enableProdMode, NgModule} from '@angular/core';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MAT_SNACK_BAR_DEFAULT_OPTIONS, MatBadgeModule, MatButtonModule, MatCardModule, MatCheckboxModule, MatChipsModule, MatDatepickerModule, MatDialogModule, MatExpansionModule, MatFormFieldModule, MatGridListModule, MatIconModule, MatInputModule, MatProgressBarModule, MatProgressSpinnerModule, MatSelectModule, MatSnackBarModule, MatTooltipModule, MatSlideToggleModule} from '@angular/material';
+import {MAT_SNACK_BAR_DEFAULT_OPTIONS, MatBadgeModule, MatButtonModule, MatCardModule, MatCheckboxModule, MatChipsModule, MatDatepickerModule, MatDialogModule, MatExpansionModule, MatFormFieldModule, MatGridListModule, MatIconModule, MatInputModule, MatProgressBarModule, MatProgressSpinnerModule, MatSelectModule, MatSlideToggleModule, MatSnackBarModule, MatTabsModule, MatTooltipModule} from '@angular/material';
 import {MatMomentDateModule} from '@angular/material-moment-adapter';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatToolbarModule} from '@angular/material/toolbar';
@@ -10,6 +10,7 @@ import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule, NoopAnimationsModule} from '@angular/platform-browser/animations';
 
 import {AddProductComponent} from './add-product/add-product.component';
+import {AddRoomComponent} from './add-room/add-room.component';
 import {AdminGuard} from './admin-guard';
 import {AdminPanelComponent} from './admin-panel/admin-panel.component';
 import {AppRoutingModule} from './app-routing.module';
@@ -29,17 +30,33 @@ import {ReviewCardComponent} from './review-card/review-card.component';
 import {ReviewsComponent} from './reviews/reviews.component';
 import {SellersComponent} from './sellers/sellers.component';
 import {SignupDialogComponent} from './signup-dialog/signup-dialog.component';
+import {UpdateUserDetailsModalComponent} from './update-user-details-modal/update-user-details-modal.component';
 import {UserCardComponent} from './user-card/user-card.component';
 
 enableProdMode();
 
 @NgModule({
   declarations: [
-    AppComponent, ProductsFeedComponent, AddProductComponent, ProductComponent,
-    LoginFormComponent, HeaderComponent, ProductFullComponent, ReviewsComponent,
-    SellersComponent, HomeComponent, SignupDialogComponent, DmessagesComponent,
-    ReversePipe, ReviewCardComponent, AdminPanelComponent, UserCardComponent,
-    ChatRoomsComponent, MemberRequestsComponent
+    AppComponent,
+    ProductsFeedComponent,
+    AddProductComponent,
+    ProductComponent,
+    LoginFormComponent,
+    HeaderComponent,
+    ProductFullComponent,
+    ReviewsComponent,
+    SellersComponent,
+    HomeComponent,
+    SignupDialogComponent,
+    DmessagesComponent,
+    ReversePipe,
+    ReviewCardComponent,
+    AdminPanelComponent,
+    UserCardComponent,
+    ChatRoomsComponent,
+    MemberRequestsComponent,
+    UpdateUserDetailsModalComponent,
+    AddRoomComponent
   ],
   imports: [
     MatBadgeModule,      MatProgressBarModule, MatChipsModule,
@@ -51,11 +68,11 @@ enableProdMode();
     BrowserModule,       MatExpansionModule,   MatCardModule,
     MatDatepickerModule, HttpClientModule,     AppRoutingModule,
     MatInputModule,      MatToolbarModule,     MatProgressSpinnerModule,
-    MatTooltipModule,MatSlideToggleModule,
+    MatTooltipModule,    MatSlideToggleModule, MatTabsModule,
   ],
   entryComponents: [
     AddProductComponent, MemberRequestsComponent, LoginFormComponent,
-    SignupDialogComponent
+    SignupDialogComponent, UpdateUserDetailsModalComponent, AddRoomComponent
   ],
   providers: [
     AuthGuard, AdminGuard,

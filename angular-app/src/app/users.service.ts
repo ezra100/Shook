@@ -7,11 +7,25 @@ import {helpers} from './helpers';
 @Injectable({providedIn: 'root'})
 export class UsersService {
   constructor(private http: HttpClient) {}
-  signup(user: Partial<User>) {
-    return this.http.post('/api/users/signup', user);
+  signup(user: Partial<User>, file?: File) {
+    let formData = new FormData();
+    for(let key in user){
+      formData.append(key, user[key]);
+    }
+    if(file){
+      formData.append('imgFile', file);
+    }
+    return this.http.post('/api/users/signup', formData);
   }
-  updateUserDetails(user: Partial<User>) {
-    return this.http.put('/api/users/updateDetails', user);
+  updateUserDetails(user: Partial<User>, file?: File) {
+    let formData = new FormData();
+    for(let key in user){
+      formData.append(key, user[key]);
+    }
+    if(file){
+      formData.append('imgFile', file);
+    }
+    return this.http.put('/api/users/updateDetails', formData);
   }
   follow(followee: string) {
     return this.http.put('/api/users/follow', followee);

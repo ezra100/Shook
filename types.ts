@@ -129,7 +129,7 @@ export interface Message {
   from: string;
   // optional - the user can add an image - the server will store the image and
   // attach it as a link to the message
-  imgUrl?: string
+  imageURL?: string
   // roomID exists only before insertion and when sending a single message via
   // socket.io
   roomID?: string;

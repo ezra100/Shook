@@ -102,7 +102,7 @@ export namespace DirectMessages {
             'user.lastName': 1,
             'user.gender': 1,
             'user.userType' : 1,
-            'user.imageUrl': 1
+            'user.imageURL': 1
           }
         }
       ]);

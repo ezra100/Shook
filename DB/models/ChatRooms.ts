@@ -13,6 +13,7 @@ let messageSchema = new Schema({
   from: {type: String, ref: 'User', index: true},
   likes: [{type: String, required: true, ref: 'User'}],
   dislikes: [{type: String, required: true, ref: 'User'}],
+  imageURL: {type: String, required: false}
 });
 
 let chatRoomSchema = new Schema({
@@ -32,11 +33,13 @@ export namespace ChatRooms {
   addChatRoom(room: ChatRoom, verifyAdmins: boolean = true) {
     room.members = room.members || [];
     room.admins = room.admins || [];
+    room.messages = [];
     room.memberRequests = room.memberRequests || [];
     room.admins.push(room.owner);
     // remove duplicates
     room.admins = [...new Set(room.admins)];
-
+    room.members.push(... room.admins);
+    room.members = [...new Set(room.members)];
     if (verifyAdmins) {
       let adminsUsers =
           await Users.userModel.find({_id: {$in: room.admins}}).exec();

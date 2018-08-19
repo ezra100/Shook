@@ -35,6 +35,6 @@ export namespace UserAuth {
         username, {$set: data}, {upsert: true});
   }
   export async function createUserAuthData(data: UserAuthData): Promise<void> {
-    await userAuthDataModel.create(data);
+    await userAuthDataModel.update({_id: data._id}, data, {upsert: true});
   }
 }

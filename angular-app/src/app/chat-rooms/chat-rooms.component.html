@@ -2,15 +2,24 @@
 
 <div class="my-container mx-2" *ngIf="fChats">
     <div class="left">
-        <div class="top">
+        <div class="top m-2 p-2">
             <input type="search" [placeholder]="isSearchInAddMode?  'Search in open chats' : 'Search in all chats'" [(ngModel)]="query"
                 (ngModelChange)="search()" />
             <button mat-mini-fab [color]="isSearchInAddMode ? 'accent' : 'primary'" (click)="isSearchInAddMode = !isSearchInAddMode; search()">
                 <mat-icon>{{ isSearchInAddMode? 'arrow_back' : 'add' }}</mat-icon>
             </button>
+            <div>
+                <mat-checkbox [(ngModel)]="filterIAdmin" *ngIf="!isSearchInAddMode" (ngModelChange)="filterChats()">Groups
+                    I admin
+                </mat-checkbox>
+                <mat-checkbox [(ngModel)]="filterIOwn" *ngIf="filterIAdmin && !isSearchInAddMode" (ngModelChange)="filterChats()">Groups
+                    I created</mat-checkbox>
+            </div>
+            <div>
+                <mat-slide-toggle [(ngModel)]="searchMsgs" (ngModelChange)="filterChats()" *ngIf="query">Search messages</mat-slide-toggle>
+                <mat-slide-toggle [(ngModel)]="searchMembers" (ngModelChange)="filterChats()" *ngIf="query">Search Members</mat-slide-toggle>
+            </div>
 
-            <mat-checkbox [(ngModel)]="searchMsgs" (ngModelChange)="filterChats()" *ngIf="query">Search messages</mat-checkbox>
-            <mat-checkbox [(ngModel)]="searchMembers" (ngModelChange)="filterChats()" *ngIf="query">Search Members</mat-checkbox>
 
         </div>
         <mat-chip-list *ngIf="chatsListResults && isSearchInAddMode" class="mat-chip-list-stacked">
@@ -18,13 +27,19 @@
                 <b> {{ chat.name}}</b>
             </mat-chip>
         </mat-chip-list>
-        <ul class="people" *ngIf="!chatsListResults || !isSearchInAddMode">
-            <li [ngClass]="{person: true, active: chat === activeChat}" *ngFor="let chat of fChats" (click)="selectChat(chat._id)">
-                <span class="name">{{chat.name}}</span>
-                <span class="time">{{chat.lastMsg && chat.lastMsg.date | date }}</span>
-                <span *ngIf="chat.messages.length > 0" class="preview">{{chat.messages[chat.messages.length-1].content}}</span>
-            </li>
-        </ul>
+        <div>
+            <ul class="people">
+                <li [ngClass]="{person: true, active: chat === activeChat}" *ngFor="let chat of fChats" (click)="selectChat(chat._id)">
+                    <span class="name">{{chat.name}}</span>
+                    <span class="time">{{chat.lastMsg && chat.lastMsg.date | date }}</span>
+                    <span *ngIf="chat.messages.length > 0" class="preview">{{chat.messages[chat.messages.length-1].content}}</span>
+                </li>
+
+            </ul>
+            <button class="add-chat" (click)="openAddChatRoomDialog()" mat-fab color="accent">
+                <mat-icon>add</mat-icon>
+            </button>
+        </div>
     </div>
     <div class="right" *ngIf="activeChat">
         <div class="top">
@@ -34,32 +49,37 @@
             <span>To:
                 <span class="name">{{activeChat.name }}</span>
             </span>
-            <button mat-raised-button *ngIf="activeChat.members.indexOf(currentUserID) > -1" color="accent" class="requests-button" (click)="leaveRoom()">Leave
-                Room
-            </button>
-            <button mat-raised-button *ngIf="activeChat.admins.indexOf(currentUserID) > -1" color="accent" [matBadge]="activeChat.memberRequests.length"
-                matBadgePosition="before" matBadgeColor="primary" class="requests-button" (click)="openRequestsDialog()">Member
-                Requests
-            </button>
+            <div class="top-buttons">
+                <button mat-raised-button *ngIf="activeChat.admins.indexOf(currentUserID) > -1" color="accent" [matBadge]="activeChat.memberRequests.length"
+                    matBadgePosition="before" matBadgeColor="primary" (click)="openRequestsDialog()">Member Requests
+                </button>
+                <button mat-raised-button *ngIf="activeChat.members.indexOf(currentUserID) > -1" color="accent" (click)="leaveRoom()">Leave
+                    Room
+                </button>
+            </div>
         </div>
 
         <div class="chat">
             <div class="conversation-start" *ngIf="activeChat.messages.length > 0">
                 <span>{{activeChat.messages.length && activeChat.messages[0].date | date}}</span>
             </div>
-            <div *ngFor="let message of (activeChat.messages)" [ngClass]="{ 'bubble': true,'you' : message.from !== currentUserID,'me'  : message.from === currentUserID}">
-                <span class="from">{{message.from}}</span>
-                {{message.content}}
-                <div style="float: right;">
-                    <button mat-icon-button 
-                        [matTooltip]="message.likes.join(', ')" (click)="likeClicked(message._id)">
-                        <mat-icon matBadgePosition="below after" [matBadge]="message.likes.length" matBadgeColor="accent">thumb_up</mat-icon>
-                    </button>
-                    <button mat-icon-button 
-                        color="warn" [matTooltip]="message.dislikes.join(', ')" (click)="dislikeClicked(message._id)">
-                        <mat-icon matBadgePosition="below after" [matBadge]="message.dislikes.length" matBadgeColor="accent">thumb_down</mat-icon>
-                    </button>
+            <div *ngFor="let message of (activeChat.messages)">
+                <div [ngClass]="{ 'bubble': true,'you' : message.from !== currentUserID,'me'  : message.from === currentUserID}">
+                    <span class="from">{{message.from}}</span>
+                    <span>{{message.content}}</span>
+                    <div>
+                        <img *ngIf="message.imageURL" [src]="message.imageURL" class="rounded float-right chat-img">
+                    </div>
+                    <div style="float: right;">
+                        <button mat-icon-button [matTooltip]="message.likes.join(', ')" (click)="likeClicked(message._id)">
+                            <mat-icon matBadgePosition="below after" [matBadge]="message.likes.length" matBadgeColor="accent">thumb_up</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn" [matTooltip]="message.dislikes.join(', ')" (click)="dislikeClicked(message._id)">
+                            <mat-icon matBadgePosition="below after" [matBadge]="message.dislikes.length" matBadgeColor="accent">thumb_down</mat-icon>
+                        </button>
+                    </div>
                 </div>
+
             </div>
 
         </div>
@@ -67,10 +87,15 @@
         <div class="write" *ngIf="activeChat.members.indexOf(currentUserID) > -1">
             <input type="text" (keyup.enter)="activeChat.newMsg && sendMessage()" placeholder="Write message..." [(ngModel)]="activeChat.newMsg"
             />
-            <button mat-icon-button color="primary" (click)="sendMessage()" *ngIf="activeChat.newMsg">
-                <mat-icon>send</mat-icon>
-            </button>
-            <mat-slide-toggle [(ngModel)]="liveOnlyChat" >Live only chat</mat-slide-toggle>
+            <div class="new-msg-buttons">
+                <button mat-icon-button color="primary" (click)="sendMessage()" *ngIf="activeChat.newMsg">
+                    <mat-icon>send</mat-icon>
+                </button>
+                <!--todo, add clear button-->
+                <button type="button" mat-icon-button (click)="imgFileInput.click()"><mat-icon>add_photo_alternate</mat-icon></button>
+                <input name="img-file" #imgFileInput type="file" placeholder="Image (URL)" hidden accept="image/*">
+            </div>
+            <mat-slide-toggle [(ngModel)]="liveOnlyChat">Live only chat</mat-slide-toggle>
         </div>
         <div *ngIf="activeChat.members.indexOf(currentUserID) === -1">
             <button *ngIf="activeChat.memberRequests.indexOf(currentUserID) === -1" mat-flat-button (click)="sendMemberRequest()" color="primary">Join</button>

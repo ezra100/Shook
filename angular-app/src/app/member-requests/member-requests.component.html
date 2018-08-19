@@ -1,16 +1,32 @@
 <h1 mat-dialog-title>Member Requests: {{room.name}}</h1>
 <div mat-dialog-content>
-  <div *ngFor="let memberID of room.memberRequests" class="py-3 px-2">
-    <span class="mr-auto">{{memberID}}</span>
-    <div class="buttons pr-1">
-      <button mat-icon-button color="warn" (click)="deleteRequest(memberID)">
-        <mat-icon aria-label="Delete member request">cancel</mat-icon>
-      </button>
-      <button mat-icon-button (click)="authorize(memberID)" color="primary">
-        <mat-icon aria-label="Authorize User">check</mat-icon>
-      </button>
-    </div>
-  </div>
+  <mat-tab-group>
+    <mat-tab label="Requests">
+      <div *ngFor="let memberID of room.memberRequests" class="py-3 px-2">
+        <span class="mr-auto">{{memberID}}</span>
+        <div class="buttons pr-1">
+          <button mat-icon-button color="warn" (click)="deleteRequest(memberID)">
+            <mat-icon aria-label="Delete member request">cancel</mat-icon>
+          </button>
+          <button mat-icon-button (click)="authorize(memberID)" color="primary">
+            <mat-icon aria-label="Authorize User">check</mat-icon>
+          </button>
+        </div>
+      </div> 
+    </mat-tab>
+    <mat-tab label="Membership">
+      <div *ngFor="let memberID of room.members" class="py-3 px-2">
+        <span class="mr-auto">{{memberID}}</span>
+        <div class="buttons pr-1">
+          <button mat-icon-button color="warn" (click)="removeMember(memberID)">
+            <mat-icon aria-label="Delete member request">cancel</mat-icon>
+          </button>
+          <mat-slide-toggle *ngIf="isUserOwner" #adminToggle (click)="changeAdminStatus(adminToggle.checked, memberID)" [ngModel]="room.admins.indexOf(memberID) >= 0">Admin</mat-slide-toggle>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+
 </div>
 <div mat-dialog-actions>
   <button mat-button (click)="dialogRef.close()">Back</button>

@@ -1,11 +1,12 @@
-import {Component, OnInit, ChangeDetectorRef} from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit, ViewChild, ElementRef} from '@angular/core';
 import {MatDialog} from '@angular/material';
 
-import {Action, ChatRoom, Message, SIORoomUpdate, User, LikeUpdate, LikeType} from '../../../../types';
+import {Action, ChatRoom, LikeType, LikeUpdate, Message, SIORoomUpdate, User} from '../../../../types';
 import {AuthService} from '../auth.service';
 import {ChatRoomsService} from '../chat-rooms.service';
 import {helpers} from '../helpers';
 import {MemberRequestsComponent} from '../member-requests/member-requests.component';
+import { AddRoomComponent } from '../add-room/add-room.component';
 
 
 // todo: request to join
@@ -27,8 +28,12 @@ export class ChatRoomsComponent implements OnInit {
   chatsListResults: ChatRoom[];
   isSearchInAddMode: boolean = false;
   liveOnlyChat: boolean = false;
+  filterIAdmin: boolean = false;
+  filterIOwn: boolean = false;
+  @ViewChild('imgFileInput') imgInput:ElementRef;
   constructor(
-      private chatRoomsService: ChatRoomsService, public dialog: MatDialog, private cdRef:ChangeDetectorRef) {}
+      private chatRoomsService: ChatRoomsService, public dialog: MatDialog,
+      private cdRef: ChangeDetectorRef) {}
   ngOnInit() {
     let self = this;
     window.onhashchange = () => {
@@ -41,7 +46,7 @@ export class ChatRoomsComponent implements OnInit {
     AuthService.loginSubject.subscribe(user => {self.initChats(user)});
     ChatRoomsService.updatesSubject.subscribe(
         update => self.updateChat(update));
-    ChatRoomsService.likesUpdateSubject.subscribe(update =>{
+    ChatRoomsService.likesUpdateSubject.subscribe(update => {
       self.updateLikes(update);
     })
   }
@@ -92,29 +97,31 @@ export class ChatRoomsComponent implements OnInit {
     }
   }
   //
-  updateLikes(update: LikeUpdate){
+  updateLikes(update: LikeUpdate) {
     let chat = this.chats.find(c => c._id === update.roomID);
-    if(!chat){
+    if (!chat) {
       console.error(`chat ${update.roomID} not found`, update);
       return;
     }
     let msg = chat.messages.find(m => m._id === update.msgID);
-    if(!msg){
-      console.error(`msg ${update.msgID} was not found in  chat ${update.roomID}`, update);
+    if (!msg) {
+      console.error(
+          `msg ${update.msgID} was not found in  chat ${update.roomID}`,
+          update);
       return;
     }
     // first remove the user from both arrays to prevent duplicates
     let i = msg.likes.indexOf(update.userID);
-    while(~i){
+    while (~i) {
       msg.likes.splice(i, 1);
       i = msg.likes.indexOf(update.userID);
     }
     i = msg.dislikes.indexOf(update.userID);
-    while(~i){
+    while (~i) {
       msg.dislikes.splice(i, 1);
       i = msg.likes.indexOf(update.userID);
     }
-    switch(update.action){
+    switch (update.action) {
       case LikeType.Like:
         msg.likes.push(update.userID);
         break;
@@ -122,7 +129,7 @@ export class ChatRoomsComponent implements OnInit {
         msg.dislikes.push(update.userID);
         break;
     }
-    //this.cdRef.detectChanges();
+    // this.cdRef.detectChanges();
   }
 
   search() {
@@ -151,8 +158,13 @@ export class ChatRoomsComponent implements OnInit {
       console.error('no active chat or no new msg');
       return;
     }
-    this.chatRoomsService.sendMsg(this.activeChat._id, this.activeChat.newMsg, !this.liveOnlyChat);
+    let imgInputElem :HTMLInputElement = this.imgInput.nativeElement;
+    let file = imgInputElem.files[0];
+    this.chatRoomsService.sendMsg(
+        this.activeChat._id, this.activeChat.newMsg, !this.liveOnlyChat, file);
     this.activeChat.newMsg = '';
+
+
   }
   filterChats() {
     // escape the query
@@ -160,8 +172,21 @@ export class ChatRoomsComponent implements OnInit {
     // search for the query in username, first name, last name and in the
     // messages if checked
     this.fChats = this.chats.filter(
-        c => regex.test(c._id) || regex.test(c.name) ||
-            (this.searchMsgs && c.messages.find(m => regex.test(m.content))));
+        c => {
+          let bool = regex.test(c._id) || regex.test(c.name) ||
+              (this.searchMsgs && c.messages.find(m => regex.test(m.content)));
+          if (this.filterIAdmin) {
+            if (this.filterIOwn) {
+              bool = bool && c.owner === this.currentUserID;
+            } else {
+              bool = bool && <any>~c.admins.indexOf(this.currentUserID);
+            }
+          }
+
+          return bool;
+        }
+
+    );
   }
   searchChats() {
     let self = this;
@@ -193,6 +218,15 @@ export class ChatRoomsComponent implements OnInit {
   openRequestsDialog() {
     this.dialog.open(MemberRequestsComponent, {data: this.activeChat});
   }
+  openAddChatRoomDialog() {
+    let self = this;
+    const dialogRef = this.dialog.open(AddRoomComponent);
+    dialogRef.afterClosed().subscribe(chat =>
+    {
+      self.chats.push(chat);
+      self.filterChats();
+    });
+  }
   // sends a member request to the active chat
   sendMemberRequest() {
     this.chatRoomsService.sendMemberRequest(this.activeChat._id).subscribe();
@@ -202,7 +236,8 @@ export class ChatRoomsComponent implements OnInit {
       roomID: string = this.activeChat._id, cancelMembership: boolean = true) {
     this.chatRoomsService.leaveRoom(roomID);
     if (cancelMembership) {
-      this.chatRoomsService.removeMember(roomID, this.currentUserID).subscribe();
+      this.chatRoomsService.removeMember(roomID, this.currentUserID)
+          .subscribe();
     }
     let i = this.chats.findIndex(c => c._id === roomID);
     if (~i) {
@@ -212,21 +247,21 @@ export class ChatRoomsComponent implements OnInit {
       this.activeChat = null;
     }
   }
-  likeClicked(msgID: string){
+  likeClicked(msgID: string) {
     let msg = this.activeChat.messages.find(m => m._id === msgID);
     let roomID: string = this.activeChat._id;
-    if(~msg.likes.indexOf(this.currentUserID)){
+    if (~msg.likes.indexOf(this.currentUserID)) {
       this.chatRoomsService.removeLikeDislike(roomID, msgID);
-    }else{
+    } else {
       this.chatRoomsService.likeMsg(roomID, msgID);
     }
   }
-  dislikeClicked(msgID: string){
+  dislikeClicked(msgID: string) {
     let msg = this.activeChat.messages.find(m => m._id === msgID);
     let roomID: string = this.activeChat._id;
-    if(~msg.dislikes.indexOf(this.currentUserID)){
+    if (~msg.dislikes.indexOf(this.currentUserID)) {
       this.chatRoomsService.removeLikeDislike(roomID, msgID);
-    }else{
+    } else {
       this.chatRoomsService.dislikeMsg(roomID, msgID);
     }
   }

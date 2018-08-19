@@ -4,8 +4,7 @@ import {Observable, Subject} from 'rxjs';
 import {map, share} from 'rxjs/operators';
 import * as io from 'socket.io-client';
 
-import {ChatRoom, Message, SIORoomUpdate, LikeUpdate,} from '../../../types';
-
+import {ChatRoom, LikeUpdate, Message, SIORoomUpdate,} from '../../../types';
 
 
 
@@ -17,8 +16,9 @@ export class ChatRoomsService {
   static likesUpdateSubject: Subject<LikeUpdate> = new Subject();
   constructor(private http: HttpClient) {}
 
-  // reconnects the socket to the server, so that the user credentials will appear 
-  // on server side, notice that this will remove all rooms joining on server side
+  // reconnects the socket to the server, so that the user credentials will
+  // appear on server side, notice that this will remove all rooms joining on
+  // server side
   reconnect() {
     let self = ChatRoomsService;
     if (self.socket) {
@@ -35,6 +35,12 @@ export class ChatRoomsService {
     self.socket.on('likes-update', update => {
       self.likesUpdateSubject.next(update);
     });
+    self.socket.on('diconnect', (reason)=>{
+      if (reason === 'io server disconnect') {
+        // the disconnection was initiated by the server, you need to reconnect manually
+        self.socket.connect();
+      }
+    })
   }
 
   join(roomIDs: string|string[]) {
@@ -45,8 +51,22 @@ export class ChatRoomsService {
     this.getSocket().emit('leave', roomID);
   }
 
-  sendMsg(roomID: string, content: string, saveToDb: boolean = true) {
-    this.getSocket().emit('msg', <Message>{content, roomID, saveToDb});
+  async sendMsg(
+      roomID: string, content: string, saveToDb: boolean = true, file?: File) {
+    let msg = <Message>{content, roomID, saveToDb};
+    if (file) {
+      msg.imageURL = await this.getImgUrl(file).toPromise().catch(err => {
+        console.error(err);
+        return null;
+      });
+    }
+    this.getSocket().emit('msg', msg);
+  }
+
+  getImgUrl(file: File) {
+    let formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<string>('/api/rooms/getImgURL', formData);
   }
 
   getMsgObservable() {
@@ -112,36 +132,60 @@ export class ChatRoomsService {
   }
 
   addMember(roomID: string, member: string) {
-    return this.http.put('/api/rooms/addMember', {roomID, member});
+    let obs = this.http.put('/api/rooms/addMember', {roomID, member}).pipe(share());
+    obs.subscribe();
+        return obs;
   }
   removeMemberRequest(roomID: string, member: string) {
-    return this.http.put('/api/rooms/removeMemberRequest', {roomID, member});
+    let obs = this.http.put('/api/rooms/removeMemberRequest', {roomID, member}).pipe(share());
+    obs.subscribe();
+        return obs;
   }
-  addAdmin(roomID: string, member: string) {
-    return this.http.put('/api/rooms/addAdmin', {roomID, member});
+  addAdmin(roomID: string, adminID: string) {
+    let obs = this.http.put('/api/rooms/addAdmin', {roomID, adminID}).pipe(share());
+    obs.subscribe();
+        return obs;
   }
-  removeAdmin(roomID: string, member: string) {
-    return this.http.put('/api/rooms/removeAdmin', {roomID, member});
+  removeAdmin(roomID: string, adminID: string) {
+    let obs = this.http.put('/api/rooms/removeAdmin', {roomID, adminID}).pipe(share());
+    obs.subscribe();
+        return obs;
   }
-  createChat(roomName: string, admins: string[]) {
-    let body: any = {roomName};
+  createChat(name: string, admins?: string[]) {
+    let body: any = {name};
     if (admins) body.admins = admins;
-    return this.http.post('/api/rooms/createRoom', {roomName, admins});
+    let obs = this.http.post<ChatRoom>(
+        '/api/rooms/createRoom', {name, admins}).pipe(share());
+        obs.subscribe();
+        return obs;
   }
   sendMemberRequest(roomID: string) {
-    return this.http.put('/api/rooms/requestMembership', {roomID});
+    let obs = this.http.put('/api/rooms/requestMembership', {roomID}).pipe(share());
+    obs.subscribe();
+        return obs;
   }
   removeMember(roomID, memberID) {
-    return this.http.put('/api/rooms/removeMember', {roomID, memberID});
+    let obs =  this.http.put('/api/rooms/removeMember', {roomID, memberID}).pipe(share());
+    obs.subscribe();
+        return obs;
   }
 
   likeMsg(roomID: string, messageID: string) {
-    return this.http.put('/api/rooms/likeMsg', {roomID, messageID}).pipe(share()).subscribe();
+    let obs =
+        this.http.put('/api/rooms/likeMsg', {roomID, messageID}).pipe(share());
+    obs.subscribe();
+    return obs;
   }
   dislikeMsg(roomID: string, messageID: string) {
-    return this.http.put('/api/rooms/dislikeMsg', {roomID, messageID}).pipe(share()).subscribe();
+    let obs = this.http.put('/api/rooms/dislikeMsg', {roomID, messageID})
+                  .pipe(share());
+    obs.subscribe();
+    return obs;
   }
   removeLikeDislike(roomID: string, messageID: string) {
-    return this.http.put('/api/rooms/removeLikeDislike', {roomID, messageID}).pipe(share()).subscribe();
+    let obs = this.http.put('/api/rooms/removeLikeDislike', {roomID, messageID})
+                  .pipe(share());
+    obs.subscribe();
+    return obs;
   }
 }

@@ -31,14 +31,16 @@
     <mat-form-field>
       <input name="address" type="text" placeholder="Address" matInput required [(ngModel)]="user.address">
     </mat-form-field>
-    <mat-form-field>`
-      <input #imgUrlInput name="img-url" type="url" placeholder="Image (URL)" matInput [(ngModel)]="user.imageURL">
-    </mat-form-field>
     <div>
       <!--todo, add clear button-->
-      <button type="button" md-button (click)="imgFileInput.click()">Add a photo</button>
+      <button type="button"  mat-raised-button (click)="imgFileInput.click()">Add a photo</button>
       <input name="img-file" #imgFileInput type="file" placeholder="Image (URL)" hidden accept="image/*">
     </div>
+    OR
+    <mat-form-field>
+      <input #imgUrlInput name="img-url" type="url" placeholder="Image (URL)" matInput [(ngModel)]="user.imageURL">
+    </mat-form-field>
+
   </div>
   <div mat-dialog-actions>
     <button mat-button (click)="dialogRef.close()">Cancel</button>

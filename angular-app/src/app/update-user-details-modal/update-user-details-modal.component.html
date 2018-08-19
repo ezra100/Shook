@@ -1,0 +1,45 @@
+<h1 mat-dialog-title>Update Details for {{user._id}}</h1>
+<form (ngSubmit)=" updateDetailsForm.form.valid && f.reportValidity() && update()"
+  id="updateDetailsForm" #updateDetailsForm="ngForm" #f>
+  <div mat-dialog-content>
+    <mat-form-field>
+      <input name="password" type="password" placeholder="Password" matInput  [(ngModel)]="user.password">
+    </mat-form-field>
+    <mat-form-field>
+      <input name="first-name" type="text" placeholder="First Name" matInput  [(ngModel)]="user.firstName">
+    </mat-form-field>
+    <mat-form-field>
+      <input name="last-name" type="text" placeholder="Last Name" matInput  [(ngModel)]="user.lastName">
+    </mat-form-field>
+    <mat-form-field>
+      <input name="email" type="email" placeholder="Email" matInput  [(ngModel)]="user.email">
+    </mat-form-field>
+    <mat-form-field>
+      <mat-select name="gender" placeholder="Gender"  [(ngModel)]="user.gender">
+        <mat-option [value]="genderRef.Male">
+          Male
+        </mat-option>
+        <mat-option [value]="genderRef.Female">
+          Female
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+      <input name="address" type="text" placeholder="Address" matInput  [(ngModel)]="user.address">
+    </mat-form-field>
+    <div>
+      <!--todo, add clear button-->
+      <button type="button"  mat-raised-button (click)="imgFileInput.click()">Add a photo</button>
+      <input name="img-file" #imgFileInput type="file" placeholder="Image (URL)" hidden accept="image/*">
+    </div>
+    OR
+    <mat-form-field>
+      <input #imgUrlInput name="img-url" type="url" placeholder="Image (URL)" matInput [(ngModel)]="user.imageURL">
+    </mat-form-field>
+
+  </div>
+  <div mat-dialog-actions>
+    <button mat-button (click)="dialogRef.close()">Cancel</button>
+    <button mat-raised-button color="primary" cdkFocusInitial>Update Details</button>
+  </div>
+</form>

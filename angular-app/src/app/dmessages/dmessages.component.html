@@ -19,8 +19,7 @@
         </mat-chip-list>
         <ul class="people" *ngIf="!usersListResults || !isSearchUsers">
             <li [ngClass]="{person: true, active: activeChat === chat}" *ngFor="let chat of fChats" (click)="selectChat(chat.user._id)">
-                <!--todo - replace with the user image-->
-                <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/382994/dog.png" alt="" />
+                <img [src]="chat.user.imageURL" alt="" />
                 <span class="name">{{chat.user.firstName}}</span>
                 <span class="time">{{chat.lastMessageDate | date }}</span>
                 <span *ngIf="chat.messages.length > 0" class="preview">{{chat.messages[chat.messages.length-1].content}}</span>

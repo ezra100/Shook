@@ -9,19 +9,24 @@
     <a class="m-2" mat-button routerLink="/dmessages"> DM </a>
     <a class="m-2" mat-button routerLink="/admin"> Admin Panel </a>
     <a class="m-2" mat-button routerLink="/rooms"> Chat Rooms </a>
-
-    <button *ngIf="!auth.currentUser" class="m-2" mat-raised-button color="accent" (click)="openLoginDialog()" style="float:right">
-      <span> Login</span>
-    </button>
-    <button *ngIf="!auth.currentUser" class="m-2" mat-raised-button color="accent" (click)="openSignupDialog()" style="float:right">
-      <span> Sign Up</span>
-    </button>
-    <button *ngIf="auth.currentUser" class="m-2" mat-raised-button color="primary" (click)="logout()" style="float:right">
-      <span> Logout</span>
-    </button>
-    <div *ngIf="auth.currentUser">
-     {{ auth.currentUser._id }}
-     <img [src]="auth.currentUser.imageURL">
+    <div class="ml-auto">
+      <button *ngIf="!auth.currentUser" class="m-2" mat-raised-button color="accent" (click)="openLoginDialog()">
+        <span> Login</span>
+      </button>
+      <button *ngIf="!auth.currentUser" class="m-2" mat-raised-button color="accent" (click)="openSignupDialog()">
+        <span> Sign Up</span>
+      </button>
+      <button *ngIf="auth.currentUser" class="m-2" mat-raised-button color="accent" (click)="openUpdateDialog()">
+        <span> Update Details</span>
+      </button>
+      <button *ngIf="auth.currentUser" class="m-2" mat-raised-button color="primary" (click)="logout()">
+        <span> Logout</span>
+      </button>
+      
+      <div class="d-inline" *ngIf="auth.currentUser">
+        {{ auth.currentUser._id }}
+        <img class="img-thumbnail profile" [src]="auth.currentUser.imageURL">
+      </div>
     </div>
   </mat-toolbar-row>
 </mat-toolbar>

@@ -5,3 +5,10 @@ mat-toolbar{
 :host{
     max-height: 100vh;
 }
+img.profile{
+    max-height: -webkit-fill-available;
+}
+.float-right{
+    float: right;
+    margin-left: auto;
+}

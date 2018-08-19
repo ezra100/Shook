@@ -82,7 +82,7 @@ export namespace Users {
       query.limit(limit);
     }
     if (!showPrivateData) {
-      query.select('_id firstName lastName gender userType imageUrl');
+      query.select('_id firstName lastName gender userType imageURL');
     }
     let users: User[] = await query;
     return users;
@@ -92,7 +92,7 @@ export namespace Users {
       Promise<Partial<User>> {
     let query = userModel.findById(username.toLowerCase());
     if (!showPrivateData) {
-      query.select('_id firstName lastName gender userType imageUrl');
+      query.select('_id firstName lastName gender userType imageURL');
     }
     let doc = await query;
     return doc && doc.toObject();
@@ -101,7 +101,7 @@ export namespace Users {
   export async function
   getUsersList(filter: any = {}, limit?: number, skip?: number) {
     let query = userModel.find(filter).select(
-        '_id firstName lastName gender userType imageUrl');
+        '_id firstName lastName gender userType imageURL');
     if (limit) {
       query.limit(limit);
     }

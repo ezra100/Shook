@@ -3,13 +3,21 @@ import * as express from 'express';
 import {createUserData} from '../auth/auth';
 import {Users} from '../DB/Models';
 import {helpers} from '../helpers';
+import upload from '../multer';
 import {User, UserType} from '../types';
+
 export var router = express.Router();
 
 // create a new user
 router.post(
-    '/signup', helpers.asyncWrapper(async function(req: express.Request, res) {
-      let user = await Users.addUser(<User>req.body);
+    '/signup', upload.any(),
+    helpers.asyncWrapper(async function(req: express.Request, res) {
+      let user: User = req.body;
+      let files = <Express.Multer.File[]>req.files;
+      if (files && files[0]) {
+        user.imageURL = '/pub/img/' + files[0].filename;
+      }
+      user = await Users.addUser(user);
       if (!user) {
         console.error('Failed to add user', user);
         throw 'failed to add user';
@@ -20,9 +28,28 @@ router.post(
     }));
 
 // update details about the current user
-router.put('/updateDetails', helpers.asyncWrapper(async function(req, res) {
+router.put('/updateDetails', (req, res, next) => {
+  if (req.user) {
+    next();
+  } else {
+    res.status(400).end('you\'re not logged in');
+  }
+}, upload.any(), helpers.asyncWrapper(async function(req, res) {
   let user: any = req.body;
+  // delete empty fields so that they won't be updated
+  for (let key in user) {
+    if (!user[key]) {
+      delete user[key];
+    }
+  }
+  let files = <Express.Multer.File[]>req.files;
+  if (files && files[0]) {
+    user.imageURL = '/pub/img/' + files[0].filename;
+  }
   let userId = req.user._id;
+  if (req.body.password) {
+    createUserData(user._id, req.body.password);
+  }
   let updatedUser = await Users.updateUserById(userId, user);
   res.status(201).json(updatedUser);
 }));
@@ -78,6 +105,5 @@ router.get('/usersList', helpers.asyncWrapper(async function(req, res) {
   };
   let limit = Number(req.query.limit || 150);
   let offset = Number(req.query.offset || 0);
-  return res.json(await  Users.getUsersList(filter, limit, offset));
+  return res.json(await Users.getUsersList(filter, limit, offset));
 }));
-
