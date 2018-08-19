@@ -19,5 +19,9 @@
     <button *ngIf="auth.currentUser" class="m-2" mat-raised-button color="primary" (click)="logout()" style="float:right">
       <span> Logout</span>
     </button>
+    <div *ngIf="auth.currentUser">
+     {{ auth.currentUser._id }}
+     <img [src]="auth.currentUser.imageURL">
+    </div>
   </mat-toolbar-row>
 </mat-toolbar>

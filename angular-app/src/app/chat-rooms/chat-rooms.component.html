@@ -3,8 +3,8 @@
 <div class="my-container mx-2" *ngIf="fChats">
     <div class="left">
         <div class="top">
-            <input type="search" [placeholder]="isSearchInAddMode?  'Search in open chats' : 'Search in all chats'" [(ngModel)]="query" (ngModelChange)="search()"
-            />
+            <input type="search" [placeholder]="isSearchInAddMode?  'Search in open chats' : 'Search in all chats'" [(ngModel)]="query"
+                (ngModelChange)="search()" />
             <button mat-mini-fab [color]="isSearchInAddMode ? 'accent' : 'primary'" (click)="isSearchInAddMode = !isSearchInAddMode; search()">
                 <mat-icon>{{ isSearchInAddMode? 'arrow_back' : 'add' }}</mat-icon>
             </button>
@@ -34,7 +34,13 @@
             <span>To:
                 <span class="name">{{activeChat.name }}</span>
             </span>
-            <button mat-raised-button *ngIf="activeChat.admins.indexOf(currentUserID) > -1" color="accent" [matBadge]="activeChat.memberRequests.length" matBadgePosition="before" matBadgeColor="primary" class="requests-button" (click)="openRequestsDialog()">Member Requests</button>
+            <button mat-raised-button *ngIf="activeChat.members.indexOf(currentUserID) > -1" color="accent" class="requests-button" (click)="leaveRoom()">Leave
+                Room
+            </button>
+            <button mat-raised-button *ngIf="activeChat.admins.indexOf(currentUserID) > -1" color="accent" [matBadge]="activeChat.memberRequests.length"
+                matBadgePosition="before" matBadgeColor="primary" class="requests-button" (click)="openRequestsDialog()">Member
+                Requests
+            </button>
         </div>
 
         <div class="chat">
@@ -44,6 +50,16 @@
             <div *ngFor="let message of (activeChat.messages)" [ngClass]="{ 'bubble': true,'you' : message.from !== currentUserID,'me'  : message.from === currentUserID}">
                 <span class="from">{{message.from}}</span>
                 {{message.content}}
+                <div style="float: right;">
+                    <button mat-icon-button 
+                        [matTooltip]="message.likes.join(', ')" (click)="likeClicked(message._id)">
+                        <mat-icon matBadgePosition="below after" [matBadge]="message.likes.length" matBadgeColor="accent">thumb_up</mat-icon>
+                    </button>
+                    <button mat-icon-button 
+                        color="warn" [matTooltip]="message.dislikes.join(', ')" (click)="dislikeClicked(message._id)">
+                        <mat-icon matBadgePosition="below after" [matBadge]="message.dislikes.length" matBadgeColor="accent">thumb_down</mat-icon>
+                    </button>
+                </div>
             </div>
 
         </div>
@@ -54,10 +70,11 @@
             <button mat-icon-button color="primary" (click)="sendMessage()" *ngIf="activeChat.newMsg">
                 <mat-icon>send</mat-icon>
             </button>
+            <mat-slide-toggle [(ngModel)]="liveOnlyChat" >Live only chat</mat-slide-toggle>
         </div>
         <div *ngIf="activeChat.members.indexOf(currentUserID) === -1">
-                <button *ngIf="activeChat.memberRequests.indexOf(currentUserID) === -1" mat-flat-button (click)="sendMemberRequest()" color="primary">Join</button>
-                <span *ngIf="activeChat.memberRequests.indexOf(currentUserID) > -1">Pending for approval</span>
+            <button *ngIf="activeChat.memberRequests.indexOf(currentUserID) === -1" mat-flat-button (click)="sendMemberRequest()" color="primary">Join</button>
+            <span *ngIf="activeChat.memberRequests.indexOf(currentUserID) > -1">Pending for approval</span>
         </div>
     </div>
 </div>

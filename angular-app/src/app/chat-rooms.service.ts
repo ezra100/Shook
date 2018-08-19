@@ -1,20 +1,24 @@
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-import {forkJoin, Observable, Subject} from 'rxjs';
-import {filter, map} from 'rxjs/operators';
+import {Observable, Subject} from 'rxjs';
+import {map, share} from 'rxjs/operators';
 import * as io from 'socket.io-client';
 
-import {ChatRoom, Message, User} from '../../../types';
+import {ChatRoom, Message, SIORoomUpdate, LikeUpdate,} from '../../../types';
 
-import {AuthService} from './auth.service';
-import {helpers} from './helpers';
+
+
 
 @Injectable({providedIn: 'root'})
 export class ChatRoomsService {
   static socket: SocketIOClient.Socket;
   static msgSubject: Subject<Message> = new Subject();
+  static updatesSubject: Subject<SIORoomUpdate> = new Subject();
+  static likesUpdateSubject: Subject<LikeUpdate> = new Subject();
   constructor(private http: HttpClient) {}
 
+  // reconnects the socket to the server, so that the user credentials will appear 
+  // on server side, notice that this will remove all rooms joining on server side
   reconnect() {
     let self = ChatRoomsService;
     if (self.socket) {
@@ -24,6 +28,12 @@ export class ChatRoomsService {
     self.socket.on('msg', (message: Message) => {
       message.date = new Date(message.date);
       self.msgSubject.next(message);
+    });
+    self.socket.on('room-update', update => {
+      self.updatesSubject.next(update);
+    });
+    self.socket.on('likes-update', update => {
+      self.likesUpdateSubject.next(update);
     });
   }
 
@@ -35,8 +45,8 @@ export class ChatRoomsService {
     this.getSocket().emit('leave', roomID);
   }
 
-  sendMsg(roomID: string, content: string) {
-    this.getSocket().emit('msg', <Message>{content, roomID});
+  sendMsg(roomID: string, content: string, saveToDb: boolean = true) {
+    this.getSocket().emit('msg', <Message>{content, roomID, saveToDb});
   }
 
   getMsgObservable() {
@@ -59,7 +69,9 @@ export class ChatRoomsService {
   }
   // parameters are the queries to search for in the name of the room, in
   // members or in messages
-  getRooms(query?: string, searchMembers: boolean = false, searchMessages: boolean = false) {
+  getRooms(
+      query?: string, searchMembers: boolean = false,
+      searchMessages: boolean = false) {
     let filter: any = {};
     filter.name = query;
     if (searchMembers) filter.members = query;
@@ -111,12 +123,25 @@ export class ChatRoomsService {
   removeAdmin(roomID: string, member: string) {
     return this.http.put('/api/rooms/removeAdmin', {roomID, member});
   }
-  createChat(roomName: string, admins:string[]){
+  createChat(roomName: string, admins: string[]) {
     let body: any = {roomName};
-    if(admins) body.admins = admins;
+    if (admins) body.admins = admins;
     return this.http.post('/api/rooms/createRoom', {roomName, admins});
   }
-  sendMemberRequest(roomID: string){
-    this.http.put('/api/rooms/requestMembership', {roomID});
+  sendMemberRequest(roomID: string) {
+    return this.http.put('/api/rooms/requestMembership', {roomID});
+  }
+  removeMember(roomID, memberID) {
+    return this.http.put('/api/rooms/removeMember', {roomID, memberID});
+  }
+
+  likeMsg(roomID: string, messageID: string) {
+    return this.http.put('/api/rooms/likeMsg', {roomID, messageID}).pipe(share()).subscribe();
+  }
+  dislikeMsg(roomID: string, messageID: string) {
+    return this.http.put('/api/rooms/dislikeMsg', {roomID, messageID}).pipe(share()).subscribe();
+  }
+  removeLikeDislike(roomID: string, messageID: string) {
+    return this.http.put('/api/rooms/removeLikeDislike', {roomID, messageID}).pipe(share()).subscribe();
   }
 }

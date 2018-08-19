@@ -1,17 +1,18 @@
 import * as mongoose from 'mongoose';
-import {Aggregate, Model, NativeError} from 'mongoose';
 
-import {helpers} from '../../helpers';
-import {Category, ChatRoom, Gender, IComment, Message, Product, Review, User, UserAuthData, UserType} from '../../types';
-import {chatRoomPermitedFields, commentPermitedFields, productPermitedFields, reviewPermitedFields, Schema, stripObject, userPermitedFields} from '../helpers';
+import {ChatRoom, Message} from '../../types';
+import {chatRoomPermitedFields, Schema, stripObject} from '../helpers';
 
 import {Users} from './users'
+import { ObjectId } from 'bson';
 
 let messageSchema = new Schema({
   date: {type: Date, default: Date.now, index: true},
   content: {type: String, required: true},
   owner: {type: String, ref: 'User', index: true},
-  from: {type: String, ref: 'User', index: true}
+  from: {type: String, ref: 'User', index: true},
+  likes: [{type: String, required: true, ref: 'User'}],
+  dislikes: [{type: String, required: true, ref: 'User'}],
 });
 
 let chatRoomSchema = new Schema({
@@ -67,13 +68,15 @@ export namespace ChatRooms {
       {$sort: {'lastMsg.date': -1}}
     ]);
   }
-  export async function getRoomByID(roomID: string, getMessages:boolean = true): Promise<ChatRoom> {
-    if(!getMessages){
+  export async function
+  getRoomByID(roomID: string, getMessages: boolean = true): Promise<ChatRoom> {
+    if (!getMessages) {
       // exclude messages if not needed
-      return <any> await chatRoomModel.findById(roomID, {messages:0});
+      return <any>await chatRoomModel.findById(roomID, {messages: 0});
     }
     let doc: ChatRoom = <any>await chatRoomModel.findById(roomID);
-    if (doc && doc.messages.length > 0) doc.lastMsg = doc.messages[doc.messages.length - 1];
+    if (doc && doc.messages.length > 0)
+      doc.lastMsg = doc.messages[doc.messages.length - 1];
     return doc;
   }
   export async function
@@ -91,13 +94,20 @@ export namespace ChatRooms {
         {$addToSet: {members: member}, $pull: {memberRequests: member}});
   }
   export async function
-  removeMember(member: string, adminName: string, roomID: string) {
+  removeMember(member: string, requesting: string, roomID: string) {
+    if (member != requesting) {
+      let chatRoom = await getRoomByID(roomID, false);
+      if (chatRoom.admins.indexOf(requesting) < 0) {
+        throw 'You\'re not authorized to remove member';
+      }
+    }
     return await chatRoomModel.updateOne(
-        {_id: roomID, admins: adminName}, {$pull: {members: member}});
+        {_id: roomID}, {$pull: {members: member}});
   }
 
-  export async function addMemberRequest(userID: string, roomID: string){
-    return await chatRoomModel.updateOne({_id: roomID}, {$addToSet:{memberRequests: userID}});
+  export async function addMemberRequest(userID: string, roomID: string) {
+    return await chatRoomModel.updateOne(
+        {_id: roomID}, {$addToSet: {memberRequests: userID}});
   }
 
   export async function
@@ -165,7 +175,7 @@ export namespace ChatRooms {
     }
     let queryResults = await chatRoomModel.updateOne(
         {_id: message.roomID}, {$push: {messages: message}});
-    return queryResults && queryResults.toObject();
+    return queryResults;
   }
   export async function deleteMessage(msg: Message, requesting: string) {
     let roomDoc =
@@ -186,6 +196,39 @@ export namespace ChatRooms {
     }
   }
 
+  export async function likeMsg(roomID: string, msgID: string, userID: string) {
+    return await chatRoomModel.updateOne(
+        {_id: roomID}, {
+          $addToSet: {'messages.$[element].likes': userID},
+          $pull: {'messages.$[element].dislikes': userID}
+        },
+        {
+          arrayFilters: [{
+            'element._id': new ObjectId( msgID) /*I hope mongoose converts this to ObjectID,
+                                    otherwise we'll have to do it*/
+          }]
+        });
+  }
+  export async function
+  dislikeMsg(roomID: string, msgID: string, userID: string) {
+    return await chatRoomModel.updateOne(
+        {_id: roomID}, {
+          $pull: {'messages.$[element].likes': userID},
+          $addToSet: {'messages.$[element].dislikes': userID}
+        },
+        {arrayFilters: [{'element._id': new ObjectId( msgID)}]});
+  }
+  export async function
+  removeLikeDislike(roomID: string, msgID: string, userID: string) {
+    return await chatRoomModel.updateOne(
+        {_id: roomID}, {
+          $pull: {
+            'messages.$[element].likes': userID,
+            'messages.$[element].dislikes': userID
+          }
+        },
+        {arrayFilters: [{'element._id': new ObjectId( msgID)}]});
+  }
   export async function getIDs() {
     return await chatRoomModel.find().select('_id');
   }

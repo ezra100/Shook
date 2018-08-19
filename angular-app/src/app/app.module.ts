@@ -2,7 +2,7 @@ import {HttpClientModule} from '@angular/common/http';
 import {enableProdMode, NgModule} from '@angular/core';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MAT_SNACK_BAR_DEFAULT_OPTIONS, MatBadgeModule, MatButtonModule, MatCardModule, MatCheckboxModule, MatChipsModule, MatDatepickerModule, MatDialogModule, MatExpansionModule, MatFormFieldModule, MatGridListModule, MatIconModule, MatInputModule, MatProgressBarModule, MatProgressSpinnerModule, MatSelectModule, MatSnackBarModule} from '@angular/material';
+import {MAT_SNACK_BAR_DEFAULT_OPTIONS, MatBadgeModule, MatButtonModule, MatCardModule, MatCheckboxModule, MatChipsModule, MatDatepickerModule, MatDialogModule, MatExpansionModule, MatFormFieldModule, MatGridListModule, MatIconModule, MatInputModule, MatProgressBarModule, MatProgressSpinnerModule, MatSelectModule, MatSnackBarModule, MatTooltipModule, MatSlideToggleModule} from '@angular/material';
 import {MatMomentDateModule} from '@angular/material-moment-adapter';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatToolbarModule} from '@angular/material/toolbar';
@@ -51,6 +51,7 @@ enableProdMode();
     BrowserModule,       MatExpansionModule,   MatCardModule,
     MatDatepickerModule, HttpClientModule,     AppRoutingModule,
     MatInputModule,      MatToolbarModule,     MatProgressSpinnerModule,
+    MatTooltipModule,MatSlideToggleModule,
   ],
   entryComponents: [
     AddProductComponent, MemberRequestsComponent, LoginFormComponent,

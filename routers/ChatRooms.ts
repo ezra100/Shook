@@ -1,9 +1,9 @@
 import * as express from 'express';
-import {Router} from 'express-serve-static-core';
 
 import * as db from '../DB/Models';
 import {helpers} from '../helpers';
-import {ChatRoom, Message, User} from '../types';
+import {updateRoom, updateRoomArr} from '../socket.io.rooms';
+import {Action, ChatRoom, LikeType, LikeUpdate, Message, User} from '../types';
 
 export var router = express.Router();
 
@@ -30,13 +30,18 @@ router.get('/getByID', helpers.asyncWrapper(async function(req, res) {
 router.put('/addAdmin', helpers.asyncWrapper(async function(req, res) {
   let adminID = req.body.adminID;
   let roomID = req.body.roomID;
-  return res.json(await db.ChatRooms.addAdmin(adminID, req.user._id, roomID));
+  let results = await db.ChatRooms.addAdmin(adminID, req.user._id, roomID);
+  updateRoomArr({action: Action.Add, roomID, field: 'admins', value: adminID});
+
+  return res.json(results);
 }));
 router.put('/removeAdmin', helpers.asyncWrapper(async function(req, res) {
   let adminID = req.body.adminID;
   let roomID = req.body.roomID;
-  return res.json(
-      await db.ChatRooms.removeAdmin(adminID, req.user._id, roomID));
+  let results = await db.ChatRooms.removeAdmin(adminID, req.user._id, roomID);
+  updateRoomArr(
+      {action: Action.Remove, roomID, field: 'admins', value: adminID});
+  return res.json(results);
 }));
 
 router.get('/groupsImMemberOf', helpers.asyncWrapper(async function(req, res) {
@@ -61,13 +66,12 @@ router.get('/getRooms', helpers.asyncWrapper(async function(req, res) {
     };
   }
   if (req.query.messages) {
-    filter.messages = {content: {
-      $regex: helpers.escapeRegExp(req.query.messages),
-      $options: 'i'
-    }};
+    filter.messages = {
+      content:
+          {$regex: helpers.escapeRegExp(req.query.messages), $options: 'i'}
+    };
   }
-  return res.json( await db.ChatRooms.getRooms(filter));
-
+  return res.json(await db.ChatRooms.getRooms(filter));
 }));
 
 
@@ -88,22 +92,98 @@ router.delete('/deleteMessage', helpers.asyncWrapper(async function(req, res) {
   res.json(await db.ChatRooms.deleteMessage(messageID, req.query._id));
 }));
 
-router.put('/removeMemberRequest', helpers.asyncWrapper(async function(req, res){
-  let member = req.body.member;
-  let roomID = req.body.roomID;
-  return res.json(await db.ChatRooms.removeMemberRequest(member, req.user._id, roomID));
-}))
+router.put(
+    '/removeMemberRequest', helpers.asyncWrapper(async function(req, res) {
+      let member = req.body.member;
+      let roomID = req.body.roomID;
+      let results =
+          await db.ChatRooms.removeMemberRequest(member, req.user._id, roomID);
+      updateRoomArr({
+        action: Action.Remove,
+        roomID,
+        field: 'memberRequests',
+        value: member
+      });
+      return res.json(results);
+    }))
 
-router.put('/addMember', helpers.asyncWrapper(async function(req, res){
+router.put('/addMember', helpers.asyncWrapper(async function(req, res) {
   let member = req.body.member;
   let roomID = req.body.roomID;
-  return res.json(await db.ChatRooms.addMember(member, req.user._id, roomID));
+  let results = await db.ChatRooms.addMember(member, req.user._id, roomID);
+  // todo make sure the member request was really authoried
+  updateRoomArr(
+      {action: Action.Remove, roomID, field: 'memberRequests', value: member});
+  updateRoomArr({action: Action.Add, roomID, field: 'members', value: member});
+  return res.json(results);
+}));
+router.put('/removeMember', helpers.asyncWrapper(async function(req, res) {
+  let member = req.body.memberID;
+  let roomID = req.body.roomID;
+  let results = await db.ChatRooms.removeMember(member, req.user._id, roomID);
+  // todo make sure the member request was really authoried
+  updateRoomArr(
+      {action: Action.Remove, roomID, field: 'members', value: member});
+  return res.json(results);
 }));
 
-router.put('/requestMembership',  helpers.asyncWrapper(async function(req, res){
-  if(!req.user){
-    throw "You're not logged in";
+router.put('/requestMembership', helpers.asyncWrapper(async function(req, res) {
+  if (!req.user) {
+    throw 'You\'re not logged in';
   }
   let roomID = req.body.roomID;
-  return res.json(await db.ChatRooms.addMemberRequest(req.user._id, roomID));
+  let results = await db.ChatRooms.addMemberRequest(req.user._id, roomID);
+  updateRoomArr({
+    action: Action.Add,
+    roomID: roomID,
+    field: 'memberRequests',
+    value: req.user._id
+  });
+  return res.json(results);
+}));
+
+router.put('/likeMsg', helpers.asyncWrapper(async function(req, res) {
+  if (!req.user) {
+    throw 'You\'re not logged in';
+  }
+  let roomID = req.body.roomID;
+  let messageID = req.body.messageID;
+  let results = await db.ChatRooms.likeMsg(roomID, messageID, req.user._id);
+  updateRoom(roomID, 'likes-update', <LikeUpdate>{
+    action: LikeType.Like,
+    msgID: messageID,
+    roomID,
+    userID: req.user._id
+  });
+  return res.json(results);
+}));
+router.put('/dislikeMsg', helpers.asyncWrapper(async function(req, res) {
+  if (!req.user) {
+    throw 'You\'re not logged in';
+  }
+  let roomID = req.body.roomID;
+  let messageID = req.body.messageID;
+  let results = await db.ChatRooms.dislikeMsg(roomID, messageID, req.user._id);
+  updateRoom(roomID, 'likes-update', <LikeUpdate>{
+    action: LikeType.Disike,
+    msgID: messageID,
+    roomID,
+    userID: req.user._id
+  });
+  return res.json(results);
+}));
+router.put('/removeLikeDislike', helpers.asyncWrapper(async function(req, res) {
+  if (!req.user) {
+    throw 'You\'re not logged in';
+  }
+  let roomID = req.body.roomID;
+  let messageID = req.body.messageID;
+  let results = await db.ChatRooms.dislikeMsg(roomID, messageID, req.user._id);
+  updateRoom(roomID, 'likes-update', <LikeUpdate>{
+    action: LikeType.Neither,
+    msgID: messageID,
+    roomID,
+    userID: req.user._id
+  });
+  return res.json(results);
 }));

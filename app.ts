@@ -68,6 +68,8 @@ app.use('/api', apiRouter);
 app.use(
     '/',
     express.static(path.join(__dirname, 'angular-app', 'dist', 'angular-app')));
+
+app.use('/pub', express.static(path.join(__dirname, 'public')));
 // for routes of the angular app
 app.use(
     '/*',
@@ -78,6 +80,6 @@ export default app;
 
 export function init(server: https.Server){
   dmsgIO.init(server, cookieParser, store, secret);
-  roomsIO.init(server, cookieParser, store, secret);
+  roomsIO.init(server, store, secret);
 
 }

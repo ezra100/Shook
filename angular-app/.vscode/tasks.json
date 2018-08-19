@@ -6,7 +6,12 @@
         {
             "label": "build & watch",
             "type": "shell",
-            "command": "ng b --watch",
+            "windows": {
+                "command": "time/T && ng b --watch",
+            },
+            "linux": {
+                "command": "export PATH=\"${PATH}:/home/es/.npm-global/bin\" && ng b --watch",
+            },
             "group": {
                 "kind": "build",
                 "isDefault": true

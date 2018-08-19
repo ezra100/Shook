@@ -2,7 +2,7 @@ import io = require('socket.io');
 import * as https from 'https';
 import {ChatRooms} from './DB/Models';
 import {helpers} from './helpers';
-import {ChatRoom, Message, User} from './types';
+import {ChatRoom, Message, User, Action, SIORoomUpdate} from './types';
 let passportSocketIo = require('passport.socketio');
 
 let socketIDMap: {[key: string]: string} = {};
@@ -33,7 +33,7 @@ async function decreaseConnectedCount(roomID: string) {
 
 let sio: io.Server;
 export function init(
-    server: https.Server, cookieParser: any, sessionStore: any,
+    server: https.Server, sessionStore: any,
     secret: string) {
   sio = io(server, {path: roomsPath});
   sio.use(passportSocketIo.authorize({
@@ -88,14 +88,26 @@ export function init(
       console.log(`msg from ${user._id}`);
       msg.date = new Date();
       msg.from = user._id;
+      msg.likes = msg.dislikes = [];
       let room = await getRoomFromCache(msg.roomID);
       if (!room) {
         throw `${msg.roomID} doesn't exists`;
       }
       if (room.members.find(uID => uID === user._id)) {
-        socket.to(msg.roomID).emit('msg', msg);
-        socket.emit('msg', msg);
+        sio.to(msg.roomID).emit('msg', msg);
+      }
+      if(msg.saveToDb){
+        await ChatRooms.addMessage(msg);
       }
     });
   })
+}
+// send an update about event to a room
+export function updateRoom( roomID: string,eventName: string, msg: any){
+  sio.to(roomID).emit(eventName, msg);
+}
+// sends a msg to all sockets of a room to update the properties of a room.
+// (i.e. an array field)
+export function updateRoomArr(update: SIORoomUpdate){
+  sio.to(update.roomID).emit('room-update', update);
 }

@@ -10,6 +10,8 @@ export enum UserType {
   Admin = 4
 }
 
+
+
 export enum Category {
   Animals,
   Apparel,
@@ -125,11 +127,19 @@ export interface IComment {
 export interface Message {
   _id?: string;
   from: string;
+  // optional - the user can add an image - the server will store the image and
+  // attach it as a link to the message
+  imgUrl?: string
   // roomID exists only before insertion and when sending a single message via
   // socket.io
   roomID?: string;
   content: string;
   date?: Date;
+  likes?: string[];
+  dislikes?: string[];
+  // should the message be saved to the DB for others to view later or not
+  // this isn't really a useful feature, but our proffesors asked us to do it
+  saveToDb?: boolean;
 }
 
 // direct message, user-2-user
@@ -150,7 +160,7 @@ export interface ChatRoom {
   connected?: number;
 
   messages: Message[];
-  //created on extraction from DB
+  // created on extraction from DB
   lastMsg?: Message;
 }
 
@@ -175,3 +185,34 @@ export type Chat = {
   user: Partial<User>,
   lastMessageDate: Date
 };
+
+
+
+export enum Action {
+  Add,
+  Remove
+}
+
+// message passed by socket.io to update chat array fields (members,
+// memberRequests etc.)
+export type SIORoomUpdate = {
+  roomID: string,
+  action: Action,
+  field: string,
+  value: string
+}
+
+export enum LikeType {
+  Like,
+  Disike,
+  Neither
+}
+
+// message passed by socket.io to update chat array fields (members,
+// memberRequests etc.)
+export type LikeUpdate = {
+  roomID: string,
+  msgID: string,
+  action: LikeType,
+  userID: string
+}
