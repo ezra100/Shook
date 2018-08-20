@@ -5,9 +5,7 @@ import escapeHtml = require('escape-html');
 
 import {ChatRoom, Message, User, Action, SIORoomUpdate} from './types';
 let passportSocketIo = require('passport.socketio');
-import {Types} from 'mongoose';
-import { ObjectId } from 'mongodb';
-type ObjectId = Types.ObjectId;
+import { ObjectId } from 'bson';
 
 let socketIDMap: {[key: string]: string} = {};
 let roomsPath = '/socket.io/rooms';
