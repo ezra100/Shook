@@ -2,12 +2,6 @@
   <mat-toolbar-row>
     <img class="img-thumbnail p-1" style="height:inherit" src="/pub/img/favicon.png">
 
-<<<<<<< HEAD
-    <button class="m-2" mat-button routerLink="/"> Home </button>
-    <button class="m-2" mat-button routerLink="/products"> Products </button>
-    <button class="m-2" mat-button routerLink="/sellers"> Sellers </button>
-    <button class="m-2" mat-button routerLink="/reviews"> Reviews </button>
-=======
     <a class="m-2" mat-button routerLink="/"> Home </a>
     <a class="m-2" mat-button routerLink="/products"> Products </a>
     <a class="m-2" mat-button routerLink="/reviews"> Reviews </a>
@@ -30,7 +24,6 @@
       <button *ngIf="auth.currentUser" class="m-2" mat-raised-button color="primary" (click)="logout()">
         <span> Logout</span>
       </button>
->>>>>>> 98358c8dc01cc178b6986dd5ee6f020db08163ca
 
     <button *ngIf="!auth.currentUser" class="m-2" mat-raised-button color="accent" (click)="openLoginDialog()" style="float:right">
       Login
