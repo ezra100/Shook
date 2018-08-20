@@ -5,7 +5,7 @@
   "main": "bin/www",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "rm node_modules/@types/connect-mongo/node_modules -r -f;"
+    "prepare": "rm node_modules/@types/connect-mongo/node_modules -r -f;Remove-Item node_modules/@types/connect-mongo/node_modules -Force -Recurse;"
   },
   "repository": {
     "type": "git",
