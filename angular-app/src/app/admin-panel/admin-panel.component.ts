@@ -25,8 +25,12 @@ export class AdminPanelComponent implements OnInit {
              number} = {['xs']: 1, ['sm']: 3, ['md']: 4, ['lg']: 5, ['xl']: 6};
     this.observableMedia.subscribe(x => this.cols = breakpoints[x.mqAlias]);
 
-    this.adminService.getAwaitingUsers().subscribe(
-        users => {this.awaitingUsers = users});
+    this.adminService.getAwaitingUsers().subscribe(users => {
+      this.awaitingUsers = users;
+      if(users.length === 0){
+        this.reachedEndOfFeed = true;
+      }
+    });
   }
   authorizeUser(userID: string) {
     this.adminService.authorizeUser(userID).subscribe(user => {

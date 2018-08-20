@@ -1,7 +1,8 @@
 import io = require('socket.io');
 import * as https from 'https';
 import {ChatRooms} from './DB/Models';
-import {helpers} from './helpers';
+import escapeHtml = require('escape-html');
+
 import {ChatRoom, Message, User, Action, SIORoomUpdate} from './types';
 let passportSocketIo = require('passport.socketio');
 
@@ -32,9 +33,7 @@ async function decreaseConnectedCount(roomID: string) {
 }
 
 let sio: io.Server;
-export function init(
-    server: https.Server, sessionStore: any,
-    secret: string) {
+export function init(server: https.Server, sessionStore: any, secret: string) {
   sio = io(server, {path: roomsPath});
   sio.use(passportSocketIo.authorize({
     // the same middleware you registrer in express
@@ -59,7 +58,9 @@ export function init(
     socket.on(
         'disconnecting',
         () => {Object.keys(socket.rooms)
-                   .forEach(room => room.length === 24 && decreaseConnectedCount(room))});
+                   .forEach(
+                       room => room.length === 24 &&
+                           decreaseConnectedCount(room))});
     socket.on('join', async (roomIDs: string|string[]) => {
       if (typeof roomIDs === 'string') {
         roomIDs = [roomIDs];
@@ -89,6 +90,7 @@ export function init(
       msg.date = new Date();
       msg.from = user._id;
       msg.likes = msg.dislikes = [];
+      msg.content = escapeHtml(msg.content);
       let room = await getRoomFromCache(msg.roomID);
       if (!room) {
         throw `${msg.roomID} doesn't exists`;
@@ -96,18 +98,18 @@ export function init(
       if (room.members.find(uID => uID === user._id)) {
         sio.to(msg.roomID).emit('msg', msg);
       }
-      if(msg.saveToDb){
+      if (msg.saveToDb) {
         await ChatRooms.addMessage(msg);
       }
     });
   })
 }
 // send an update about event to a room
-export function updateRoom( roomID: string,eventName: string, msg: any){
+export function updateRoom(roomID: string, eventName: string, msg: any) {
   sio.to(roomID).emit(eventName, msg);
 }
 // sends a msg to all sockets of a room to update the properties of a room.
 // (i.e. an array field)
-export function updateRoomArr(update: SIORoomUpdate){
+export function updateRoomArr(update: SIORoomUpdate) {
   sio.to(update.roomID).emit('room-update', update);
 }

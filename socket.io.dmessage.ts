@@ -4,6 +4,7 @@ import {DirectMessages} from './DB/Models';
 import {helpers} from './helpers';
 import {DMessage} from './types';
 let passportSocketIo = require('passport.socketio');
+import escapeHtml = require('escape-html');
 
 let socketIDMap: {[key: string]: string} = {};
 let dmPath = '/socket.io/DMessages';
@@ -13,7 +14,7 @@ let sio: io.Server;
 export function init(
     server: https.Server, cookieParser: any, sessionStore: any,
     secret: string) {
-  sio = io(server, {path:dmPath});
+  sio = io(server, {path: dmPath});
   sio.use(passportSocketIo.authorize({
     // the same middleware you registrer in express
     key: 'connect.sid',  // the name of the cookie where express/connect stores
@@ -35,6 +36,7 @@ export function init(
     socket.on('dmessage', (msg: DMessage) => {
       msg.from = user._id;
       msg.date = new Date();
+      msg.content = escapeHtml(msg.content);
       DirectMessages.addDMessage(msg);
       // send back, for confirmation
       socket.emit('dmessage', msg);
@@ -53,4 +55,3 @@ export function sendDMessage(msg: DMessage) {
   }
   sio.to(sid).emit('dmessage', msg);
 }
-

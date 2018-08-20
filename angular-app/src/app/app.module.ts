@@ -9,6 +9,8 @@ import {MatToolbarModule} from '@angular/material/toolbar';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule, NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {DisqusModule} from 'ngx-disqus';
+import { NgxLinkifyjsModule } from 'ngx-linkifyjs';
+
 
 import {AddProductComponent} from './add-product/add-product.component';
 import {AddRoomComponent} from './add-room/add-room.component';
@@ -34,8 +36,9 @@ import {SellersComponent} from './sellers/sellers.component';
 import {SignupDialogComponent} from './signup-dialog/signup-dialog.component';
 import {UpdateUserDetailsModalComponent} from './update-user-details-modal/update-user-details-modal.component';
 import {UserCardComponent} from './user-card/user-card.component';
+import { ResetModalComponent } from './reset-modal/reset-modal.component';
 
-
+ 
 @NgModule({
   declarations: [
     AppComponent,
@@ -58,7 +61,8 @@ import {UserCardComponent} from './user-card/user-card.component';
     MemberRequestsComponent,
     UpdateUserDetailsModalComponent,
     AddRoomComponent,
-    DisqusComponent
+    DisqusComponent,
+    ResetModalComponent
   ],
   imports: [
     MatBadgeModule,
@@ -92,6 +96,7 @@ import {UserCardComponent} from './user-card/user-card.component';
     MatSlideToggleModule,
     MatTabsModule,
     DisqusModule.forRoot('shook-1'),
+    NgxLinkifyjsModule
   ],
   entryComponents: [
     AddProductComponent, MemberRequestsComponent, LoginFormComponent,

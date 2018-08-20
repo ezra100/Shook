@@ -1,5 +1,6 @@
 import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
+import {MatSnackBar} from '@angular/material';
 import {Router} from '@angular/router';
 import * as jsSHA from 'jssha';
 import {EMPTY, Observable, Subject} from 'rxjs';
@@ -24,7 +25,8 @@ type Salts = {
     static currentUser: User;
     static loginSubject: Subject<User|null> = new Subject();
     static http: HttpClient = null;
-    constructor(private http: HttpClient, private router: Router) {
+    constructor(
+        private http: HttpClient, private router: Router) {
       if (!AuthService.http) {
         AuthService.http = this.http;
       }
@@ -60,20 +62,29 @@ type Salts = {
       }
       var response = googleUser.getAuthResponse();
       let token = response.id_token;
-      AuthService.http.put<User>('/api/auth/verify', {token}).subscribe(
-        user => {
-          if(user){
-            AuthService.loginSubject.next(user);
-          }
-        }, err =>{console.log(err.error)}
-      );
+      AuthService.http.put<User>('/api/auth/verify', {token})
+          .subscribe(
+              user => {
+                if (user) {
+                  AuthService.loginSubject.next(user);
+                }
+              },
+              err => {
+                console.log(err.error);
+              });
     }
 
     logout() {
+      // logout from google first
+      var auth2 = gapi.auth2.getAuthInstance();
+      auth2 && auth2.signOut().then(function() {
+        console.log('Google user signed out.');
+      });
       let obs = this.http.put('/api/auth/logout', {}, {responseType: 'text'})
                     .pipe(share());
       // for security, don't keep showing sensivtive data
       this.router.navigate(['/home']);
+
       obs.subscribe(() => AuthService.loginSubject.next());
       return obs;
     }
@@ -90,7 +101,7 @@ type Salts = {
       return obs;
     }
 
-    requestPasswordReset(email?: string, username?: string) {
+    requestPasswordReset(username?: string, email?: string) {
       if (!(email || username)) {
         throw 'you must provide email or a username';
       }
@@ -104,8 +115,8 @@ type Salts = {
     }
 
     completeReset(key: string, username: string, newPassword: string) {
-      return this.http.post(
-          '/api/auth/reset/complete', {key, username, newPassword})
+      return this.http
+          .post('/api/auth/reset/complete', {key, username, newPassword});
     }
   }
   AuthService.init();

@@ -1,0 +1,9 @@
+<div class="m-5">
+  <h5>Password reset for {{ userID }}</h5>
+  <form (ngSubmit)="resetPassword()">
+    <mat-form-field class="m-2">
+      <input name="password" type="password" placeholder="Password" matInput required [(ngModel)]="newPassword">
+    </mat-form-field>
+    <button class="m-2" mat-raised-button color="primary" cdkFocusInitial>Reset Password</button>
+  </form>
+</div>

@@ -5,6 +5,7 @@ import {AuthService} from '../auth.service';
 import {LoginFormComponent} from '../login-form/login-form.component';
 import {SignupDialogComponent} from '../signup-dialog/signup-dialog.component';
 import {UpdateUserDetailsModalComponent} from '../update-user-details-modal/update-user-details-modal.component';
+import { UserType } from '../../../../types';
 
 @Component({
   selector: 'app-header',
@@ -32,5 +33,8 @@ export class HeaderComponent implements OnInit {
     this.authService.logout().subscribe(
         msg => this.snackBar.open(msg, 'Close', {duration: 3000}),
         err => this.snackBar.open(err.message, 'OK', {duration: 3000}));
+  }
+  isUserAdmin(){
+    return this.auth.currentUser && this.auth.currentUser.userType === UserType.Admin;
   }
 }

@@ -66,7 +66,7 @@
             <div *ngFor="let message of (activeChat.messages)">
                 <div [ngClass]="{ 'bubble': true,'you' : message.from !== currentUserID,'me'  : message.from === currentUserID}">
                     <span class="from">{{message.from}}</span>
-                    <span>{{message.content}}</span>
+                    <span [innerHTML]="message.content | linkify"></span>
                     <div>
                         <img *ngIf="message.imageURL" [src]="message.imageURL" class="rounded float-right chat-img">
                     </div>

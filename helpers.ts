@@ -1,7 +1,6 @@
 import {Request, Response} from 'express-serve-static-core';
 import * as nodemailer from 'nodemailer';
 import {URL} from 'url';
-
 import * as data from './data';
 
 export namespace helpers {
@@ -45,7 +44,7 @@ export namespace helpers {
   export function isValidURL(url: string) {
     try {
       return /https?:/i.test(new URL(url).protocol);
-    }catch(e){
+    } catch (e) {
       return false;
     }
   }
@@ -62,4 +61,6 @@ export namespace helpers {
   export function regexToMongoRegex(regex: RegExp) {
     return {$regex: regex.source, $options: regex.flags};
   }
+
+
 }

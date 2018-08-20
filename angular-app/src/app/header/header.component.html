@@ -1,11 +1,36 @@
 <mat-toolbar color="primary">
   <mat-toolbar-row>
-    <!-- <span>Custom Toolbar</span> -->
+    <img class="img-thumbnail p-1" style="height:inherit" src="/pub/img/favicon.png">
 
+<<<<<<< HEAD
     <button class="m-2" mat-button routerLink="/"> Home </button>
     <button class="m-2" mat-button routerLink="/products"> Products </button>
     <button class="m-2" mat-button routerLink="/sellers"> Sellers </button>
     <button class="m-2" mat-button routerLink="/reviews"> Reviews </button>
+=======
+    <a class="m-2" mat-button routerLink="/"> Home </a>
+    <a class="m-2" mat-button routerLink="/products"> Products </a>
+    <a class="m-2" mat-button routerLink="/reviews"> Reviews </a>
+    <a class="m-2" mat-button routerLink="/dmessages"> DM </a>
+    <a class="m-2" mat-button routerLink="/rooms"> Chat Rooms </a>
+    <a class="m-2" *ngIf="isUserAdmin()" mat-button routerLink="/admin"> Admin Panel </a>
+    <div class="ml-auto">
+      <button *ngIf="!auth.currentUser" class="m-2" mat-raised-button color="accent" (click)="openLoginDialog()">
+        <span> Login</span>
+      </button>
+      <button *ngIf="!auth.currentUser" class="m-2" mat-raised-button color="accent" (click)="openSignupDialog()">
+        <span> Sign Up</span>
+      </button>
+      <div [hidden]="auth.currentUser" class="inline">
+        <div class="g-signin2 d-inline" data-onsuccess="onSignIn"></div>
+      </div>
+      <button *ngIf="auth.currentUser" class="m-2" mat-raised-button color="accent" (click)="openUpdateDialog()">
+        <span> Update Details</span>
+      </button>
+      <button *ngIf="auth.currentUser" class="m-2" mat-raised-button color="primary" (click)="logout()">
+        <span> Logout</span>
+      </button>
+>>>>>>> 98358c8dc01cc178b6986dd5ee6f020db08163ca
 
     <button *ngIf="!auth.currentUser" class="m-2" mat-raised-button color="accent" (click)="openLoginDialog()" style="float:right">
       Login

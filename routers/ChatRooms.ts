@@ -77,13 +77,7 @@ router.get('/getRooms', helpers.asyncWrapper(async function(req, res) {
 
 
 
-// todo add socket.io
-router.post('/addMessage', helpers.asyncWrapper(async function(req, res) {
-  let content = req.body.content;
-  let roomID = req.body.roomID;
-  let message: Message = {content, from: req.user._id, roomID: roomID};
-  return res.json(await db.ChatRooms.addMessage(message));
-}));
+
 
 router.delete('/deleteMessage', helpers.asyncWrapper(async function(req, res) {
   if (!req.user._id) {
@@ -111,8 +105,19 @@ router.put(
 router.put('/addMember', helpers.asyncWrapper(async function(req, res) {
   let member = req.body.member;
   let roomID = req.body.roomID;
-  let results = await db.ChatRooms.addMember(member, req.user._id, roomID);
-  // todo make sure the member request was really authoried
+  let adminID = req.user._id;
+  let chatRoom = await db.ChatRooms.getRoomByID(roomID);
+  if (!chatRoom) {
+    throw 'chat rooom doesn\'t exists'
+  }
+  if (!req.user) {
+    throw 'You\'re not logged in';
+  }
+  if (!chatRoom.admins.indexOf(adminID)) {
+    throw 'You\'re not the admin of this room';
+  }
+  let results = await db.ChatRooms.addMember(member, adminID, roomID);
+
   updateRoomArr(
       {action: Action.Remove, roomID, field: 'memberRequests', value: member});
   updateRoomArr({action: Action.Add, roomID, field: 'members', value: member});
@@ -121,8 +126,18 @@ router.put('/addMember', helpers.asyncWrapper(async function(req, res) {
 router.put('/removeMember', helpers.asyncWrapper(async function(req, res) {
   let member = req.body.memberID;
   let roomID = req.body.roomID;
-  let results = await db.ChatRooms.removeMember(member, req.user._id, roomID);
-  // todo make sure the member request was really authoried
+  let adminID = req.user._id;
+  let chatRoom = await db.ChatRooms.getRoomByID(roomID);
+  if (!chatRoom) {
+    throw 'chat rooom doesn\'t exists'
+  }
+  if (!req.user) {
+    throw 'You\'re not logged in';
+  }
+  if (!chatRoom.admins.indexOf(adminID)) {
+    throw 'You\'re not the admin of this room';
+  }
+  let results = await db.ChatRooms.removeMember(member, adminID, roomID);
   updateRoomArr(
       {action: Action.Remove, roomID, field: 'members', value: member});
   return res.json(results);

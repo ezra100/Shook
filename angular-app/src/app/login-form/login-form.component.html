@@ -1,17 +1,18 @@
 <h1 mat-dialog-title>Login</h1>
-<form (ngSubmit)="loginForm.form.valid && login()" id="loginForm" #loginForm="ngForm">
-  <div mat-dialog-content>
+<div mat-dialog-content>
+  <form (ngSubmit)="loginForm.form.valid && login()" id="loginForm" #loginForm="ngForm">
 
     <mat-form-field>
-        <input name="username" type="text" placeholder="Username" matInput required [(ngModel)]="username">
+      <input name="username" #userIDInput type="text" placeholder="Username" matInput required [(ngModel)]="username">
     </mat-form-field>
     <mat-form-field>
-        <input name="password" type="password" placeholder="Password" matInput required [(ngModel)]="password">
+      <input name="password" type="password" placeholder="Password" matInput required [(ngModel)]="password">
     </mat-form-field>
-    
-  </div>
-  <div mat-dialog-actions>
-    <button mat-button (click)="dialogRef.close()">Cancel</button>
-    <button mat-raised-button color="primary" cdkFocusInitial>Login</button>
-  </div>
-</form>
+  </form>
+  <button (click)="resetPassword(userIDInput.value)" mat-button>I forgot my password</button>
+  
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="dialogRef.close()">Cancel</button>
+  <button mat-raised-button form="loginForm" color="primary" cdkFocusInitial>Login</button>
+</div>

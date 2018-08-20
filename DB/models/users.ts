@@ -5,7 +5,7 @@ import {helpers} from '../../helpers';
 import {Category, Gender, IComment, Review, User, UserAuthData, UserType} from '../../types';
 import {chatRoomPermitedFields, commentPermitedFields, productPermitedFields, reviewPermitedFields, stripObject, userPermitedFields} from '../helpers';
 import {Schema} from '../helpers';
-import { Products } from './Products';
+import {Products} from './Products';
 
 let userSchema: Schema = new Schema({
   _id: String,
@@ -72,8 +72,6 @@ export namespace Users {
     return await userModel.findOneAndUpdate(
         {_id: userID}, {$set: {isAuthorized: true}});
   }
-  //#region users
-  // todo: update this
   export async function getUsers(
       filter: any = {}, offset: number = 0, limit?: number,
       showPrivateData: boolean = false): Promise<User[]> {
