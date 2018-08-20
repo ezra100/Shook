@@ -217,7 +217,7 @@ export type LikeUpdate = {
   userID: string
 }
 
-export type Bakset = {
+export type Basket = {
   sum: number, products: {
     product: Product,
     quantity: number,
