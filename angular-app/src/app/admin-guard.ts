@@ -6,6 +6,6 @@ import { UserType } from '../../../types';
 @Injectable()
 export class AdminGuard implements CanActivate {
   canActivate() {
-    return AuthService.currentUser.userType === UserType.Admin;
+    return AuthService.currentUser && AuthService.currentUser.userType === UserType.Admin;
   }
 }

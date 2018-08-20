@@ -16,13 +16,16 @@
       <button *ngIf="!auth.currentUser" class="m-2" mat-raised-button color="accent" (click)="openSignupDialog()">
         <span> Sign Up</span>
       </button>
+      <div [hidden]="auth.currentUser" class="inline">
+        <div class="g-signin2 d-inline"  data-onsuccess="onSignIn"></div>
+      </div>
       <button *ngIf="auth.currentUser" class="m-2" mat-raised-button color="accent" (click)="openUpdateDialog()">
         <span> Update Details</span>
       </button>
       <button *ngIf="auth.currentUser" class="m-2" mat-raised-button color="primary" (click)="logout()">
         <span> Logout</span>
       </button>
-      
+
       <div class="d-inline" *ngIf="auth.currentUser">
         {{ auth.currentUser._id }}
         <img class="img-thumbnail profile" [src]="auth.currentUser.imageURL">

@@ -7,8 +7,6 @@ import {catchError, mergeMap, share} from 'rxjs/operators';
 
 import {User} from '../../../types';
 
-
-
 function sha512(password: string, salt: string): string {
   var shaObj = new jsSHA('SHA-512', 'TEXT');
   shaObj.setHMACKey(salt, 'TEXT');
@@ -20,12 +18,22 @@ type Salts = {
   permSalt: string
 };
 
+
   @Injectable({providedIn: 'root'})
   export class AuthService {
     static currentUser: User;
     static loginSubject: Subject<User|null> = new Subject();
-    constructor(private http: HttpClient, private router: Router) {}
+    static http: HttpClient = null;
+    constructor(private http: HttpClient, private router: Router) {
+      if (!AuthService.http) {
+        AuthService.http = this.http;
+      }
+    }
 
+    static init() {
+      AuthService.loginSubject.subscribe(
+          user => AuthService.currentUser = user);
+    }
 
     login(username: string, password: string): Observable<User> {
       username = username.toLowerCase();  // all usernames must be lower-case
@@ -43,6 +51,22 @@ type Salts = {
         AuthService.loginSubject.next(user);
       });
       return obs;
+    }
+
+    static onGoogleSignIn(googleUser: gapi.auth2.GoogleUser) {
+      if (!AuthService.http) {
+        console.log('http client not injected yet, trying in 500ms');
+        setTimeout(() => AuthService.onGoogleSignIn(googleUser), 500);
+      }
+      var response = googleUser.getAuthResponse();
+      let token = response.id_token;
+      AuthService.http.put<User>('/api/auth/verify', {token}).subscribe(
+        user => {
+          if(user){
+            AuthService.loginSubject.next(user);
+          }
+        }, err =>{console.log(err.error)}
+      );
     }
 
     logout() {
@@ -84,4 +108,5 @@ type Salts = {
           '/api/auth/reset/complete', {key, username, newPassword})
     }
   }
-  AuthService.loginSubject.subscribe(user => AuthService.currentUser = user);
+  AuthService.init();
+  (<any>window).onSignIn = AuthService.onGoogleSignIn;

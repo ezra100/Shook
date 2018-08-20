@@ -1,5 +1,9 @@
 /* You can add global styles to this file, and also import other style files */
 @import "~@angular/material/prebuilt-themes/deeppurple-amber.css";
-@import '~bootstrap/dist/css/bootstrap.min.css';
+@import "~bootstrap/dist/css/bootstrap.min.css";
 
 $primary: rgb(103, 58, 183);
+// for google signup button
+.abcRioButton.abcRioButtonLightBlue {
+    display: inline-block;
+}
