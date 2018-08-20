@@ -1,12 +1,15 @@
 import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
+import {ChangeDetectorRef} from '@angular/core';
 import {MatSnackBar} from '@angular/material';
 import {Router} from '@angular/router';
 import * as jsSHA from 'jssha';
 import {EMPTY, Observable, Subject} from 'rxjs';
 import {catchError, mergeMap, share} from 'rxjs/operators';
+
 import {client_id} from '../../../google-auth';
 import {User} from '../../../types';
+import { ApplicationRef } from '@angular/core';
 
 function sha512(password: string, salt: string): string {
   var shaObj = new jsSHA('SHA-512', 'TEXT');
@@ -25,7 +28,13 @@ type Salts = {
     static currentUser: User;
     static loginSubject: Subject<User|null> = new Subject();
     static http: HttpClient = null;
-    constructor(private http: HttpClient, private router: Router) {
+    static appRef: ApplicationRef = null;
+    constructor(
+        private http: HttpClient, private router: Router,
+        private appRef: ApplicationRef) {
+      if (!AuthService.appRef) {
+        AuthService.appRef = this.appRef;
+      }
       if (!AuthService.http) {
         AuthService.http = this.http;
       }
@@ -67,6 +76,7 @@ type Salts = {
                 if (user) {
                   AuthService.loginSubject.next(user);
                 }
+                AuthService.appRef.tick();
               },
               err => {
                 console.log(err.error);

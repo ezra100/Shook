@@ -30,7 +30,8 @@ export class ChatRoomsComponent implements OnInit {
   @ViewChild('imgFileInput') imgInput:ElementRef;
   constructor(
       private chatRoomsService: ChatRoomsService, public dialog: MatDialog,
-      private cdRef: ChangeDetectorRef) {}
+      private cdRef: ChangeDetectorRef) {
+      }
   ngOnInit() {
     let self = this;
     window.onhashchange = () => {

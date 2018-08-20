@@ -2,7 +2,7 @@
   <mat-toolbar-row>
     <img class="img-thumbnail p-1" style="height:inherit" src="/pub/img/favicon.png">
 
-    <a class="m-2" mat-button routerLink="/"> Home </a>
+    <a class="m-2" mat-button routerLink="/home"> Home </a>
     <a class="m-2" mat-button routerLink="/products"> Products </a>
     <a class="m-2" mat-button routerLink="/reviews"> Reviews </a>
     <a class="m-2" mat-button routerLink="/dmessages"> DM </a>
@@ -24,15 +24,9 @@
       <button *ngIf="auth.currentUser" class="m-2" mat-raised-button color="primary" (click)="logout()">
         <span> Logout</span>
       </button>
-
-    <button *ngIf="!auth.currentUser" class="m-2" mat-raised-button color="accent" (click)="openLoginDialog()" style="float:right">
-      Login
-    </button>
-    <button *ngIf="!auth.currentUser" class="m-2" mat-raised-button color="accent" (click)="openSignupDialog()" style="float:right">
-      Sign Up
-    </button>
-    <button *ngIf="auth.currentUser" class="m-2" mat-raised-button color="primary" (click)="logout()" style="float:right"> 
-      Logout
-    </button>
+      <div class="d-inline" *ngIf="auth.currentUser">
+        {{ auth.currentUser._id }} <img class="img-thumbnail profile" [src]="auth.currentUser.imageURL">
+      </div>
+    </div>
   </mat-toolbar-row>
 </mat-toolbar>

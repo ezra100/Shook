@@ -1,8 +1,10 @@
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {from, Observable, Operator} from 'rxjs';
+import {share} from 'rxjs/operators';
 
 import {Category, Product} from '../../../types';
+
 import {MongoProductFilter} from './product-filter';
 
 
@@ -18,14 +20,20 @@ export class ProductsService {
     return this.http.get<Product[]>('/api/products/getLatest', {params});
   }
   addProduct(product: Product): Observable<Product> {
-    return this.http.post<Product>('/api/products/add', product);
+    let obs =
+        this.http.post<Product>('/api/products/add', product).pipe(share());
+    obs.subscribe();
+    return obs;
   }
   updateProduct(
       id: string, title?: string, subtitle?: string, link?: URL, price?: number,
       category?: Category) {
     let product: Product =
         {_id: id, title, category, subtitle, link: link.toString(), price};
-    return this.http.put<Product>('/api/products/update', product);
+    let obs =
+        this.http.put<Product>('/api/products/update', product).pipe(share());
+    obs.subscribe();
+    return obs;
   }
 
   getProductByID(id: string) {
@@ -34,17 +42,22 @@ export class ProductsService {
   }
 
   deleteProduct(id: string) {
-    return this.http.delete<Product>(
-        '/api/products/getByID', {params: new HttpParams({fromObject: {id}})});
+    let obs = this.http
+                  .delete<Product>(
+                      '/api/products/getByID',
+                      {params: new HttpParams({fromObject: {id}})})
+                  .pipe(share());
+    obs.subscribe();
+    return obs;
   }
 
   getAvgRatring(id: string) {
     return this.http.get<number>(
-        '/api/products/getAvgRating', {params: new HttpParams({fromObject: {id}})});
+        '/api/products/getAvgRating',
+        {params: new HttpParams({fromObject: {id}})});
   }
 
   getMyFeed() {
     return this.http.get<Product[]>('/api/products/myFeed');
   }
-
 }

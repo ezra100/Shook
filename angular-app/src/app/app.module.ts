@@ -37,6 +37,7 @@ import {SignupDialogComponent} from './signup-dialog/signup-dialog.component';
 import {UpdateUserDetailsModalComponent} from './update-user-details-modal/update-user-details-modal.component';
 import {UserCardComponent} from './user-card/user-card.component';
 import { ResetModalComponent } from './reset-modal/reset-modal.component';
+import { ChangeDetectorRef } from '@angular/core';
 
  
 @NgModule({
