@@ -1,0 +1,59 @@
+:host {
+    overflow-y: scroll;
+    height: 100%;
+}
+
+mat-form-field {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+}
+
+mat-expansion-panel {
+    width: 90%;
+    display: inline-block;
+}
+
+mat-icon {
+    margin-bottom: 2rem;
+}
+
+.filter-grid mat-grid-tile {
+    border-right: rgba(128, 128, 128, 0.34) dashed 0.05rem;
+}
+
+.divider-msg {
+    position: relative;
+    width: auto;
+    margin: 1px;
+    text-align: center;
+
+    span {
+        &:before, &:after {
+            content: "";
+            position: absolute;
+            height: 5px;
+            border-bottom: 1px solid white;
+            border-top: 1px solid white;
+            top: 0;
+            width: 100%;
+        }
+
+        &:before {
+            right: 100%;
+            margin-right: 15px;
+        }
+
+        &:after {
+            left: 100%;
+            margin-left: 15px;
+        }
+    }
+}
+
+.center {
+    margin: auto;
+
+    @at-root button#{&} {
+        left: 45%;
+    }
+}
