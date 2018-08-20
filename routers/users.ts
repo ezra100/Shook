@@ -89,8 +89,8 @@ router.put('/addToBasket', helpers.asyncWrapper(async function(req, res) {
   return res.json(await Users.addToBasket(req.user._id, productID, qunatity));
 }));
 
-router.get('/basketSum', helpers.asyncWrapper(async function(req, res) {
-  return res.json(await Users.getBasketSum(req.user._id));
+router.get('/basket', helpers.asyncWrapper(async function(req, res) {
+  return res.json(await Users.getBasket(req.user._id));
 }));
 
 // it's supposed to be get, but it's easier to send a nested object via post

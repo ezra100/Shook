@@ -1,7 +1,7 @@
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 
-import {User} from '../../../types';
+import {User, Product, Basket} from '../../../types';
 import {helpers} from './helpers';
 
 @Injectable({providedIn: 'root'})
@@ -43,8 +43,8 @@ export class UsersService {
     return this.http.get<User>(
         '/api/users/user', {params: new HttpParams({fromObject: {_id: id}})})
   }
-  getBasketSum() {
-    return this.http.get('/api/users/basketSum');
+  getBasket() {
+    return this.http.get<Basket>('/api/users/basket');
   }
   getUserList(query: string) {
     return this.http.get<User[]>(
