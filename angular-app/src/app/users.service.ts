@@ -1,9 +1,10 @@
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 
-import {User, Product, Basket} from '../../../types';
+import {User, Product} from '../../../types';
 import {helpers} from './helpers';
 import { share } from 'rxjs/internal/operators/share';
+import { map } from 'rxjs/operators';
 
 @Injectable({providedIn: 'root'})
 export class UsersService {
@@ -55,7 +56,7 @@ export class UsersService {
         '/api/users/user', {params: new HttpParams({fromObject: {_id: id}})})
   }
   getBasket() {
-    return this.http.get<Basket>('/api/users/basket');
+    return this.http.get<Product[]>('/api/users/basket');
   }
   getUserList(query: string) {
     return this.http.get<User[]>(

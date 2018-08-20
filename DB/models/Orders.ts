@@ -21,9 +21,9 @@ let orderSchema = new Schema({
   });
 
   export let orderModel = mongoose.model('Order', orderSchema);
-
+// Order must contain owner name, and products ID and quantity
 export namespace orders {
-    export async function addOrder(order: Order) {
+    export async function addOrder(order: Partial<Order>) {
       order.paid = false;
       let productIDList = order.products.map(p => p.productID);
       let productDocs =

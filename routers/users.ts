@@ -5,6 +5,7 @@ import {Users} from '../DB/Models';
 import {helpers} from '../helpers';
 import upload from '../multer';
 import {User, UserType} from '../types';
+import { Db } from 'mongodb';
 
 export var router = express.Router();
 
@@ -106,4 +107,13 @@ router.get('/usersList', helpers.asyncWrapper(async function(req, res) {
   let limit = Number(req.query.limit || 150);
   let offset = Number(req.query.offset || 0);
   return res.json(await Users.getUsersList(filter, limit, offset));
+}));
+
+router.put('/makeOrder',  helpers.asyncWrapper(async function(req, res) {
+
+  if(!req.user){
+    throw 'you\'re not logged in';
+  }
+  let results = await Users.makeOrder(req.user._id);
+  return res.json(results);
 }));

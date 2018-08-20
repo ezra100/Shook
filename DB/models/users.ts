@@ -5,6 +5,8 @@ import {helpers} from '../../helpers';
 import {Category, Gender, IComment, Review, User, UserAuthData, UserType} from '../../types';
 import {chatRoomPermitedFields, commentPermitedFields, productPermitedFields, reviewPermitedFields, stripObject, userPermitedFields} from '../helpers';
 import {Schema} from '../helpers';
+
+import {orders} from './Orders';
 import {Products} from './Products';
 
 let userSchema: Schema = new Schema({
@@ -186,26 +188,14 @@ export namespace Users {
           from: 'products',
           localField: 'basket.productID',
           foreignField : '_id',
-          as: 'products'
-        }
-      },
-      {
-        $project: {product:{$arrayElemAt : ['$products', 0]}, quantity :'$basket.quantity'}
-      },
-      {
-        $addFields: {
-          'finalPrice' : {
-          $multiply : ['$product.price', '$quantity']
-        }}
-      }
-      ,{
-        $group :{
-          _id: null,
-          sum:{$sum: '$finalPrice'},
-          products:{$push: '$$ROOT'}
+          as: 'product'
         }
       }
     ]);
+    agg = agg.map(p => {
+      p.product.quantity = p.basket.quantity;
+      return p.product;
+    });
     return agg;
   }
 
@@ -239,6 +229,11 @@ export namespace Users {
       }
     }
     return await userModel.findByIdAndRemove(userID);
+  }
+  export async function makeOrder(userID: string) {
+    let user: User = await userModel.findById(userID, {basket: 1});
+    await orders.addOrder({owner: userID, products: user.basket});
+    userModel.updateOne({_id: userID}, {$set: {basket: []}});
   }
   export async function getCount() {
     return await userModel.estimatedDocumentCount().exec();

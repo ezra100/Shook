@@ -93,6 +93,7 @@ export interface Product {
   price?: number;
   owner?: string;  // publisher of the product - must exist in users collection
   category?: Category;
+  quantity?:number;
 }
 
 export interface Review {
@@ -166,7 +167,7 @@ export interface ChatRoom {
 
 export interface Order {
   _id?: string, owner: string,
-      products: {productID: string, quantity: number, currentPrice: number}[],
+      products: {productID: string, quantity: number, currentPrice?: number}[],
       orderDate: Date, paid: boolean
 }
 
@@ -215,11 +216,4 @@ export type LikeUpdate = {
   msgID: string,
   action: LikeType,
   userID: string
-}
-
-export type Basket = {
-  sum: number, products: {
-    product: Product,
-    quantity: number,
-  }[]
 }
