@@ -12,6 +12,7 @@ import {ReviewsComponent} from './reviews/reviews.component';
 import {SellersComponent} from './sellers/sellers.component';
 import { ChatRoomsComponent } from './chat-rooms/chat-rooms.component';
 import { ResetModalComponent } from './reset-modal/reset-modal.component';
+import {BasketComponent} from './basket/basket.component';
 
 
 const routes: Routes = [
@@ -28,6 +29,8 @@ const routes: Routes = [
   {path: 'admin', canActivate:[AdminGuard], component: AdminPanelComponent},
   {path: 'rooms', component: ChatRoomsComponent},
   {path: 'auth/completeReset', component: ResetModalComponent},
+  {path: 'basket', component: BasketComponent}
+
 ];
 
 @NgModule({

@@ -38,6 +38,7 @@ import {UpdateUserDetailsModalComponent} from './update-user-details-modal/updat
 import {UserCardComponent} from './user-card/user-card.component';
 import { ResetModalComponent } from './reset-modal/reset-modal.component';
 import { ChangeDetectorRef } from '@angular/core';
+import { BasketComponent } from './basket/basket.component';
 
  
 @NgModule({
@@ -63,7 +64,8 @@ import { ChangeDetectorRef } from '@angular/core';
     UpdateUserDetailsModalComponent,
     AddRoomComponent,
     DisqusComponent,
-    ResetModalComponent
+    ResetModalComponent,
+    BasketComponent
   ],
   imports: [
     MatBadgeModule,
