@@ -1,5 +1,5 @@
 import * as express from 'express';
-import {message} from '../../data';
+import {message, msgHeader} from '../../data';
 import {UserAuth, Users} from '../../DB/Models';
 import {helpers} from '../../helpers';
 import {User} from '../../types';
@@ -16,7 +16,7 @@ router.post('/request', helpers.asyncWrapper(async function(req, res) {
   if (req.body.email) {
     user = await Users.findUserByEmail(req.body.email);
   } else if (req.body.username) {
-    user = <User> await Users.getUser(req.body.username);
+    user = <User> await Users.getUser(req.body.username, true);
   }
   if (!user) {
     res.status(400).end('user not found');
@@ -30,15 +30,15 @@ router.post('/request', helpers.asyncWrapper(async function(req, res) {
   }
   UserAuth.updateUserAuthData(
       user._id, {recoveryKey: key, recoverydate: new Date()});
-  helpers.sendEmail(
+  helpers.sendEmail(  
       user.email, user.firstName + ' ' + user.lastName,
-      'Password reset for your account at flowers++',
+        msgHeader,
       message.replace(
           'placeholder',
-          'https://localhost:3000/complete?key=' + key +
-              '&&username=' + user._id));
+          'https://localhost:3000/auth/completeReset?key=' + key +
+              '&&userID=' + user._id));
   // don't show the email unless the user sent it
-  res.status(201).end('reset email sent to' + (req.body.email || 'your email'));
+  res.status(201).json('reset email sent to ' + (req.body.email || ' your email'));
 }));
 
 
@@ -67,7 +67,7 @@ router.post('/complete', helpers.asyncWrapper(async function(req, res) {
       hashedPassword: newPasswordHash,
       salt: newSalt
     });
-    res.status(201).end("reset complete");
+    res.status(201).json("reset complete");
     return;
   } else {
     res.status(400).end(

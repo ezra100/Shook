@@ -9,7 +9,8 @@
                 <mat-icon>{{ isSearchUsers? 'arrow_back' : 'add' }}</mat-icon>
             </button>
 
-            <mat-checkbox [(ngModel)]="searchMsgs" (ngModelChange)="filterChats()" *ngIf="query && !isSearchUsers">Search messages</mat-checkbox>
+            <mat-checkbox [(ngModel)]="searchMsgs" (ngModelChange)="filterChats()" *ngIf="query && !isSearchUsers">Search
+                messages</mat-checkbox>
 
         </div>
         <mat-chip-list *ngIf="usersListResults && isSearchUsers" class="mat-chip-list-stacked">
@@ -41,8 +42,8 @@
             <div class="conversation-start" *ngIf="activeChat.messages.length > 0">
                 <span>{{activeChat.messages[0].date | date}}</span>
             </div>
-            <div *ngFor="let message of (activeChat.messages)" [ngClass]="{ 'bubble': true,'you' : message.from !== currentUserID,'me'  : message.from === currentUserID}">
-                {{message.content}}
+            <div *ngFor="let message of (activeChat.messages)" [innerHTML]="message.content | linkify" [ngClass]="{ 'bubble': true,'you' : message.from !== currentUserID,'me'  : message.from === currentUserID}">
+
             </div>
 
         </div>

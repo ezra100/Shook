@@ -50,7 +50,7 @@ app.use(passport.session());
 // server favicon
 
 app.get('/favicon.ico', function(req: Request, res: Response) {
-  res.sendFile(path.join(__dirname, 'public/img/robot.gif'));
+  res.sendFile(path.join(__dirname, 'public/img/favicon.png'));
 });
 
 let apiRouter = express.Router();

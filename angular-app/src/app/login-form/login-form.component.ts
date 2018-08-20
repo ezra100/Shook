@@ -28,4 +28,10 @@ export class LoginFormComponent implements OnInit {
          duration: 4000
        })});
   }
+  resetPassword(userID: string){
+    this.authService.requestPasswordReset(userID).subscribe(
+      (msg: string) => this.snackBar.open(msg, 'OK')
+    );
+    this.dialogRef.close();
+  }
 }

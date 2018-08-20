@@ -11,6 +11,7 @@ import {ProductsFeedComponent} from './products-feed/products-feed.component';
 import {ReviewsComponent} from './reviews/reviews.component';
 import {SellersComponent} from './sellers/sellers.component';
 import { ChatRoomsComponent } from './chat-rooms/chat-rooms.component';
+import { ResetModalComponent } from './reset-modal/reset-modal.component';
 
 
 const routes: Routes = [
@@ -25,7 +26,8 @@ const routes: Routes = [
   {path: 'home', component: HomeComponent},
   {path: 'dmessages', canActivate: [AuthGuard], component: DmessagesComponent},
   {path: 'admin', canActivate:[AdminGuard], component: AdminPanelComponent},
-  {path: 'rooms', component: ChatRoomsComponent}
+  {path: 'rooms', component: ChatRoomsComponent},
+  {path: 'auth/completeReset', component: ResetModalComponent},
 ];
 
 @NgModule({

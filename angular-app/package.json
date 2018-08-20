@@ -36,6 +36,7 @@
     "jssha": "^2.3.1",
     "moment": "^2.22.2",
     "ngx-disqus": "^2.4.0",
+    "ngx-linkifyjs": "^1.0.0",
     "rxjs": "^6.2.2",
     "socket.io": "^2.1.1",
     "socket.io-client": "^2.1.1",
