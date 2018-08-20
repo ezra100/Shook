@@ -5,6 +5,9 @@ import escapeHtml = require('escape-html');
 
 import {ChatRoom, Message, User, Action, SIORoomUpdate} from './types';
 let passportSocketIo = require('passport.socketio');
+import {Types} from 'mongoose';
+import { ObjectId } from 'mongodb';
+type ObjectId = Types.ObjectId;
 
 let socketIDMap: {[key: string]: string} = {};
 let roomsPath = '/socket.io/rooms';
@@ -89,6 +92,7 @@ export function init(server: https.Server, sessionStore: any, secret: string) {
       console.log(`msg from ${user._id}`);
       msg.date = new Date();
       msg.from = user._id;
+      msg._id = new ObjectId().toHexString();
       msg.likes = msg.dislikes = [];
       msg.content = escapeHtml(msg.content);
       let room = await getRoomFromCache(msg.roomID);

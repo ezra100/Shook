@@ -3,8 +3,8 @@ import * as mongoose from 'mongoose';
 import {ChatRoom, Message} from '../../types';
 import {chatRoomPermitedFields, Schema, stripObject} from '../helpers';
 
-import {Users} from './users'
-import { ObjectId } from 'bson';
+import {Users} from './users';
+type ObjectId = mongoose.Types.ObjectId;
 
 let messageSchema = new Schema({
   date: {type: Date, default: Date.now, index: true},
