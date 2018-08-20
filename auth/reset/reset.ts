@@ -11,12 +11,12 @@ export var router = express.Router();
 // request a password reset - sends an email to the given address if a user with
 // such email exists
 router.post('/request', helpers.asyncWrapper(async function(req, res) {
-  let user:  User;
+  let user: User;
   // the user can send an email or a username to reset
   if (req.body.email) {
     user = await Users.findUserByEmail(req.body.email);
   } else if (req.body.username) {
-    user = <User> await Users.getUser(req.body.username, true);
+    user = <User>await Users.getUser(req.body.username, true);
   }
   if (!user) {
     res.status(400).end('user not found');
@@ -30,15 +30,15 @@ router.post('/request', helpers.asyncWrapper(async function(req, res) {
   }
   UserAuth.updateUserAuthData(
       user._id, {recoveryKey: key, recoverydate: new Date()});
-  helpers.sendEmail(  
-      user.email, user.firstName + ' ' + user.lastName,
-        msgHeader,
+  helpers.sendEmail(
+      user.email, user.firstName + ' ' + user.lastName, msgHeader,
       message.replace(
           'placeholder',
           'https://localhost:3000/auth/completeReset?key=' + key +
               '&&userID=' + user._id));
   // don't show the email unless the user sent it
-  res.status(201).json('reset email sent to ' + (req.body.email || ' your email'));
+  res.status(201).json(
+      'reset email sent to ' + (req.body.email || ' your email'));
 }));
 
 
@@ -56,18 +56,14 @@ router.post('/complete', helpers.asyncWrapper(async function(req, res) {
       res.status(400).end('Can\'t reset after more than 24 hours');
       return;
     }
-    // deletes the key
-    // todo - make sure that the key is actually deleted in MongoDB
-
     // new salt, because why not
     let newSalt = getRandomString(hashLength);
     let newPasswordHash = sha512(newPassword, newSalt);
-    UserAuth.updateUserAuthData(username, {
-      recoveryKey: undefined,  // prevent reuse of the recovery key
-      hashedPassword: newPasswordHash,
-      salt: newSalt
-    });
-    res.status(201).json("reset complete");
+    UserAuth.updateUserAuthData(
+        username, {hashedPassword: newPasswordHash, salt: newSalt});
+    // prevent reuse of the key
+    UserAuth.removeUserRecoveryKey(username);
+    res.status(201).json('reset complete');
     return;
   } else {
     res.status(400).end(

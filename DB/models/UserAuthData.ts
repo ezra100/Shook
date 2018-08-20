@@ -34,6 +34,11 @@ export namespace UserAuth {
     return await userAuthDataModel.findByIdAndUpdate(
         username, {$set: data}, {upsert: true});
   }
+  export async function removeUserRecoveryKey(
+      username: string): Promise<void> {
+    return await userAuthDataModel.findByIdAndUpdate(
+        username, {$unset: {recoveryKey: ''}}, {upsert: true});
+  }
   export async function createUserAuthData(data: UserAuthData): Promise<void> {
     await userAuthDataModel.update({_id: data._id}, data, {upsert: true});
   }

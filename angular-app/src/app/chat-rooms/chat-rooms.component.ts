@@ -9,9 +9,6 @@ import {MemberRequestsComponent} from '../member-requests/member-requests.compon
 import { AddRoomComponent } from '../add-room/add-room.component';
 
 
-// todo: request to join
-//  authorize/delete request
-// add/delete admins
 @Component({
   selector: 'app-chat-rooms',
   templateUrl: './chat-rooms.component.html',
@@ -209,7 +206,6 @@ export class ChatRoomsComponent implements OnInit {
       self.chatRoomsService.join(roomID);
       this.activeChat = chat;
       this.chats.push(chat);
-      // todo manage empty messages
       this.chats.sort((a, b) => -helpers.compareChatRooms(a, b));
       this.filterChats();
     });
