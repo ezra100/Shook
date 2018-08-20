@@ -20,8 +20,8 @@ const routes: Routes = [
     pathMatch: 'full'
   },  // i would rather the '' path will be to some random feed of all kinds
       // sellers, products and reviews.
-  {path: 'reviews', component: ReviewsComponent},
-  {path: 'sellers', component: SellersComponent},
+  {path: 'reviews', component: ProductsFeedComponent},
+  {path: 'sellers', component: ProductsFeedComponent},
   {path: 'home', component: HomeComponent},
   {path: 'dmessages', canActivate: [AuthGuard], component: DmessagesComponent},
   {path: 'admin', canActivate:[AdminGuard], component: AdminPanelComponent},
