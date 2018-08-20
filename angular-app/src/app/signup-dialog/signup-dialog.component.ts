@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { MatSnackBarRef, SimpleSnackBar, MatDialogRef, MatSnackBar } from '@angular/material';
 import { Gender, User } from '../../../../types';
 import { UsersService } from '../users.service';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-signup-dialog',
@@ -15,7 +16,13 @@ export class SignupDialogComponent implements OnInit {
   genderRef = Gender;
   constructor(
       public dialogRef: MatDialogRef<SignupDialogComponent>,
-      public usersService: UsersService, public snackBar: MatSnackBar) {}
+      public usersService: UsersService, public snackBar: MatSnackBar, public authService: AuthService) {
+        //suggest the user his google profile details to sign-up with
+        let user = this.authService.tryGetGoogleUserProfile();
+        if(user){
+          this.user = user;
+        } 
+      }
 
   ngOnInit() {}
   signup() {

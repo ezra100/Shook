@@ -51,7 +51,7 @@
             </span>
             <div class="top-buttons">
                 <button mat-raised-button *ngIf="activeChat.admins.indexOf(currentUserID) > -1" color="accent" [matBadge]="activeChat.memberRequests.length"
-                    matBadgePosition="before" matBadgeColor="primary" (click)="openRequestsDialog()">Member Requests
+                    matBadgePosition="before" matBadgeColor="primary" (click)="openRequestsDialog()">Chat Admin Panel
                 </button>
                 <button mat-raised-button *ngIf="activeChat.members.indexOf(currentUserID) > -1" color="accent" (click)="leaveRoom()">Leave
                     Room
@@ -71,10 +71,12 @@
                         <img *ngIf="message.imageURL" [src]="message.imageURL" class="rounded float-right chat-img">
                     </div>
                     <div style="float: right;">
-                        <button mat-icon-button [matTooltip]="message.likes.join(', ')" (click)="likeClicked(message._id)">
+                        <button [disabled]="activeChat.members.indexOf(currentUserID) < 0" mat-icon-button [matTooltip]="message.likes.join(', ')"
+                            (click)="likeClicked(message._id)">
                             <mat-icon matBadgePosition="below after" [matBadge]="message.likes.length" matBadgeColor="accent">thumb_up</mat-icon>
                         </button>
-                        <button mat-icon-button color="warn" [matTooltip]="message.dislikes.join(', ')" (click)="dislikeClicked(message._id)">
+                        <button mat-icon-button color="warn" [disabled]="activeChat.members.indexOf(currentUserID) < 0" [matTooltip]="message.dislikes.join(', ')"
+                            (click)="dislikeClicked(message._id)">
                             <mat-icon matBadgePosition="below after" [matBadge]="message.dislikes.length" matBadgeColor="accent">thumb_down</mat-icon>
                         </button>
                     </div>
@@ -99,7 +101,7 @@
         </div>
         <div *ngIf="activeChat.members.indexOf(currentUserID) === -1">
             <button *ngIf="activeChat.memberRequests.indexOf(currentUserID) === -1" mat-flat-button (click)="sendMemberRequest()" color="primary">Join</button>
-            <span *ngIf="activeChat.memberRequests.indexOf(currentUserID) > -1">Pending for approval</span>
+            <span class="m-3" *ngIf="activeChat.memberRequests.indexOf(currentUserID) > -1">Pending for approval</span>
         </div>
     </div>
 </div>

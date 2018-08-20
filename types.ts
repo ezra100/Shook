@@ -61,10 +61,10 @@ export let categoryNames = [
 ];
 
 export interface User {
-  userType: UserType;
+  userType?: UserType;
   firstName: string;
   lastName: string;
-  _id: string;  // username
+  _id?: string;  // username
   email: string;
   gender: Gender;
   address: string;
