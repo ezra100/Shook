@@ -5,7 +5,7 @@ import {Router} from '@angular/router';
 import * as jsSHA from 'jssha';
 import {EMPTY, Observable, Subject} from 'rxjs';
 import {catchError, mergeMap, share} from 'rxjs/operators';
-
+import {client_id} from '../../../google-auth';
 import {User} from '../../../types';
 
 function sha512(password: string, salt: string): string {
@@ -25,8 +25,7 @@ type Salts = {
     static currentUser: User;
     static loginSubject: Subject<User|null> = new Subject();
     static http: HttpClient = null;
-    constructor(
-        private http: HttpClient, private router: Router) {
+    constructor(private http: HttpClient, private router: Router) {
       if (!AuthService.http) {
         AuthService.http = this.http;
       }
@@ -74,6 +73,21 @@ type Salts = {
               });
     }
 
+    tryGetGoogleUserProfile() {
+      let auth2 = gapi.auth2.init({client_id: client_id});
+      if (auth2.isSignedIn.get()) {
+        var profile = auth2.currentUser.get().getBasicProfile();
+        let user: Partial<User> = {
+          email: profile.getEmail(),
+          firstName: profile.getName(),
+          lastName: profile.getFamilyName(),
+          imageURL: profile.getImageUrl()
+        };
+        return user;
+      }
+      return null;
+    }
+
     logout() {
       // logout from google first
       var auth2 = gapi.auth2.getAuthInstance();
@@ -115,8 +129,8 @@ type Salts = {
     }
 
     completeReset(key: string, username: string, newPassword: string) {
-      return this.http
-          .post('/api/auth/reset/complete', {key, username, newPassword});
+      return this.http.post(
+          '/api/auth/reset/complete', {key, username, newPassword});
     }
   }
   AuthService.init();
