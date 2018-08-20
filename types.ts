@@ -216,3 +216,10 @@ export type LikeUpdate = {
   action: LikeType,
   userID: string
 }
+
+export type Bakset = {
+  sum: number, products: {
+    product: Product,
+    quantity: number,
+  }[]
+}

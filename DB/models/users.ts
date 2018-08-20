@@ -176,10 +176,7 @@ export namespace Users {
                 .exec());
   }
 
-  export async function getBasketSum(username: string) {
-    let user = await getUser(username, true);
-
-
+  export async function getBasket(username: string) {
     let agg = await userModel.aggregate(
 
       [{$match: {_id:username}},
@@ -196,7 +193,7 @@ export namespace Users {
         $project: {product:{$arrayElemAt : ['$products', 0]}, quantity :'$basket.quantity'}
       },
       {
-        $project: {
+        $addFields: {
           'finalPrice' : {
           $multiply : ['$product.price', '$quantity']
         }}
@@ -204,11 +201,12 @@ export namespace Users {
       ,{
         $group :{
           _id: null,
-          sum:{$sum: '$finalPrice'}
+          sum:{$sum: '$finalPrice'},
+          products:{$push: '$$ROOT'}
         }
       }
     ]);
-    return agg && agg[0].sum;
+    return agg;
   }
 
   export function updateUserById(username: string, user: Partial<User>):
