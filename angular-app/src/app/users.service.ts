@@ -44,7 +44,7 @@ export class UsersService {
         '/api/users/user', {params: new HttpParams({fromObject: {_id: id}})})
   }
   getBasket() {
-    return this.http.get<Basket>('/api/users/basket');
+    return this.http.get<Product[]>('/api/users/basket');
   }
   getUserList(query: string) {
     return this.http.get<User[]>(

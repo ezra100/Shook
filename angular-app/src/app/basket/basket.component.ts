@@ -11,6 +11,7 @@ import {AddProductComponent} from '../add-product/add-product.component';
 import {AuthService} from '../auth.service';
 import {ProductFilter} from '../product-filter';
 import {ProductsService} from '../products.service';
+import { UsersService } from '../users.service';
 
 @Component({
   selector: 'app-basket',
@@ -30,6 +31,7 @@ export class BasketComponent implements OnInit {
   authService = AuthService;
   panelOpenState: boolean = false;
   constructor(
+      private basketService: UsersService,
       private service: ProductsService, private router: Router,
       private route: ActivatedRoute, private observableMedia: ObservableMedia,
       public dialog: MatDialog) {
@@ -50,6 +52,10 @@ export class BasketComponent implements OnInit {
     });
     this.sub = this.service.getLatest().subscribe(products => {
       thisPF.products = products;
+
+    this.basketService.getBasket().subscribe(basket => {
+      this.products = basket;
+    })
     });
     // let elem = this.elementRef.nativeElement;
     // elem.height = screen.height * 2.5;

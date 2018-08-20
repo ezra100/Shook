@@ -216,10 +216,3 @@ export type LikeUpdate = {
   action: LikeType,
   userID: string
 }
-
-export type Basket = {
-  sum: number, products: {
-    product: Product,
-    quantity: number,
-  }[]
-}
