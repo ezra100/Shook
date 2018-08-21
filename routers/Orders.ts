@@ -6,7 +6,7 @@ import {Order} from '../types';
 
 export var router = express.Router();
 
-router.post('/addOrder', helpers.asyncWrapper(async function(req, res){
+router.post('/addOrder', helpers.asyncWrapper(async function(req, res) {
   if (!req.user) {
     throw 'You\'re not logged in';
   }
@@ -15,21 +15,17 @@ router.post('/addOrder', helpers.asyncWrapper(async function(req, res){
   res.json(await orders.addOrder(order));
 }));
 
-router.get("/myOrders", helpers.asyncWrapper(
-    async function(req, res){
-        if (!req.user) {
-            throw 'You\'re not logged in';
-          }
-        res.json(await orders.getOrderByUser(req.user._id));
-    }
-));
+router.get('/myOrders', helpers.asyncWrapper(async function(req, res) {
+  if (!req.user) {
+    throw 'You\'re not logged in';
+  }
+  res.json(await orders.getOrderByUser(req.user._id));
+}));
 
-router.get(/\/orderByID/i, helpers.asyncWrapper(
-    async function(req, res){
-        if (!req.user) {
-            throw 'You\'re not logged in';
-          }
-          let orderID = req.query.orderID;
-        res.json(await orders.getOrder(orderID, req.user._id));
-    }
-));
+router.get(/\/orderByID/i, helpers.asyncWrapper(async function(req, res) {
+  if (!req.user) {
+    throw 'You\'re not logged in';
+  }
+  let orderID = req.query.orderID;
+  res.json(await orders.getOrder(orderID, req.user._id));
+}));

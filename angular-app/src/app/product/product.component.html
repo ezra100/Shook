@@ -6,7 +6,7 @@
     {{ product.subtitle }}
   </mat-card-subtitle>
   <mat-card-subtitle>
-    {{ product.price | number : 0 : 3  }} ₪
+    {{ product.price | number : '1.0-3'  }} ₪
   </mat-card-subtitle>
   <mat-card-content>
     Owner: {{ product.owner }}
