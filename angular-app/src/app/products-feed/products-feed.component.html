@@ -88,7 +88,7 @@
     <mat-icon color="primary" aria-label="Add product">add</mat-icon>
 </button>
 <mat-divider></mat-divider>
-<mat-grid-list class="m-2" rowHeight="15em" [cols]="cols" gutterSize="0.5rem">
+<mat-grid-list class="m-2" [cols]="cols" gutterSize="0.5rem">
     <mat-grid-tile *ngFor="let product of products">
         <app-product [product]="product">
         </app-product>

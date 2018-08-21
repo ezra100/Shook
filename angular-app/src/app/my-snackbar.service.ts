@@ -6,7 +6,7 @@ import {Observable} from 'rxjs';
 export class MySnackbarService {
   constructor(public snackBar: MatSnackBar) {}
 
-  sendSnackBar(msgObservable: Observable<string|Object>) {
+  subscribeToSnackBar(msgObservable: Observable<string|Object>) {
     let self = this;
     msgObservable.subscribe(
         msg => {

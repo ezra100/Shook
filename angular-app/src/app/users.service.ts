@@ -63,4 +63,9 @@ export class UsersService {
         '/api/users/usersList',
         {params: new HttpParams({fromObject: {query}})});
   }
+  makeOrder(){
+    let obs = this.http.put('/api/users/makeOrder', {}).pipe(share());
+    obs.subscribe();
+    return obs;
+  }
 }

@@ -167,7 +167,7 @@ export interface ChatRoom {
 
 export interface Order {
   _id?: string, owner: string,
-      products: {productID: string, quantity: number, currentPrice?: number}[],
+      products: {productID: string, quantity: number, currentPrice?: number, totalPrice?:number}[],
       orderDate: Date, paid: boolean
 }
 

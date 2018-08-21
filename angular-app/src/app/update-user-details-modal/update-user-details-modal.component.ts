@@ -31,7 +31,7 @@ export class UpdateUserDetailsModalComponent implements OnInit {
       file = element.files[0];
     }
     let obs = this.usersService.updateUserDetails(this.user, file);
-    this.snackbarService.sendSnackBar(obs);
+    this.snackbarService.subscribeToSnackBar(obs);
   }
   log(obj: any) {
     console.log(obj);

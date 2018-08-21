@@ -21,6 +21,7 @@ import * as users from './routers/users';
 import * as admin from './routers/admin';
 import * as dmsgIO from './socket.io.dmessage';
 import * as roomsIO from './socket.io.rooms';
+import * as orders from './routers/Orders';
 
 // init the data base with fake data
 initDB();
@@ -63,6 +64,7 @@ apiRouter.use('/reviews', reviews.router);
 apiRouter.use('/rooms', chatRooms.router);
 apiRouter.use('/DMessages', DMessages.router);
 apiRouter.use('/admin', admin.router);
+apiRouter.use('/orders', orders.router);
 
 app.use('/api', apiRouter);
 app.use(

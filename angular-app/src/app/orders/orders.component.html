@@ -1,0 +1,8 @@
+<mat-paginator [length]="orders.length" [pageSize]="pageSize" [pageSizeOptions]="[1, 3, 5, 10]" (page)="pageEvent = $event">
+</mat-paginator>
+<div *ngIf="pageEvent">
+  <div *ngFor="let order of orders">
+    <app-order [order]="order">
+    </app-order>
+  </div>
+</div>

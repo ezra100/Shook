@@ -1,16 +1,16 @@
 import {HttpClientModule} from '@angular/common/http';
 import {enableProdMode, Injector, NgModule} from '@angular/core';
+import {ChangeDetectorRef} from '@angular/core';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MAT_SNACK_BAR_DEFAULT_OPTIONS, MatBadgeModule, MatButtonModule, MatCardModule, MatCheckboxModule, MatChipsModule, MatDatepickerModule, MatDialogModule, MatExpansionModule, MatFormFieldModule, MatGridListModule, MatIconModule, MatInputModule, MatProgressBarModule, MatProgressSpinnerModule, MatSelectModule, MatSlideToggleModule, MatSnackBarModule, MatTabsModule, MatTooltipModule} from '@angular/material';
+import {MAT_SNACK_BAR_DEFAULT_OPTIONS, MatBadgeModule, MatButtonModule, MatCardModule, MatCheckboxModule, MatChipsModule, MatDatepickerModule, MatDialogModule, MatExpansionModule, MatFormFieldModule, MatGridListModule, MatIconModule, MatInputModule, MatProgressBarModule, MatProgressSpinnerModule, MatSelectModule, MatSlideToggleModule, MatSnackBarModule, MatTableModule, MatTabsModule, MatTooltipModule, MatPaginatorModule} from '@angular/material';
 import {MatMomentDateModule} from '@angular/material-moment-adapter';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule, NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {DisqusModule} from 'ngx-disqus';
-import { NgxLinkifyjsModule } from 'ngx-linkifyjs';
-
+import {NgxLinkifyjsModule} from 'ngx-linkifyjs';
 
 import {AddProductComponent} from './add-product/add-product.component';
 import {AddRoomComponent} from './add-room/add-room.component';
@@ -19,6 +19,7 @@ import {AdminPanelComponent} from './admin-panel/admin-panel.component';
 import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
 import {AuthGuard} from './AuthGuard';
+import {BasketComponent} from './basket/basket.component';
 import {ChatRoomsComponent} from './chat-rooms/chat-rooms.component';
 import {DisqusComponent} from './disqus/disqus.component';
 import {DmessagesComponent} from './dmessages/dmessages.component';
@@ -26,9 +27,12 @@ import {HeaderComponent} from './header/header.component';
 import {HomeComponent} from './home/home.component';
 import {LoginFormComponent} from './login-form/login-form.component';
 import {MemberRequestsComponent} from './member-requests/member-requests.component';
+import {OrderComponent} from './order/order.component';
+import {OrdersComponent} from './orders/orders.component';
 import {ProductFullComponent} from './product-full/product-full.component';
 import {ProductComponent} from './product/product.component';
 import {ProductsFeedComponent} from './products-feed/products-feed.component';
+import {ResetModalComponent} from './reset-modal/reset-modal.component';
 import {ReversePipe} from './reverse.pipe'
 import {ReviewCardComponent} from './review-card/review-card.component';
 import {ReviewsComponent} from './reviews/reviews.component';
@@ -36,11 +40,8 @@ import {SellersComponent} from './sellers/sellers.component';
 import {SignupDialogComponent} from './signup-dialog/signup-dialog.component';
 import {UpdateUserDetailsModalComponent} from './update-user-details-modal/update-user-details-modal.component';
 import {UserCardComponent} from './user-card/user-card.component';
-import { ResetModalComponent } from './reset-modal/reset-modal.component';
-import { ChangeDetectorRef } from '@angular/core';
-import { BasketComponent } from './basket/basket.component';
 
- 
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -65,7 +66,9 @@ import { BasketComponent } from './basket/basket.component';
     AddRoomComponent,
     DisqusComponent,
     ResetModalComponent,
-    BasketComponent
+    BasketComponent,
+    OrdersComponent,
+    OrderComponent
   ],
   imports: [
     MatBadgeModule,
@@ -99,7 +102,9 @@ import { BasketComponent } from './basket/basket.component';
     MatSlideToggleModule,
     MatTabsModule,
     DisqusModule.forRoot('shook-1'),
-    NgxLinkifyjsModule
+    NgxLinkifyjsModule,
+    MatTableModule,
+    MatPaginatorModule
   ],
   entryComponents: [
     AddProductComponent, MemberRequestsComponent, LoginFormComponent,

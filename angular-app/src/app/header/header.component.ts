@@ -32,7 +32,7 @@ export class HeaderComponent implements OnInit {
   }
   logout() {
     let obs = this.authService.logout();
-    this.sbService.sendSnackBar(obs);
+    this.sbService.subscribeToSnackBar(obs);
   }
   isUserAdmin(){
     return this.auth.currentUser && this.auth.currentUser.userType === UserType.Admin;

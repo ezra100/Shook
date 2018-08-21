@@ -88,16 +88,10 @@
   <mat-icon color="primary" aria-label="Add product">add</mat-icon>
 </button>
 <mat-divider></mat-divider>
-<mat-grid-list class="m-2" rowHeight="15em" [cols]="cols" gutterSize="0.5rem">
+<button mat-raised-button color="accent" (click)="order()" >Order</button>
+<mat-grid-list class="m-2" [cols]="cols" gutterSize="0.5rem">
   <mat-grid-tile *ngFor="let product of products">
       <app-product [product]="product">
       </app-product>
   </mat-grid-tile>
 </mat-grid-list>
-<button *ngIf="!loadingMore && !reachedEndOfFeed" class="center" mat-fab (click)="loadMore()">
-  <mat-icon color="primary" aria-label="Load more" >autorenew</mat-icon>
-</button>
-<mat-progress-bar *ngIf="loadingMore" mode="buffer"></mat-progress-bar>
-<div class="divider-msg fancy" *ngIf="reachedEndOfFeed">
-  <span>End of products feed</span>
-</div>

@@ -6,11 +6,17 @@
     {{ product.subtitle }}
   </mat-card-subtitle>
   <mat-card-subtitle>
-    {{ product.price }} ₪
+    {{ product.price | number : 0 : 3  }} ₪
   </mat-card-subtitle>
   <mat-card-content>
-      Owner: {{ product.owner }}
-      <br> Date: {{ product.date | date : "dd.MM.y" }}
-      <br> Category: {{ categoryNames[product.category]}}
+    Owner: {{ product.owner }}
+    <br> Date: {{ product.date | date : "dd.MM.y" }}
+    <br> Category: {{ categoryNames[product.category]}}
   </mat-card-content>
+  <mat-card-actions class="mx-auto" *ngIf="auth.currentUser">
+    <button class="mx-auto" *ngIf="!product.quantity" mat-raised-button color="primary" (click)="product.quantity = 1; addToBasket()">Add to basket</button>
+    <mat-form-field *ngIf="product.quantity" class="mx-auto">
+      <input  matInput min="0" type="number" [(ngModel)]="product.quantity" (ngModelChange)="addToBasket()">
+    </mat-form-field>
+  </mat-card-actions>
 </mat-card>

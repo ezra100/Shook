@@ -190,11 +190,17 @@ export namespace Users {
           foreignField : '_id',
           as: 'product'
         }
+      }, {
+        $project:{
+          'quantity': '$basket.quantity', 
+          product: 1
+        }
       }
     ]);
     agg = agg.map(p => {
-      p.product.quantity = p.basket.quantity;
-      return p.product;
+      let product = p.product[0];
+      product.quantity = p.quantity;
+      return product;
     });
     return agg;
   }
@@ -231,9 +237,9 @@ export namespace Users {
     return await userModel.findByIdAndRemove(userID);
   }
   export async function makeOrder(userID: string) {
-    let user: User = await userModel.findById(userID, {basket: 1});
-    await orders.addOrder({owner: userID, products: user.basket});
-    userModel.updateOne({_id: userID}, {$set: {basket: []}});
+    let user: User = (await userModel.findById(userID, {basket: 1})).toObject();
+    await orders.addOrder({owner: userID, products: user.basket}, false);
+    return userModel.updateOne({_id: userID}, {$set: {basket: []}});
   }
   export async function getCount() {
     return await userModel.estimatedDocumentCount().exec();
