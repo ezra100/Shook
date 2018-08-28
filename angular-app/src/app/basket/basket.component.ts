@@ -32,10 +32,9 @@ export class BasketComponent implements OnInit {
   authService = AuthService;
   panelOpenState: boolean = false;
   constructor(
-      private basketService: UsersService, private service: ProductsService,
-      private router: Router, private route: ActivatedRoute,
-      private observableMedia: ObservableMedia, public dialog: MatDialog,
-      private sbService: MySnackbarService) {}
+      private basketService: UsersService, private router: Router,
+      private route: ActivatedRoute, private observableMedia: ObservableMedia,
+      public dialog: MatDialog, private sbService: MySnackbarService) {}
   ngOnInit() {
     // credit http://disq.us/p/1ouo8m4
     const breakpoints:
@@ -44,66 +43,12 @@ export class BasketComponent implements OnInit {
     this.observableMedia.subscribe(x => this.cols = breakpoints[x.mqAlias]);
 
     let thisPF = this;
-    this.route.queryParams.pipe(first()).subscribe(params => {
-      if (params.filter) {
-        this.filter = new ProductFilter(params.filter);
-        this.filterProducts(false);
-      }
+    this.sub = this.basketService.getBasket().subscribe(basket => {
+      thisPF.products = basket;
     });
-    this.sub = this.service.getLatest().subscribe(products => {
-      thisPF.products = products;
-
-      this.basketService.getBasket().subscribe(basket => {
-        this.products = basket;
-      })
-    });
-    // let elem = this.elementRef.nativeElement;
-    // elem.height = screen.height * 2.5;
-    // this.renderer.listen(elem, 'scroll', function() {
-    //   if ($(elem).scrollTop() > 0.8 * $(elem).height()) {
-    //     thisPF.loadMore();
-    //   }
-    // });
   }
 
-  filterChanged(timeout: number = 700) {
-    // clear the previous timeout
-    clearTimeout(this.timeoutID);
-    // set a new timeout
-    this.timeoutID = setTimeout(() => this.filterProducts(true, this), timeout);
-  }
 
-  filterProducts(navigate: boolean = true, thisPF = this) {
-    if (navigate) {
-      let queryParams: Params = {filter: this.filter.stringify()};
-      thisPF.router.navigate(
-          [], {relativeTo: thisPF.route, replaceUrl: true, queryParams});
-    }
-    thisPF.sub && thisPF.sub.unsubscribe();
-    thisPF.sub =
-        thisPF.service.getLatest(0, null, thisPF.filter.toMongoFilter())
-            .subscribe(products => {
-              thisPF.products = products;
-            });
-  }
-  loadMore() {
-    if (this.loadingMore || this.reachedEndOfFeed) {
-      return;
-    }
-    let thisPF = this;
-    this.loadingMore = true;
-
-    this.sub =
-        this.service
-            .getLatest(this.products.length, null, this.filter.toMongoFilter())
-            .subscribe(products => {
-              if (products.length === 0) {
-                thisPF.reachedEndOfFeed = true;
-              }
-              thisPF.products.push(...products);
-              thisPF.loadingMore = false;
-            });
-  }
   openDialog() {
     this.dialog.open(AddProductComponent, {data: this.addedProduct});
   }

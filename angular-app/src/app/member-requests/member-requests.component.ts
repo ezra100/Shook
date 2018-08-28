@@ -12,9 +12,10 @@ import { AuthService } from '../auth.service';
 })
 export class MemberRequestsComponent implements OnInit {
   isUserOwner: boolean;
-  currentUserId = AuthService.currentUser._id;
+  currentUserID = AuthService.currentUser._id;
   constructor(private chatRoomService: ChatRoomsService,  public dialogRef: MatDialogRef<MemberRequestsComponent>, @Inject(MAT_DIALOG_DATA) public room: ChatRoom) {
     this.isUserOwner = room.owner === AuthService.currentUser._id;
+    this.currentUserID = AuthService.currentUser._id;
   }
 
   ngOnInit() {

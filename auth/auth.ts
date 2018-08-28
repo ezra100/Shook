@@ -50,20 +50,14 @@ router.put('/logout', function(req: express.Request, res) {
   res.end('You\'ve logged out successfully');
 });
 
-// requests the salts for the challengs
-router.post('/salts', helpers.asyncWrapper(async function(req, res) {
-  let username = req.body.username;
-  let userData = await UserAuth.getUserAuthData(username);
-  if (!userData) {
-    // throw username + ' not found';
-    res.json({
-      tempSalt: getRandomString(hashLength),
-      permSalt: getRandomString(hashLength),
-    });
+router.get('/loginTimeout', function(req, res) {
+  if (req.user && req.session.cookie.expires) {
+    res.json((<Date>req.session.cookie.expires).getTime());
   }
-  tempSalts[username] = getRandomString(hashLength);
-  res.json({tempSalt: tempSalts[username], permSalt: (userData).salt});
-}));
+  res.json();
+});
+
+
 
 //------------------------------------------------------------
 
@@ -75,8 +69,6 @@ export async function createUserData(username: string, password: string) {
 }
 
 
-
-async function verify(token: string) {}
 
 router.put('/verify', helpers.asyncWrapper(async function(req, res) {
   let token = req.body.token;

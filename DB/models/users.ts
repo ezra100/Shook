@@ -1,9 +1,8 @@
 import * as mongoose from 'mongoose';
-import {Aggregate, Model, NativeError} from 'mongoose';
 
 import {helpers} from '../../helpers';
-import {Category, Gender, IComment, Review, User, UserAuthData, UserType} from '../../types';
-import {chatRoomPermitedFields, commentPermitedFields, productPermitedFields, reviewPermitedFields, stripObject, userPermitedFields} from '../helpers';
+import {Gender, User, UserType} from '../../types';
+import {stripObject, userPermitedFields} from '../helpers';
 import {Schema} from '../helpers';
 
 import {orders} from './Orders';
@@ -178,11 +177,11 @@ export namespace Users {
                 .exec());
   }
 
-  export async function getBasket(username: string) {
+  export async function getBasket(userID: string) {
     let agg = await userModel.aggregate(
 
-      [{$match: {_id:username}},
-        {$unwind : {path: '$basket', preserveNullAndEmptyArrays: true}},
+      [{$match: {_id:userID}},
+        {$unwind : {path: '$basket', preserveNullAndEmptyArrays: false}},
         {
           $lookup:{
           from: 'products',

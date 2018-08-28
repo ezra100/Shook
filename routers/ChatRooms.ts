@@ -4,7 +4,7 @@ import * as db from '../DB/Models';
 import {helpers} from '../helpers';
 import upload from '../multer';
 import {updateRoom, updateRoomArr} from '../socket.io.rooms';
-import {Action, ChatRoom, LikeType, LikeUpdate, Message, User} from '../types';
+import {Action, LikeType, LikeUpdate} from '../types';
 
 export var router = express.Router();
 

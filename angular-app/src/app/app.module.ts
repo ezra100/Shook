@@ -3,7 +3,7 @@ import {enableProdMode, Injector, NgModule} from '@angular/core';
 import {ChangeDetectorRef} from '@angular/core';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MAT_SNACK_BAR_DEFAULT_OPTIONS, MatBadgeModule, MatButtonModule, MatCardModule, MatCheckboxModule, MatChipsModule, MatDatepickerModule, MatDialogModule, MatExpansionModule, MatFormFieldModule, MatGridListModule, MatIconModule, MatInputModule, MatProgressBarModule, MatProgressSpinnerModule, MatSelectModule, MatSlideToggleModule, MatSnackBarModule, MatTableModule, MatTabsModule, MatTooltipModule, MatPaginatorModule} from '@angular/material';
+import {MAT_SNACK_BAR_DEFAULT_OPTIONS, MatBadgeModule, MatButtonModule, MatCardModule, MatCheckboxModule, MatChipsModule, MatDatepickerModule, MatDialogModule, MatExpansionModule, MatFormFieldModule, MatGridListModule, MatIconModule, MatInputModule, MatMenuModule, MatPaginatorModule, MatProgressBarModule, MatProgressSpinnerModule, MatSelectModule, MatSlideToggleModule, MatSnackBarModule, MatTableModule, MatTabsModule, MatTooltipModule} from '@angular/material';
 import {MatMomentDateModule} from '@angular/material-moment-adapter';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatToolbarModule} from '@angular/material/toolbar';
@@ -104,7 +104,8 @@ import {UserCardComponent} from './user-card/user-card.component';
     DisqusModule.forRoot('shook-1'),
     NgxLinkifyjsModule,
     MatTableModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    MatMenuModule
   ],
   entryComponents: [
     AddProductComponent, MemberRequestsComponent, LoginFormComponent,

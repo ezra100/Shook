@@ -27,8 +27,8 @@ passportMod.use(new Strategy(async function(username, password, cb) {
   try {
     if (userAuthData) {
       let hashedPassword =
-          sha512(userAuthData.hashedPassword, tempSalts[username]);
-      if (hashedPassword === password) {
+          sha512(password, userAuthData.salt);
+      if (hashedPassword === userAuthData.hashedPassword) {
         let user = await Users.getUser(username, true);
         if (!user.isAuthorized) {
           return cb(null, false, {message: 'user not authorized yet'});
