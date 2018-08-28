@@ -1,15 +1,13 @@
 <mat-toolbar color="primary">
   <mat-toolbar-row>
-    <img class="img-thumbnail p-1" style="height:inherit" src="/pub/img/favicon.png">
 
-    <a class="m-2" mat-button routerLink="/home"> Home </a>
+    <a class="m-2" mat-button routerLink="/home">
+      <img class="my-logo" style="height:inherit" src="/pub/img/favicon.png"> </a>
     <a class="m-2" mat-button routerLink="/products"> Products </a>
     <a class="m-2" *ngIf="auth.currentUser" mat-button routerLink="/basket"> Basket </a>
-
-    <a class="m-2" mat-button routerLink="/reviews"> Reviews </a>
+    <a class="m-2" *ngIf="auth.currentUser" mat-button routerLink="/orders"> Orders </a>
     <a class="m-2" mat-button routerLink="/dmessages"> DM </a>
     <a class="m-2" mat-button routerLink="/rooms"> Chat Rooms </a>
-    <a class="m-2" mat-button routerLink="/orders"> Orders </a>
 
     <a class="m-2" *ngIf="isUserAdmin()" mat-button routerLink="/admin"> Admin Panel </a>
     <div class="ml-auto">
@@ -22,14 +20,24 @@
       <div [hidden]="auth.currentUser" class="inline">
         <div class="g-signin2 d-inline" data-onsuccess="onSignIn"></div>
       </div>
-      <button *ngIf="auth.currentUser" class="m-2" mat-raised-button color="accent" (click)="openUpdateDialog()">
-        <span> Update Details</span>
-      </button>
-      <button *ngIf="auth.currentUser" class="m-2" mat-raised-button color="primary" (click)="logout()">
-        <span> Logout</span>
-      </button>
+
       <div class="d-inline" *ngIf="auth.currentUser">
-        {{ auth.currentUser._id }} <img class="img-thumbnail profile" [src]="auth.currentUser.imageURL">
+        <button mat-button [matMenuTriggerFor]="userMenu">
+          <span> {{ auth.currentUser._id }} </span>
+
+          <img class="img-thumbnail profile" [src]="auth.currentUser.imageURL">
+        </button>
+        <mat-menu #userMenu="matMenu">
+          <button mat-menu-item color="primary" (click)="logout()">
+            <mat-icon>arrow_forward</mat-icon>
+            <span> Logout</span>
+          </button>
+          <button mat-menu-item color="accent" (click)="openUpdateDialog()">
+            <mat-icon>edit</mat-icon>
+            <span>Edit Details</span>
+          </button>
+
+        </mat-menu>
       </div>
     </div>
   </mat-toolbar-row>

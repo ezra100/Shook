@@ -5,7 +5,7 @@ mat-toolbar{
 :host{
     max-height: 100vh;
 }
-img.profile{
+img.profile, img.my-logo{
     max-height: -webkit-fill-available;
 }
 .float-right{
@@ -14,4 +14,8 @@ img.profile{
 }
 .inline{
     display: inline;
+}
+a:hover{
+    color: unset;
+    text-decoration: unset;
 }
