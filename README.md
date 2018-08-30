@@ -22,6 +22,8 @@ Products:
 ![Imgur](https://i.imgur.com/dDWUbks.png)
 
 ![Imgur](https://i.imgur.com/7vIzcdK.png)
+
+
 Some responsiveness:
 ![Responsive](https://i.imgur.com/F8zopjO.png)
 
@@ -34,7 +36,7 @@ npm i
 tsc
 node bin/www
 ```
-#### Build and run angular
+#### Build angular
 ```
 cd angular-app
 npm i
