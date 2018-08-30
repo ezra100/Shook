@@ -25,6 +25,7 @@ Products:
 
 
 Some responsiveness:
+
 ![Responsive](https://i.imgur.com/F8zopjO.png)
 
 ![Responsive](https://i.imgur.com/VdDfgAT.png)
