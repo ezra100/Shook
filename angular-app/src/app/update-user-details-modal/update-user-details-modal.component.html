@@ -3,13 +3,10 @@
   id="updateDetailsForm" #updateDetailsForm="ngForm" #f>
   <div mat-dialog-content>
     <mat-form-field>
-      <input name="password" type="password" placeholder="Password" matInput  [(ngModel)]="user.password">
-    </mat-form-field>
-    <mat-form-field>
       <input name="first-name" type="text" placeholder="First Name" matInput  [(ngModel)]="user.firstName">
     </mat-form-field>
     <mat-form-field>
-      <input name="last-name" type="text" placeholder="Last Name" matInput  [(ngModel)]="user.lastName">
+      <input name="last-name" type="text" placeholder="Last Name" matInput  [(ngModel)]="user.lastName"> 
     </mat-form-field>
     <mat-form-field>
       <input name="email" type="email" placeholder="Email" matInput  [(ngModel)]="user.email">

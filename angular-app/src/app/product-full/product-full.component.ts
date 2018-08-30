@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {Product, Review} from '../../../../types';
+import {Product, Review, categoryNames} from '../../../../types';
 import {ProductsService} from '../products.service';
 import {ReviewsService} from '../reviews.service';
 
@@ -12,6 +12,7 @@ import {ReviewsService} from '../reviews.service';
 export class ProductFullComponent implements OnInit {
   product: Product;
   reviews: Review[];
+  categoryNames = categoryNames;
   constructor(
       private route: ActivatedRoute, private productService: ProductsService,
       private reviewsService: ReviewsService) {}

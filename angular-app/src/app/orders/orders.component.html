@@ -1,4 +1,4 @@
-<mat-paginator [length]="orders.length" [pageSize]="pageSize" [pageSizeOptions]="[1, 3, 5, 10]" (page)="pageEvent = $event">
+<mat-paginator [length]="orders.length"  [pageSizeOptions]="[1, 3, 5, 10]" (page)="pageEvent = $event">
 </mat-paginator>
 <div *ngIf="pageEvent">
   <div class="order m-5" *ngFor="let order of ( orders | slice : pageEvent.pageSize*pageEvent.pageIndex : (pageEvent.pageIndex+1)* pageEvent.pageSize )">
