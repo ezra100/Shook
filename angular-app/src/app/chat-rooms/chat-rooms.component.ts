@@ -171,7 +171,7 @@ export class ChatRoomsComponent implements OnInit {
     // messages if checked
     this.fChats = this.chats.filter(
         c => {
-          let bool = regex.test(c._id) || regex.test(c.name) ||
+          let bool : any = regex.test(c._id) || regex.test(c.name) ||
               (this.searchMsgs && c.messages.find(m => regex.test(m.content)));
           if (this.filterIAdmin) {
             if (this.filterIOwn) {
